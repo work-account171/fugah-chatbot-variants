@@ -251,7 +251,7 @@
               console.log(`Setting inactive message image for theme ${themeName}:`, img.src);
             } else if (tabType === "home") {
               if (themeName === 'black') {
-                img.src = getAssetPath("inactive-home-footer.png.png");
+                img.src = getAssetPath("new-img.png");
               } else {
                 img.src = getAssetPath("inactive-home-footer.png.png");
               }
@@ -503,6 +503,7 @@
         const messageListArrow = shadow.querySelector(".message-item img");
         const messageCloseBtn = shadow.querySelector("#message-close-btn");
         const footerLogo = shadow.querySelector("#footer-logo");
+        const fileUploadIcon = shadow.querySelector("#file-upload-icon");
         
         if (chatWindow) {
           // Remove all existing theme classes
@@ -713,6 +714,17 @@
             } else {
               footerLogo.src = getAssetPath("fugah-footer-end.png");
               console.log("Set footer logo to fugah-footer-end.png for theme:", themeName);
+            }
+          }
+          
+          // Set file upload icon based on theme
+          if (fileUploadIcon) {
+            if (themeName === 'black') {
+              fileUploadIcon.src = getAssetPath("black-new.png");
+              console.log("Set file upload icon to black-new.png for black theme");
+            } else {
+              fileUploadIcon.src = getAssetPath("fugah-file-icon.png");
+              console.log("Set file upload icon to fugah-file-icon.png for theme:", themeName);
             }
           }
           

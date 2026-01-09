@@ -1,0 +1,725 @@
+(function() {
+  // 1️⃣ Read store ID
+  const scriptTag = document.currentScript;
+  const storeId = scriptTag.getAttribute("data-store-id") || "demo-store";
+
+  console.log("Widget loaded for store:", storeId);
+
+  // 2️⃣ Create wrapper and shadow DOM
+  const wrapper = document.createElement("div");
+  wrapper.id = "chatbot-widget-root";
+  document.body.appendChild(wrapper);
+
+  fetch("https://n8n.srv1196634.hstgr.cloud/webhook/body")
+  .then(response => response.json())
+  .then(data => {
+    console.log(data);
+  })
+  .catch(error => {
+    console.error("Error fetching response from n8n server:", error);
+  });
+  const shadow = wrapper.attachShadow({ mode: "open" }); // ✅ must be here
+
+  // 3️⃣ Load CSS into shadow
+  const style = document.createElement("link");
+  style.rel = "stylesheet";
+  style.href = "widget.css"; // adjust path if needed
+  shadow.appendChild(style);
+
+      // 4️⃣ Load HTML
+      fetch("ui.html") // adjust path if needed
+        .then(res => res.text())
+        .then(html => {
+          shadow.innerHTML += html; // or = html
+
+          // ✅ Now shadow exists here
+          const bubble = shadow.querySelector("#chat-bubble");
+          const chatIcon = shadow.querySelector("#chat-icon");
+          const chatWindow = shadow.querySelector("#chat-window");
+          const closeBtn = shadow.querySelector("#close-btn");
+          const sendMessageBtn = shadow.querySelector(".fugah-send-button");
+          const phoneInput = shadow.querySelector("#phone-input");
+          const mainHomeContainer = shadow.querySelector(".main-home-container");
+          const mainMessageContainer = shadow.querySelector(".main-message-container");
+          const mainMessageDetailContainer = shadow.querySelector(".main-message-detail-container");
+          const messageCloseBtn = shadow.querySelector("#message-close-btn");
+          const messageDetailBackBtn = shadow.querySelector("#message-detail-back-btn");
+          const fugahMessageDetailDropdownIcon = shadow.querySelector("#fugah-message-detail-dropdown-icon");
+          const fugahMessageDetailDropdown = shadow.querySelector("#fugah-message-detail-dropdown");
+          const closeChatDetailMenuItem = shadow.querySelector("#close-chat-detail-menu-item");
+          const createTicketDetailMenuItem = shadow.querySelector("#create-ticket-detail-menu-item");
+          const messageDetailInput = shadow.querySelector("#message-detail-input");
+          const messageDetailSendBtn = shadow.querySelector("#message-detail-send-btn");
+          const messageDetailMessages = shadow.querySelector("#message-detail-messages");
+          const messageItems = shadow.querySelectorAll(".message-item");
+          const footerTabItems = shadow.querySelectorAll(".fugah-footer-tab-item");
+          const fugahFooter = shadow.querySelector("#fugah-footer");
+          
+          // Helper function to get asset path
+          // In shadow DOM, image src is resolved relative to the document URL
+          const getAssetPath = (filename) => {
+            // Since we're at /test/index.html, assets are at ../assets/
+            return `../assets/${filename}`;
+          };
+          
+          // Fix initial icon path
+          if (chatIcon) {
+            chatIcon.src = getAssetPath("message.png");
+          }
+          
+          // Fix initial arrow paths
+          const backArrow = shadow.querySelector("#message-detail-back-btn");
+          const messageListArrow = shadow.querySelector(".message-item img");
+          if (backArrow) {
+            backArrow.src = getAssetPath("right-arrow.png");
+          }
+          if (messageListArrow) {
+            messageListArrow.src = getAssetPath("right-arrow.png");
+          }
+
+      let isOpen = false;
+
+      // Toggle chat window
+      const toggleChat = () => {
+        isOpen = !isOpen;
+        chatWindow.style.display = isOpen ? "flex" : "none";
+        
+        // Toggle icon between message and cross
+        if (isOpen) {
+          // Get current theme to set correct X icon
+          const currentTheme = chatWindow.classList.toString().match(/theme-(\w+)/);
+          const themeName = currentTheme ? currentTheme[1] : 'black';
+          
+          let xIconPath;
+          switch(themeName) {
+            case 'green':
+              xIconPath = getAssetPath("X-green.png");
+              break;
+            case 'red':
+              xIconPath = getAssetPath("X-red.png");
+              break;
+            case 'blue':
+              xIconPath = getAssetPath("X-blue.png");
+              break;
+            case 'yellow':
+              xIconPath = getAssetPath("X-yellow.png");
+              break;
+            case 'cyan':
+              xIconPath = getAssetPath("X-cyan.png");
+              break;
+            case 'white':
+              xIconPath = getAssetPath("X-white.png");
+              break;
+            case 'black':
+            default:
+              xIconPath = getAssetPath("X.png"); // Default X for black theme
+              break;
+          }
+          
+          chatIcon.src = xIconPath;
+          bubble.classList.add("chat-open");
+        } else {
+          // Get current theme to set correct icon
+          const currentTheme = chatWindow.classList.toString().match(/theme-(\w+)/);
+          const themeName = currentTheme ? currentTheme[1] : 'black';
+          
+          let iconPath;
+          switch(themeName) {
+            case 'green':
+              iconPath = getAssetPath("message-green.png");
+              break;
+            case 'red':
+              iconPath = getAssetPath("message-red.png");
+              break;
+            case 'blue':
+              iconPath = getAssetPath("message-blue.png");
+              break;
+            case 'yellow':
+              iconPath = getAssetPath("message-yellow.png");
+              break;
+            case 'cyan':
+              iconPath = getAssetPath("message-cyan.png");
+              break;
+            case 'white':
+              iconPath = getAssetPath("message.png");
+              break;
+            case 'black':
+            default:
+              iconPath = getAssetPath("message-white.png");
+              break;
+          }
+          chatIcon.src = iconPath;
+          bubble.classList.remove("chat-open");
+        }
+      };
+
+      // Open chat from bubble
+      bubble.addEventListener("click", toggleChat);
+
+      // Close chat from header button
+      if (closeBtn) {
+        closeBtn.addEventListener("click", toggleChat);
+      }
+
+      // Close chat from message container X button
+      if (messageCloseBtn) {
+        messageCloseBtn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          toggleChat();
+        });
+      }
+
+      // Close chat from FAB (when open)
+      chatIcon.addEventListener("click", (e) => {
+        if (isOpen) {
+          e.stopPropagation();
+          toggleChat();
+        }
+      });
+
+      // Send message button
+      if (sendMessageBtn) {
+        sendMessageBtn.addEventListener("click", () => {
+          const phone = phoneInput.value.trim();
+          if (phone) {
+            // Switch to message tab
+            switchTab("message");
+            // Add message to chat
+            addMessage(phone, "user");
+            phoneInput.value = "";
+            
+            // Simulate bot response
+            setTimeout(() => {
+              addMessage("شكراً لك! سنتواصل معك قريباً.", "bot");
+            }, 1000);
+          }
+        });
+      }
+
+      // Phone input enter key
+      if (phoneInput) {
+        phoneInput.addEventListener("keydown", e => {
+          if (e.key === "Enter" && sendMessageBtn) {
+            sendMessageBtn.click();
+          }
+        });
+      }
+
+      // Tab switching functionality
+      function switchTab(tabName) {
+        // Remove active class from all tabs
+        footerTabItems.forEach(item => {
+          item.classList.remove("active");
+        });
+
+        // Get current theme to use correct images
+        const currentTheme = chatWindow.classList.toString().match(/theme-(\w+)/);
+        const themeName = currentTheme ? currentTheme[1] : 'default';
+        
+        // Find and activate the clicked tab
+        footerTabItems.forEach(item => {
+          const tabType = item.getAttribute("data-tab");
+          const img = item.querySelector("img");
+          
+          if (tabType === tabName) {
+            // Activate this tab
+            item.classList.add("active");
+            
+            // Update image to active variant based on theme
+            if (tabName === "message") {
+              if (themeName === 'black') {
+                img.src = getAssetPath("active-message-footer-black.png");
+              } else {
+                img.src = getAssetPath("active-message-footer.png");
+              }
+              img.alt = "message active";
+            } else if (tabName === "home") {
+              if (themeName === 'black') {
+                img.src = getAssetPath("active-home-footer-black.png");
+              } else {
+                img.src = getAssetPath("active-home-footer.png");
+              }
+              img.alt = "home active";
+            }
+          } else {
+            // Deactivate other tabs based on theme
+            if (tabType === "message") {
+              if (themeName === 'black') {
+                img.src = getAssetPath("inactive-message-footer-black.png");
+              } else {
+                img.src = getAssetPath("inactive-message-footer.png");
+              }
+              img.alt = "message inactive";
+            } else if (tabType === "home") {
+              if (themeName === 'black') {
+                img.src = getAssetPath("inactive-home-footer.png");
+              } else {
+                img.src = getAssetPath("inactive-home-footer.png");
+              }
+              img.alt = "home inactive";
+            }
+          }
+        });
+
+        // Show/hide containers based on active tab
+        if (tabName === "home") {
+          if (mainHomeContainer) mainHomeContainer.style.display = "flex";
+          if (mainMessageContainer) mainMessageContainer.style.display = "none";
+          if (mainMessageDetailContainer) mainMessageDetailContainer.style.display = "none";
+          // Remove detail-active class from footer
+          if (fugahFooter) fugahFooter.classList.remove("detail-active");
+        } else if (tabName === "message") {
+          if (mainHomeContainer) mainHomeContainer.style.display = "none";
+          if (mainMessageContainer) mainMessageContainer.style.display = "block";
+          if (mainMessageDetailContainer) mainMessageDetailContainer.style.display = "none";
+          // Remove detail-active class from footer (tabs should be visible in message list)
+          if (fugahFooter) fugahFooter.classList.remove("detail-active");
+          // Reset to message list when switching tabs
+          goBackToMessageList();
+        }
+      }
+
+      // Function to open message detail
+      function openMessageDetail(messageId) {
+        // Hide message list container
+        if (mainMessageContainer) mainMessageContainer.style.display = "none";
+        // Show message detail container
+        if (mainMessageDetailContainer) mainMessageDetailContainer.style.display = "flex";
+        // Add detail-active class on footer (tabs should be hidden in detail view)
+        if (fugahFooter) fugahFooter.classList.add("detail-active");
+        
+        // Scroll to bottom of messages
+        if (messageDetailMessages) {
+          setTimeout(() => {
+            messageDetailMessages.scrollTop = messageDetailMessages.scrollHeight;
+          }, 100);
+        }
+      }
+
+      // Function to show loading indicator
+      function showLoadingIndicator() {
+        if (!messageDetailMessages) return null;
+        
+        // Remove any existing loading indicator
+        const existingLoading = messageDetailMessages.querySelector(".chat-message-loading");
+        if (existingLoading) {
+          existingLoading.remove();
+        }
+        
+        const messageDiv = document.createElement("div");
+        messageDiv.className = "chat-message chat-message-bot";
+        
+        const contentDiv = document.createElement("div");
+        contentDiv.className = "chat-message-content";
+        
+        const loadingDiv = document.createElement("div");
+        loadingDiv.className = "chat-message-loading";
+        loadingDiv.innerHTML = `
+          <div class="loading-dot"></div>
+          <div class="loading-dot"></div>
+          <div class="loading-dot"></div>
+        `;
+        
+        contentDiv.appendChild(loadingDiv);
+        messageDiv.appendChild(contentDiv);
+        messageDetailMessages.appendChild(messageDiv);
+        
+        // Scroll to bottom
+        setTimeout(() => {
+          messageDetailMessages.scrollTop = messageDetailMessages.scrollHeight;
+        }, 50);
+        
+        return messageDiv;
+      }
+
+      // Function to remove loading indicator
+      function removeLoadingIndicator() {
+        if (!messageDetailMessages) return;
+        const loadingIndicator = messageDetailMessages.querySelector(".chat-message-loading");
+        if (loadingIndicator) {
+          loadingIndicator.closest(".chat-message").remove();
+        }
+      }
+
+      // Function to add message to detail chat
+      function addDetailMessage(text, isUser = true) {
+        if (!messageDetailMessages) return;
+        
+        // Remove loading indicator if it exists
+        removeLoadingIndicator();
+        
+        const messageDiv = document.createElement("div");
+        messageDiv.className = `chat-message ${isUser ? "chat-message-user" : "chat-message-bot"}`;
+        
+        const contentDiv = document.createElement("div");
+        contentDiv.className = "chat-message-content";
+        
+        const textP = document.createElement("p");
+        textP.textContent = text;
+        contentDiv.appendChild(textP);
+        
+        messageDiv.appendChild(contentDiv);
+        messageDetailMessages.appendChild(messageDiv);
+        
+        // Scroll to bottom
+        setTimeout(() => {
+          messageDetailMessages.scrollTop = messageDetailMessages.scrollHeight;
+        }, 50);
+      }
+
+      // Send message in detail chat
+      function sendDetailMessage() {
+        if (!messageDetailInput) return;
+        
+        const message = messageDetailInput.value.trim();
+        if (!message) return;
+        
+        // Add user message
+        addDetailMessage(message, true);
+        
+        // Clear input
+        messageDetailInput.value = "";
+        
+        // Show loading indicator
+        showLoadingIndicator();
+        
+        // Simulate bot response (after delay)
+        setTimeout(() => {
+          addDetailMessage("شكراً لك! سأقوم بالرد عليك قريباً.", false);
+        }, 1500);
+      }
+
+      // Add event listeners for detail chat
+      if (messageDetailSendBtn) {
+        messageDetailSendBtn.addEventListener("click", sendDetailMessage);
+      }
+
+      if (messageDetailInput) {
+        messageDetailInput.addEventListener("keydown", (e) => {
+          if (e.key === "Enter") {
+            sendDetailMessage();
+          }
+        });
+      }
+
+      // Function to go back to message list
+      function goBackToMessageList() {
+        if (mainMessageContainer) mainMessageContainer.style.display = "block";
+        if (mainMessageDetailContainer) mainMessageDetailContainer.style.display = "none";
+        // Remove detail-active class from footer (tabs should be visible in message list)
+        if (fugahFooter) fugahFooter.classList.remove("detail-active");
+        // Clear input when going back
+        if (messageDetailInput) messageDetailInput.value = "";
+      }
+
+      // Add click handler to message detail back button
+      if (messageDetailBackBtn) {
+        messageDetailBackBtn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          goBackToMessageList();
+        });
+      }
+
+      // Toggle message detail dropdown menu
+      if (fugahMessageDetailDropdownIcon) {
+        fugahMessageDetailDropdownIcon.addEventListener("click", (e) => {
+          e.stopPropagation();
+          const isVisible = fugahMessageDetailDropdown.style.display === "block";
+          fugahMessageDetailDropdown.style.display = isVisible ? "none" : "block";
+        });
+      }
+
+      // Close dropdown when clicking outside
+      shadow.addEventListener("click", (e) => {
+        if (fugahMessageDetailDropdown && fugahMessageDetailDropdownIcon) {
+          if (!fugahMessageDetailDropdown.contains(e.target) && !fugahMessageDetailDropdownIcon.contains(e.target)) {
+            fugahMessageDetailDropdown.style.display = "none";
+          }
+        }
+      });
+
+      // Close chat from detail menu item
+      if (closeChatDetailMenuItem) {
+        closeChatDetailMenuItem.addEventListener("click", (e) => {
+          e.stopPropagation();
+          fugahMessageDetailDropdown.style.display = "none";
+          toggleChat();
+        });
+      }
+
+      // Create ticket from detail menu item
+      if (createTicketDetailMenuItem) {
+        createTicketDetailMenuItem.addEventListener("click", (e) => {
+          e.stopPropagation();
+          fugahMessageDetailDropdown.style.display = "none";
+          // Add your ticket creation logic here
+          console.log("Create ticket clicked from detail menu");
+        });
+      }
+
+      // Add click handlers to message items
+      messageItems.forEach(item => {
+        item.addEventListener("click", () => {
+          const messageId = item.getAttribute("data-message-id");
+          if (messageId) {
+            openMessageDetail(messageId);
+          }
+        });
+        // Make message items look clickable
+        item.style.cursor = "pointer";
+      });
+
+      // Add click handlers to footer tabs
+      footerTabItems.forEach(item => {
+        item.addEventListener("click", () => {
+          const tabType = item.getAttribute("data-tab");
+          switchTab(tabType);
+        });
+      });
+
+      // Initialize: ensure home container is visible and message container is hidden
+      // Home tab should be active by default - this will also set correct images and colors
+      if (mainHomeContainer) {
+        mainHomeContainer.style.display = "flex";
+      }
+      if (mainMessageContainer) {
+        mainMessageContainer.style.display = "none";
+      }
+      if (mainMessageDetailContainer) {
+        mainMessageDetailContainer.style.display = "none";
+      }
+      
+      // Initialize tab state (Home active by default)
+      switchTab("home");
+
+      // Theme switching function
+      function changeTheme(themeName) {
+        const chatWindow = shadow.querySelector("#chat-window");
+        const chatIcon = shadow.querySelector("#chat-icon");
+        const sendButton = shadow.querySelector("#message-detail-send-btn img");
+        const mainSendButton = shadow.querySelector(".fugah-send-button img");
+        const footerTabItems = shadow.querySelectorAll(".fugah-footer-tab-item");
+        const backArrow = shadow.querySelector("#message-detail-back-btn");
+        const messageListArrow = shadow.querySelector(".message-item img");
+        
+        if (chatWindow) {
+          // Remove all existing theme classes
+          chatWindow.classList.remove('theme-green', 'theme-red', 'theme-blue', 'theme-yellow', 'theme-cyan', 'theme-black', 'theme-white');
+          
+          // Add the new theme class
+          chatWindow.classList.add(`theme-${themeName}`);
+          
+          // Change chat bubble icon based on theme
+          if (chatIcon) {
+            let iconPath;
+            
+            // Check if chat is currently open (showing X icon)
+            if (isOpen) {
+              // Use theme-specific X icon
+              switch(themeName) {
+                case 'green':
+                  iconPath = getAssetPath("X-green.png");
+                  break;
+                case 'red':
+                  iconPath = getAssetPath("X-red.png");
+                  break;
+                case 'blue':
+                  iconPath = getAssetPath("X-cyan.png");
+                  break;
+                case 'yellow':
+                  iconPath = getAssetPath("X-yellow.png");
+                  break;
+                case 'cyan':
+                  iconPath = getAssetPath("X-blue.png");
+                  break;
+                case 'white':
+                  iconPath = getAssetPath("X-white.png");
+                  break;
+                case 'black':
+                default:
+                  iconPath = getAssetPath("X.png");
+                  break;
+              }
+            } else {
+              // Use theme-specific message icon
+              switch(themeName) {
+                case 'green':
+                  iconPath = getAssetPath("message-green.png");
+                  break;
+                case 'red':
+                  iconPath = getAssetPath("message-red.png");
+                  break;
+                case 'blue':
+                  iconPath = getAssetPath("message-blue.png");
+                  break;
+                case 'yellow':
+                  iconPath = getAssetPath("message-yellow.png");
+                  break;
+                case 'cyan':
+                  iconPath = getAssetPath("message-cyan.png");
+                  break;
+                case 'white':
+                  iconPath = getAssetPath("message-white.png");
+                  break;
+                case 'black':
+                default:
+                  iconPath = getAssetPath("message.png"); // Keep default for black theme
+                  break;
+              }
+            }
+            chatIcon.src = iconPath;
+          }
+          
+          // Change send button icon based on theme
+          if (sendButton) {
+            let sendButtonPath;
+            switch(themeName) {
+              case 'green':
+                sendButtonPath = getAssetPath("fugah-send-button-green.png");
+                break;
+              case 'red':
+                sendButtonPath = getAssetPath("fugah-send-button-red.png");
+                break;
+              case 'blue':
+                sendButtonPath = getAssetPath("fugah-send-button-cyan.png");
+                break;
+              case 'yellow':
+                sendButtonPath = getAssetPath("fugah-send-button-yellow.png");
+                break;
+              case 'cyan':
+                sendButtonPath = getAssetPath("fugah-send-button-blue.png");
+                break;
+              case 'white':
+                sendButtonPath = getAssetPath("fugah-send-button-white.png");
+                break;
+              case 'black':
+              default:
+                sendButtonPath = getAssetPath("fugah-send-button.png"); // Default for black theme
+                break;
+            }
+            sendButton.src = sendButtonPath;
+          }
+          
+          // Change main send button icon based on theme
+          if (mainSendButton) {
+            let mainSendIconPath;
+            switch(themeName) {
+              case 'green':
+                mainSendIconPath = getAssetPath("send-icon.png");
+                break;
+              case 'red':
+                mainSendIconPath = getAssetPath("send-icon.png");
+                break;
+              case 'blue':
+                mainSendIconPath = getAssetPath("send-icon.png");
+                break;
+              case 'yellow':
+                mainSendIconPath = getAssetPath("send-icon.png");
+                break;
+              case 'cyan':
+                mainSendIconPath = getAssetPath("send-icon.png");
+                break;
+              case 'white':
+                mainSendIconPath = getAssetPath("send-icon.png");
+                break;
+              case 'black':
+              default:
+                mainSendIconPath = getAssetPath("send-icon.png"); // Default for black theme
+                break;
+            }
+            mainSendButton.src = mainSendIconPath;
+          }
+          
+          // Change footer tab images based on theme
+          if (footerTabItems && footerTabItems.length > 0) {
+            footerTabItems.forEach(item => {
+              const tabType = item.getAttribute("data-tab");
+              const img = item.querySelector("img");
+              const isActive = item.classList.contains("active");
+              
+              if (img && tabType) {
+                let imagePath;
+                
+                if (themeName === 'black') {
+                  // Use black theme specific images
+                  if (tabType === "message") {
+                    imagePath = isActive ? 
+                      getAssetPath("active-message-footer-black.png") : 
+                      getAssetPath("inactive-message-footer-black.png");
+                  } else if (tabType === "home") {
+                    imagePath = isActive ? 
+                      getAssetPath("active-home-footer-black.png") : 
+                      getAssetPath("inactive-home-footer-black.png");
+                  }
+                } else {
+                  // Use default images for all other themes
+                  if (tabType === "message") {
+                    imagePath = isActive ? 
+                      getAssetPath("active-message-footer.png") : 
+                      getAssetPath("inactive-message-footer.png");
+                  } else if (tabType === "home") {
+                    imagePath = isActive ? 
+                      getAssetPath("active-home-footer.png") : 
+                      getAssetPath("inactive-home-footer.png");
+                  }
+                }
+                
+                if (imagePath) {
+                  img.src = imagePath;
+                }
+              }
+            });
+          }
+          
+          // Ensure all arrows always use the correct image for all themes
+          if (backArrow) {
+            backArrow.src = getAssetPath("right-arrow.png");
+          }
+          if (messageListArrow) {
+            messageListArrow.src = getAssetPath("right-arrow.png");
+          }
+          
+          console.log("Theme changed to:", themeName);
+          console.log("Chat window classes:", chatWindow.className);
+          console.log("Chat icon changed to:", chatIcon ? chatIcon.src : "not found");
+          console.log("Send button changed to:", sendButton ? sendButton.src : "not found");
+          console.log("Main send button changed to:", mainSendButton ? mainSendButton.src : "not found");
+          console.log("Footer tab images updated for theme:", themeName);
+        } else {
+          console.error("Chat window not found in shadow DOM");
+        }
+      }
+
+      // Expose theme changing function globally
+      window.changeChatbotTheme = changeTheme;
+
+      // Set initial theme if specified
+      const scriptTag = document.querySelector('script[data-theme]');
+      if (scriptTag) {
+        const initialTheme = scriptTag.getAttribute('data-theme');
+        if (initialTheme) {
+          changeTheme(initialTheme);
+        }
+      }
+
+      // Add message function
+      function addMessage(text, type) {
+        if (!mainMessageContainer) return;
+        
+        const messageDiv = document.createElement("div");
+        messageDiv.className = `message`;
+        messageDiv.textContent = text;
+        messageDiv.style.cssText = `
+          padding: 12px 16px;
+          margin-bottom: 10px;
+          border-radius: 18px;
+          max-width: 80%;
+          word-wrap: break-word;
+        `;
+        mainMessageContainer.appendChild(messageDiv);
+        mainMessageContainer.scrollTop = mainMessageContainer.scrollHeight;
+      }
+    })
+    .catch(err => console.error("Failed to load ui.html:", err));
+
+})();

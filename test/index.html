@@ -1,0 +1,106 @@
+<!-- <!DOCTYPE html>
+<html>
+<head>
+  <title>Chatbot Widget Dev</title>
+</head>
+<style>
+
+    .fugah-body{
+        background-color: black;
+    }
+    .fugah-body h1{
+        color: white;
+    }
+</style>
+<body class="fugah-body">
+
+  <h1>Testing Chatbot Widget...</h1>
+
+  <script src="/widget.js" data-store-id="test-store-123"></script>
+
+</body>
+</html> -->
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Chatbot Widget Dev</title>
+
+  <style>
+    .fugah-body {
+      background-color: black;
+      padding: 20px;
+      font-family: Arial, sans-serif;
+    }
+
+    .fugah-body h1 {
+      color: white;
+      margin-bottom: 10px;
+    }
+
+    /* Theme switcher BELOW heading */
+    #fugah-theme-switcher {
+      display: block;          /* forces new line */
+      margin-bottom: 20px;     /* spacing below */
+      padding: 6px 10px;
+      font-size: 14px;
+      border-radius: 6px;
+      border: none;
+      outline: none;
+      cursor: pointer;
+    }
+  </style>
+</head>
+
+<body class="fugah-body">
+
+  <h1>Testing Chatbot Widget...</h1>
+
+  <!-- Theme switcher JUST BELOW TEXT -->
+  <select id="fugah-theme-switcher">
+    <option value="green">Green Gradient</option>
+    <option value="red">Red Gradient</option>
+    <option value="blue">Cyan Gradient</option>
+    <option value="yellow" selected>Yellow Gradient</option>
+    <option value="cyan">Blue Gradient</option>
+    <option value="black">Black</option>
+    <option value="white">White</option>
+  </select>
+
+  <!-- Load widget ONCE -->
+  <script
+    src="/widget.js"
+    data-store-id="test-store-123"
+    data-theme="yellow">
+  </script>
+
+  <!-- Theme switching script -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const themeSelector = document.getElementById('fugah-theme-switcher');
+      
+      if (themeSelector) {
+        // Set initial value to match data-theme
+        themeSelector.value = 'yellow';
+        
+        themeSelector.addEventListener('change', function() {
+          const selectedTheme = this.value;
+          console.log('Theme selector changed to:', selectedTheme);
+          
+          // Call the global theme change function if it exists
+          if (typeof window.changeChatbotTheme === 'function') {
+            window.changeChatbotTheme(selectedTheme);
+          } else {
+            // If function not ready yet, wait a bit and try again
+            setTimeout(() => {
+              if (typeof window.changeChatbotTheme === 'function') {
+                window.changeChatbotTheme(selectedTheme);
+              }
+            }, 1000);
+          }
+        });
+      }
+    });
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,160 @@
+<!-- ui.html -->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Rubik:ital,wght@0,300..900;1,300..900&display=swap" rel="stylesheet">
+
+<div id="chat-bubble">
+  <img
+    id="chat-icon"
+    src="../assets/message-white.png"
+    alt="Chat"
+  />
+</div>
+ <!-- fetching response from n8n server -->
+ <script>
+  fetch("https://n8n.srv1196634.hstgr.cloud/webhook/body")
+  .then(response => response.json())
+  .then(data => {
+    console.log(data);
+  })
+  .catch(error => {
+    console.error("Error fetching response from n8n server:", error);
+  });
+</script>
+<div id="chat-window">
+  
+  <div id="chat-container">
+    <!-- Header with close button -->
+   
+
+    <!-- Welcome section -->
+
+    <div id="fugah-main-container" >
+      
+   
+     <!-- main section -->
+      <div id="fugah-main-content" class="main-home-container" >
+        <div id="chat-header">
+          <button id="close-btn" class="close-button">
+            <svg
+              width="30"
+              height="30"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+      <div class="fugah-flex-col-end">
+        <h1 class="welcome-title">👋 مرحبا عزيزي العميل</h1>
+        <h1 class="welcome-title">كيف يمكننا مساعدتك</h1>
+      </div>
+      <div id="fugah-body" >
+        <div class="fugah-number-div">
+          <label for="phone-input">رقم الهاتف</label>
+          <input type="tel" id="phone-input" placeholder="+966 5xxxxxxxx" />
+        </div>
+        <button class="fugah-send-button fugah-flex-between">
+          <img src="../assets/send-icon.png" alt="Send" />
+          <p>أرسل لنا رسالة</p>
+        </button>
+      </div>
+      </div>
+      <div class="main-message-container" style="display: none;">
+        <div class="flex-1">
+          <img id="message-close-btn" src="../assets/X.png" alt="close icon" class="message-close-icon" />
+          <p>تاريخ الدردشة</p>
+        </div>
+        <div class="message-container">
+          <div class="message-item" data-message-id="1">
+           <div class="fugah-message-content">
+            <p class="fugah-message-heading">إذا كنت لا تزال بحاجة إلى أي مساعدة۔۔</p>
+            <div class="fugah-message-date-time">
+              <p class="date">19 Nov 2025</p>
+              <p class="time">03:53</p>
+            </div>
+           </div>
+           <img src="../assets/right-arrow.png" alt="message right" />
+          </div>
+        </div>          
+      </div>
+      <!-- Message Detail Container -->
+      <div class="main-message-detail-container" style="display: none;">
+        <div class="flex-1">
+          <img id="message-detail-back-btn" src="../assets/right-arrow.png" alt="back icon" class="message-back-icon" />
+          <div class="fugah-message-detail-header">
+            <img id="fugah-message-detail-icon" src="../assets/fugah-messsage-icon.png" alt="fugah message icon"  />
+            <p>الدردشة<p>
+              <img id="fugah-message-detail-dropdown-icon" src="../assets/fugah-menue-dropdown.png" alt="three dots icon" class="fugah-dropdown-trigger" />
+          </div>
+          <div id="fugah-message-detail-dropdown" class="fugah-message-detail-dropdown" style="display: none;">
+            <button class="fugah-dropdown-item" id="close-chat-detail-menu-item">
+              <img src="../assets/fugah-close-icon.png" alt="Close" />
+              <span>إغلاق الدردشة</span>
+            </button>
+            <button class="fugah-dropdown-item" id="create-ticket-detail-menu-item">
+              <img src="../assets/fugah-ticket-icon.png" alt="Ticket" />
+              <span>رفع تذكرة</span>
+            </button>
+          </div>
+        </div>
+        <div class="message-detail-chat">
+          <div class="message-detail-messages" id="message-detail-messages">
+            <!-- Demo messages -->
+            <div class="chat-message chat-message-bot">
+              <div class="chat-message-content">
+                <p>مرحباً! كيف يمكنني مساعدتك اليوم؟</p>
+              </div>
+            </div>
+            <div class="chat-message chat-message-user">
+              <div class="chat-message-content">
+                <p>أحتاج إلى مساعدة في طلبي</p>
+              </div>
+            </div>
+            <div class="chat-message chat-message-bot">
+              <div class="chat-message-content">
+                <p>بالطبع، سأكون سعيداً لمساعدتك. ما هو رقم الطلب الخاص بك؟</p>
+              </div>
+            </div>
+          </div>
+          <div class="message-detail-input-container">
+            <div class="message-detail-input-wrapper">
+              <input type="text" id="message-detail-input" class="message-detail-input" placeholder="اكتب هنا" />
+              <div class="message-detail-actions-row">
+                <label for="message-detail-file-input" class="message-detail-file-label">
+                  <img src="../assets/fugah-file-icon.png" alt="Upload file" />
+                </label>
+                <input type="file" id="message-detail-file-input" class="message-detail-file-input" style="display: none;" />
+                <button id="message-detail-send-btn" class="message-detail-send-btn">
+                  <img src="../assets/fugah-send-button.png" alt="Send" />
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div id="fugah-footer">
+      <div id="fugah-footer-tab">
+        <div class="fugah-footer-tab-item" data-tab="message">
+          <img src="../assets/inactive-message-footer.png" alt="message inactive" />
+          <p>Message</p>
+        </div>
+        <div class="fugah-footer-tab-item active" data-tab="home">
+          <img src="../assets/active-home-footer.png" alt="home active" />
+          <p>Home</p>
+        </div>
+      </div>
+      <div id="fugah-footer-end">
+        <img src="../assets/fugah-footer-end.png" alt="Fugah Logo" />
+        <p>مدعوم من فقاعة </p>
+      </div>
+      </div>
+    </div>
+      
+    </div>
+  </div>
+</div>

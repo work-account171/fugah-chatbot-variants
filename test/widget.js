@@ -73,9 +73,7 @@
           if (backArrow) {
             backArrow.src = getAssetPath("right-arrow.png");
           }
-          if (messageListArrow) {
-            messageListArrow.src = getAssetPath("right-arrow.png");
-          }
+          // messageListArrow will be set correctly by changeTheme() function
 
       let isOpen = false;
 
@@ -245,18 +243,20 @@
             // Deactivate other tabs based on theme
             if (tabType === "message") {
               if (themeName === 'black') {
-                img.src = getAssetPath("inactive-message-footer-black.png");
+                img.src = getAssetPath("inactive-message-footer-black.png.png");
               } else {
                 img.src = getAssetPath("inactive-message-footer.png");
               }
               img.alt = "message inactive";
+              console.log(`Setting inactive message image for theme ${themeName}:`, img.src);
             } else if (tabType === "home") {
               if (themeName === 'black') {
-                img.src = getAssetPath("inactive-home-footer.png");
+                img.src = getAssetPath("inactive-home-footer.png.png");
               } else {
-                img.src = getAssetPath("inactive-home-footer.png");
+                img.src = getAssetPath("inactive-home-footer.png.png");
               }
               img.alt = "home inactive";
+              console.log(`Setting inactive home image for theme ${themeName}:`, img.src);
             }
           }
         });
@@ -530,10 +530,10 @@
                   iconPath = getAssetPath("X-yellow.png");
                   break;
                 case 'cyan':
-                  iconPath = getAssetPath("X-blue.png");
+                  iconPath = getAssetPath("x-blue.png");
                   break;
                 case 'white':
-                  iconPath = getAssetPath("X-white.png");
+                  iconPath = getAssetPath("X.png");
                   break;
                 case 'black':
                 default:
@@ -645,11 +645,11 @@
                   if (tabType === "message") {
                     imagePath = isActive ? 
                       getAssetPath("active-message-footer-black.png") : 
-                      getAssetPath("inactive-message-footer-black.png");
+                      getAssetPath("inactive-message-footer-black.png.png");
                   } else if (tabType === "home") {
                     imagePath = isActive ? 
                       getAssetPath("active-home-footer-black.png") : 
-                      getAssetPath("inactive-home-footer-black.png");
+                      getAssetPath("inactive-home-footer.png.png");
                   }
                 } else {
                   // Use default images for all other themes
@@ -660,7 +660,7 @@
                   } else if (tabType === "home") {
                     imagePath = isActive ? 
                       getAssetPath("active-home-footer.png") : 
-                      getAssetPath("inactive-home-footer.png");
+                      getAssetPath("inactive-home-footer-black.png.png");
                   }
                 }
                 
@@ -671,12 +671,19 @@
             });
           }
           
-          // Ensure all arrows always use the correct image for all themes
+          // Ensure all arrows use the correct image for all themes
           if (backArrow) {
             backArrow.src = getAssetPath("right-arrow.png");
           }
+          // Set message list arrow based on theme
           if (messageListArrow) {
-            messageListArrow.src = getAssetPath("right-arrow.png");
+            if (themeName === 'black') {
+              messageListArrow.src = getAssetPath("arrow-for-black1.png");
+              console.log("Set message list arrow to arrow-for-black1.png for black theme");
+            } else {
+              messageListArrow.src = getAssetPath("right-arrow.png");
+              console.log("Set message list arrow to right-arrow.png for theme:", themeName);
+            }
           }
           
           console.log("Theme changed to:", themeName);

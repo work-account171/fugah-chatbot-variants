@@ -175,6 +175,7 @@ border-radius: 16px;
   font-size: 16px;
   font-weight: 500;
   color: #000000 !important;
+  box-shadow: rgba(0, 0, 0, 0.08);
 }
 .fugah-send-button img {
   width: 14px;
@@ -493,7 +494,7 @@ border-radius: 16px;
   height: 600px;
   box-sizing: border-box;
   overflow-y: auto;
-  background-color: #f0f0f0;
+  background-color: white;
 }
 
 .flex-1{

@@ -501,6 +501,8 @@
         const footerTabItems = shadow.querySelectorAll(".fugah-footer-tab-item");
         const backArrow = shadow.querySelector("#message-detail-back-btn");
         const messageListArrow = shadow.querySelector(".message-item img");
+        const messageCloseBtn = shadow.querySelector("#message-close-btn");
+        const footerLogo = shadow.querySelector("#footer-logo");
         
         if (chatWindow) {
           // Remove all existing theme classes
@@ -671,9 +673,15 @@
             });
           }
           
-          // Ensure all arrows use the correct image for all themes
+          // Set message detail back button based on theme
           if (backArrow) {
-            backArrow.src = getAssetPath("right-arrow.png");
+            if (themeName === 'black') {
+              backArrow.src = getAssetPath("back-tick-black.png");
+              console.log("Set message detail back button to back-tick-black.png for black theme");
+            } else {
+              backArrow.src = getAssetPath("right-arrow.png");
+              console.log("Set message detail back button to right-arrow.png for theme:", themeName);
+            }
           }
           // Set message list arrow based on theme
           if (messageListArrow) {
@@ -683,6 +691,28 @@
             } else {
               messageListArrow.src = getAssetPath("right-arrow.png");
               console.log("Set message list arrow to right-arrow.png for theme:", themeName);
+            }
+          }
+          
+          // Set message close button icon based on theme
+          if (messageCloseBtn) {
+            if (themeName === 'black') {
+              messageCloseBtn.src = getAssetPath("exit-button-for-black.png");
+              console.log("Set message close button to exit-button-for-black.png for black theme");
+            } else {
+              messageCloseBtn.src = getAssetPath("X.png");
+              console.log("Set message close button to X.png for theme:", themeName);
+            }
+          }
+          
+          // Set footer logo based on theme
+          if (footerLogo) {
+            if (themeName === 'black') {
+              footerLogo.src = getAssetPath("black-logo.png");
+              console.log("Set footer logo to black-logo.png for black theme");
+            } else {
+              footerLogo.src = getAssetPath("fugah-footer-end.png");
+              console.log("Set footer logo to fugah-footer-end.png for theme:", themeName);
             }
           }
           

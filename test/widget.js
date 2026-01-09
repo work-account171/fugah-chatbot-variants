@@ -728,6 +728,36 @@
             }
           }
           
+          // Initialize footer tab images based on current active state
+          if (footerTabItems && footerTabItems.length > 0) {
+            footerTabItems.forEach(item => {
+              const tabType = item.getAttribute("data-tab");
+              const img = item.querySelector("img");
+              const isActive = item.classList.contains("active");
+
+              if (img && tabType) {
+                let imagePath;
+                if (themeName === 'black') {
+                  if (tabType === "message") {
+                    imagePath = isActive ? getAssetPath("active-message-footer-black.png") : getAssetPath("inactive-message-footer-black.png.png");
+                  } else if (tabType === "home") {
+                    imagePath = isActive ? getAssetPath("active-home-footer-black.png") : getAssetPath("new-img.png");
+                  }
+                } else {
+                  if (tabType === "message") {
+                    imagePath = isActive ? getAssetPath("active-message-footer.png") : getAssetPath("inactive-message-footer.png");
+                  } else if (tabType === "home") {
+                    imagePath = isActive ? getAssetPath("active-home-footer.png") : getAssetPath("inactive-home-footer.png.png");
+                  }
+                }
+                if (imagePath) {
+                  img.src = imagePath;
+                  console.log(`Initialized ${tabType} tab image (${isActive ? 'active' : 'inactive'}) for theme ${themeName}:`, imagePath);
+                }
+              }
+            });
+          }
+          
           console.log("Theme changed to:", themeName);
           console.log("Chat window classes:", chatWindow.className);
           console.log("Chat icon changed to:", chatIcon ? chatIcon.src : "not found");

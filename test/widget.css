@@ -1229,6 +1229,9 @@ border-radius: 16px;
   color:  white !important;
 }
 
+.theme-black .close-button {
+  margin-top: 15px !important;
+}
 
 .theme-black .fugah-number-div {
   background-color: black !important;

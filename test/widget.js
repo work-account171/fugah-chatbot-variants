@@ -504,6 +504,7 @@
         const messageCloseBtn = shadow.querySelector("#message-close-btn");
         const footerLogo = shadow.querySelector("#footer-logo");
         const fileUploadIcon = shadow.querySelector("#file-upload-icon");
+        const dropdownIcon = shadow.querySelector("#fugah-message-detail-dropdown-icon");
         
         if (chatWindow) {
           // Remove all existing theme classes
@@ -725,6 +726,17 @@
             } else {
               fileUploadIcon.src = getAssetPath("fugah-file-icon.png");
               console.log("Set file upload icon to fugah-file-icon.png for theme:", themeName);
+            }
+          }
+          
+          // Set dropdown icon based on theme
+          if (dropdownIcon) {
+            if (themeName === 'black') {
+              dropdownIcon.src = getAssetPath("white-dropdown.png");
+              console.log("Set dropdown icon to white-dropdown.png for black theme");
+            } else {
+              dropdownIcon.src = getAssetPath("fugah-menue-dropdown.png");
+              console.log("Set dropdown icon to fugah-menue-dropdown.png for theme:", themeName);
             }
           }
           

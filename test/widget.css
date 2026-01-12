@@ -841,7 +841,7 @@ border-radius: 16px;
   flex-direction: row;
   justify-content: end;
   align-items: center;
-  gap: 12px;
+  gap: 15px;
   width: 100%;
   height: fit-content;
   box-sizing: border-box;
@@ -854,7 +854,7 @@ border-radius: 16px;
 #fugah-message-detail-dropdown-icon {
   width: auto;
   height: 24px;
-  object-fit: contain;
+  object-fit: cover;
   cursor: pointer;
   transition: opacity 0.2s ease;
 }

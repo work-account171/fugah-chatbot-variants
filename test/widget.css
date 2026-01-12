@@ -857,6 +857,7 @@ border-radius: 16px;
   object-fit: cover;
   cursor: pointer;
   transition: opacity 0.2s ease;
+  margin-top: 10px;
 }
 
 #fugah-message-detail-dropdown-icon:hover {

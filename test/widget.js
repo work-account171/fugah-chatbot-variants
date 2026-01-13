@@ -384,7 +384,7 @@
       function playMessageSound() {
         try {
           const audio = new Audio(getAssetPath("message.mp3"));
-          audio.volume = 0.5; // Set volume to 50%
+          audio.volume = 0.7; // Set volume to 70%
           audio.play().catch(error => {
             console.log("Could not play message sound:", error);
           });

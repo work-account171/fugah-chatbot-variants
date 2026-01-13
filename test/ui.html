@@ -47,7 +47,13 @@
       <div id="fugah-body" >
         <div class="fugah-number-div">
           <label for="phone-input">رقم الهاتف</label>
-          <input type="tel" id="phone-input" placeholder="+966 5xxxxxxxx" />
+          <div class="phone-input-wrapper">
+            <input type="tel" id="phone-input" placeholder="" />
+            <div class="custom-placeholder" id="custom-placeholder">
+              <span class="country-code">+966</span>
+              <span class="number-format">5xxxxxxxx</span>
+            </div>
+          </div>
         </div>
         <button class="fugah-send-button fugah-flex-between">
           <img src="../assets/send-icon.png" alt="Send" />

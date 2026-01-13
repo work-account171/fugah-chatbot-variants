@@ -398,12 +398,12 @@ border-radius: 16px;
 }
 
 .custom-placeholder .country-code {
-  font-weight: bold;
+  font-weight: 600; /* Slightly bolder */
   color: #000000;
 }
 
 .custom-placeholder .number-format {
-  font-weight: normal;
+  font-weight: 300; /* Same font-weight as country code base */
   color: #000000;
 }
 

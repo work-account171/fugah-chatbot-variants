@@ -1018,7 +1018,7 @@ border-radius: 16px;
 
 /* Blue Gradient Theme */
 .theme-blue#chat-window {
-  background-image: url(/assets/chatbot-blue-bg.png) !important;
+  background-image: url(/assets/chatbot-cyan-bg.png) !important;
   background-size: cover !important;
   background-position: center top !important;
   background-repeat: no-repeat !important;
@@ -1140,7 +1140,7 @@ border-radius: 16px;
 }
 
 .theme-yellow .message-detail-input-container {
-  background-color: rgba(255,255,255,0.95) !important;
+  
 }
 
 .theme-yellow .message-detail-input-wrapper {
@@ -1200,7 +1200,7 @@ border-radius: 16px;
 
 /* Cyan Gradient Theme */
 .theme-cyan#chat-window {
-  background-image: url(/assets/chatbot-cyan-bg.png) !important;
+  background-image: url(/assets/chatbot-blue-bg.png) !important;
   background-size: cover !important;
   background-position: center top !important;
   background-repeat: no-repeat !important;
@@ -1255,19 +1255,19 @@ border-radius: 16px;
 
 
 .theme-black .fugah-number-div {
-  background-color: black !important;
-  border: 2px solid black !important;
+  background-color: white !important;
+ 
   
 }
 
 .theme-black .fugah-number-div label {
-  color: white !important;
+  color: black !important;
 }
 
 .theme-black .fugah-number-div input {
-  background-color: black !important;
-  color: white !important;
-  border-color: black !important;
+  background-color: white !important;
+  color: black !important;
+ 
   text-align: left;
 }
 

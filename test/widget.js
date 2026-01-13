@@ -206,27 +206,11 @@
         });
       }
 
-      // Send message button
+      // Send message button - just switch to message tab like footer message icon
       if (sendMessageBtn) {
         sendMessageBtn.addEventListener("click", () => {
-          const phone = phoneInput.value.trim();
-          if (phone) {
-            // Switch to message tab
-            switchTab("message");
-            // Add message to chat
-            addMessage(phone, "user");
-            phoneInput.value = "";
-            
-            // Reset custom placeholder
-            if (customPlaceholder) {
-              customPlaceholder.style.display = "flex";
-            }
-            
-            // Simulate bot response
-            setTimeout(() => {
-              addMessage("شكراً لك! سنتواصل معك قريباً.", "bot");
-            }, 1000);
-          }
+          // Switch to message tab (same as footer message icon)
+          switchTab("message");
         });
       }
 
@@ -377,6 +361,25 @@
         }
       }
 
+      // Helper function to format date and time
+      function formatDateTime() {
+        const now = new Date();
+        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        const day = now.getDate();
+        const month = months[now.getMonth()];
+        const year = now.getFullYear();
+        
+        // Convert to 12-hour format
+        let hours = now.getHours();
+        const ampm = hours >= 12 ? 'PM' : 'AM';
+        hours = hours % 12;
+        hours = hours ? hours : 12; // 0 should be 12
+        
+        const minutes = now.getMinutes().toString().padStart(2, '0');
+        
+        return `${day} ${month} ${year}, ${hours}:${minutes} ${ampm}`;
+      }
+
       // Function to add message to detail chat
       function addDetailMessage(text, isUser = true) {
         if (!messageDetailMessages) return;
@@ -396,6 +399,12 @@
         
         messageDiv.appendChild(contentDiv);
         messageDetailMessages.appendChild(messageDiv);
+        
+        // Add date/time for both user and bot messages - outside the message container
+        const dateTimeDiv = document.createElement("div");
+        dateTimeDiv.className = `chat-message-datetime ${isUser ? "user-datetime" : "bot-datetime"}`;
+        dateTimeDiv.textContent = formatDateTime();
+        messageDetailMessages.appendChild(dateTimeDiv);
         
         // Scroll to bottom
         setTimeout(() => {
@@ -634,7 +643,7 @@
                 break;
               case 'black':
               default:
-                sendButtonPath = getAssetPath("fugah-send-button.png"); // Default for black theme
+                sendButtonPath = getAssetPath("black-arrow.png"); // Black arrow for black theme
                 break;
             }
             sendButton.src = sendButtonPath;

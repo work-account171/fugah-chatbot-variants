@@ -352,7 +352,7 @@ border-radius: 16px;
   border: 0.5px solid rgba(34, 34, 34, 0.1);
   font-size: 16px;
   box-sizing: border-box;
-  text-align: right;
+  text-align: left;
 }
 
 .fugah-number-div input::placeholder {
@@ -469,8 +469,8 @@ border-radius: 16px;
   transition: all 0.2s ease;
 }
 .fugah-footer-tab-item img {
-  width: 24px;
-  height: 24px;
+  width: 28px;
+  height: 28px;
   object-fit: contain;
 }
 .fugah-footer-tab-item p {
@@ -754,6 +754,24 @@ border-radius: 16px;
   border-radius: 18px;
   word-wrap: break-word;
   box-sizing: border-box;
+}
+
+.chat-message-datetime {
+  font-size: 12px;
+  color: #666;
+  text-align: left;
+  padding-left: 16px;
+}
+
+.chat-message-datetime.user-datetime {
+  text-align: right;
+  padding-left: 0;
+  padding-right: 16px;
+}
+
+.chat-message-datetime.bot-datetime {
+  text-align: left;
+  padding-left: 16px;
 }
 
 .chat-message-user .chat-message-content {
@@ -1203,7 +1221,7 @@ border-radius: 16px;
 
 .theme-yellow .message-detail-input-wrapper {
   background-color: rgba(255,255,255,0.9) !important;
-  border: 1px solid rgba(255,215,0,0.3) !important;
+ 
 }
 
 .theme-yellow .message-detail-input {

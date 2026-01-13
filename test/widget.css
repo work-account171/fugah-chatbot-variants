@@ -452,6 +452,8 @@ border-radius: 16px;
   font-size: 14px;
   font-weight: 500;
   color: #222;
+  opacity: 0.6;
+
 }
 #fugah-footer-tab{
   display: flex;

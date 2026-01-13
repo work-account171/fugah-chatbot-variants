@@ -92,7 +92,7 @@ border-radius: 16px;
 
 
 
-/* .close-button {
+ .close-button {
   width: 32px;
   height: 32px;
   border-radius: 50%;
@@ -107,13 +107,13 @@ border-radius: 16px;
   position: absolute;
   top: 20px;
   left: 20px;
-} */
+} 
 
-/* .close-button:hover {
+ .close-button:hover {
   background: rgba(0, 0, 0, 0.8);
 }
 
-.close-button svg {
+/*.close-button svg {
   width: 15px;
   height: 15px;
 } */
@@ -650,6 +650,7 @@ border-radius: 16px;
   flex-direction: column;
   height: calc(100% - 60px);
   background-color: #ffffff;
+  overflow: hidden;
 }
 
 .message-detail-messages {
@@ -763,6 +764,10 @@ border-radius: 16px;
   background-color: white;
   box-sizing: border-box;
   padding: 12px 16px;
+  flex-shrink: 0;
+  position: sticky;
+  bottom: 0;
+  z-index: 5;
 }
 
 .message-detail-input-wrapper {
@@ -1252,6 +1257,7 @@ border-radius: 16px;
 .theme-black .fugah-number-div {
   background-color: black !important;
   border: 2px solid black !important;
+  
 }
 
 .theme-black .fugah-number-div label {

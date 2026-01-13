@@ -156,7 +156,14 @@
 
       // Close chat from header button
       if (closeBtn) {
-        closeBtn.addEventListener("click", toggleChat);
+        closeBtn.addEventListener("click", (e) => {
+          console.log("Close button clicked");
+          e.stopPropagation();
+          toggleChat();
+        });
+        console.log("Close button event listener added");
+      } else {
+        console.error("Close button not found in shadow DOM");
       }
 
       // Close chat from message container X button

@@ -39,6 +39,7 @@
           const closeBtn = shadow.querySelector("#close-btn");
           const sendMessageBtn = shadow.querySelector(".fugah-send-button");
           const phoneInput = shadow.querySelector("#phone-input");
+          const customPlaceholder = shadow.querySelector("#custom-placeholder");
           const mainHomeContainer = shadow.querySelector(".main-home-container");
           const mainMessageContainer = shadow.querySelector(".main-message-container");
           const mainMessageDetailContainer = shadow.querySelector(".main-message-detail-container");
@@ -182,6 +183,29 @@
         }
       });
 
+      // Handle custom placeholder behavior
+      if (phoneInput && customPlaceholder) {
+        phoneInput.addEventListener("input", () => {
+          if (phoneInput.value.length > 0) {
+            customPlaceholder.style.display = "none";
+          } else {
+            customPlaceholder.style.display = "flex";
+          }
+        });
+
+        phoneInput.addEventListener("focus", () => {
+          if (phoneInput.value.length === 0) {
+            customPlaceholder.style.display = "none";
+          }
+        });
+
+        phoneInput.addEventListener("blur", () => {
+          if (phoneInput.value.length === 0) {
+            customPlaceholder.style.display = "flex";
+          }
+        });
+      }
+
       // Send message button
       if (sendMessageBtn) {
         sendMessageBtn.addEventListener("click", () => {
@@ -192,6 +216,11 @@
             // Add message to chat
             addMessage(phone, "user");
             phoneInput.value = "";
+            
+            // Reset custom placeholder
+            if (customPlaceholder) {
+              customPlaceholder.style.display = "flex";
+            }
             
             // Simulate bot response
             setTimeout(() => {

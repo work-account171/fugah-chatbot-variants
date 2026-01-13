@@ -380,6 +380,19 @@
         return `${day} ${month} ${year}, ${hours}:${minutes} ${ampm}`;
       }
 
+      // Helper function to play message sound
+      function playMessageSound() {
+        try {
+          const audio = new Audio(getAssetPath("message.mp3"));
+          audio.volume = 0.5; // Set volume to 50%
+          audio.play().catch(error => {
+            console.log("Could not play message sound:", error);
+          });
+        } catch (error) {
+          console.log("Error creating audio:", error);
+        }
+      }
+
       // Function to add message to detail chat
       function addDetailMessage(text, isUser = true) {
         if (!messageDetailMessages) return;
@@ -405,6 +418,9 @@
         dateTimeDiv.className = `chat-message-datetime ${isUser ? "user-datetime" : "bot-datetime"}`;
         dateTimeDiv.textContent = formatDateTime();
         messageDetailMessages.appendChild(dateTimeDiv);
+        
+        // Play message sound notification
+        playMessageSound();
         
         // Scroll to bottom
         setTimeout(() => {

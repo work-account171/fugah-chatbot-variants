@@ -430,7 +430,10 @@
 
       // Send message in detail chat
       function sendDetailMessage() {
-        if (!messageDetailInput) return;
+        if (!messageDetailInput || !messageDetailSendBtn) return;
+        
+        // Don't send if button is inactive
+        if (messageDetailSendBtn.classList.contains("inactive")) return;
         
         const message = messageDetailInput.value.trim();
         if (!message) return;
@@ -440,6 +443,9 @@
         
         // Clear input
         messageDetailInput.value = "";
+        
+        // Update send button state
+        toggleMessageDetailSendButtonState();
         
         // Show loading indicator
         showLoadingIndicator();
@@ -461,6 +467,29 @@
             sendDetailMessage();
           }
         });
+
+        // Toggle send button state based on input content
+        messageDetailInput.addEventListener("input", () => {
+          toggleMessageDetailSendButtonState();
+        });
+      }
+
+      // Function to toggle message detail send button active/inactive state
+      function toggleMessageDetailSendButtonState() {
+        if (!messageDetailInput || !messageDetailSendBtn) return;
+        
+        const hasText = messageDetailInput.value.trim().length > 0;
+        
+        if (hasText) {
+          messageDetailSendBtn.classList.remove("inactive");
+        } else {
+          messageDetailSendBtn.classList.add("inactive");
+        }
+      }
+
+      // Initialize message detail send button as inactive
+      if (messageDetailSendBtn) {
+        messageDetailSendBtn.classList.add("inactive");
       }
 
       // Function to go back to message list
@@ -470,7 +499,10 @@
         // Remove detail-active class from footer (tabs should be visible in message list)
         if (fugahFooter) fugahFooter.classList.remove("detail-active");
         // Clear input when going back
-        if (messageDetailInput) messageDetailInput.value = "";
+        if (messageDetailInput) {
+          messageDetailInput.value = "";
+          toggleMessageDetailSendButtonState();
+        }
       }
 
       // Add click handler to message detail back button

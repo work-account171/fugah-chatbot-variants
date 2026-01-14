@@ -1,17 +1,15 @@
-/* widget.css */
-
-/* Latin (Rubik) */
+/* Latin characters */
 @font-face {
-  font-family: "RubikAuto";
+  font-family: "RubikForce";
   src: url("https://fonts.gstatic.com/s/rubik/v28/iJWKBXyIfDnIV7nBrXw.woff2")
        format("woff2");
   unicode-range: U+0000-00FF, U+0100-024F;
   font-display: swap;
 }
 
-/* Arabic (Rubik Arabic) */
+/* Arabic characters */
 @font-face {
-  font-family: "RubikAuto";
+  font-family: "RubikForce";
   src: url("https://fonts.gstatic.com/s/rubikarabic/v4/1Ptvg83HX_SGhgqk0gotcqA.woff2")
        format("woff2");
   unicode-range: U+0600-06FF, U+0750-077F, U+08A0-08FF;
@@ -21,10 +19,11 @@
 /* Apply to chatbot */
 #chat-window,
 #chat-window * {
-  font-family: "RubikAuto",
+  font-family: "RubikForce",
                -apple-system, BlinkMacSystemFont,
                "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
+
 
 
 /* Geometric pattern background */

@@ -1,15 +1,34 @@
+// ========================================
+// FUGAH CHATBOT WIDGET - MAIN JAVASCRIPT
+// ========================================
+// This file contains all the functionality for the Fugah chatbot widget
+// including theme switching, message handling, and user interactions
+
 (function() {
-  // 1️⃣ Read store ID
+  // ========================================
+  // STORE ID CONFIGURATION FUNCTIONALITY
+  // ========================================
+  // Read store ID from script tag data attribute
   const scriptTag = document.currentScript;
   const storeId = scriptTag.getAttribute("data-store-id") || "demo-store";
 
   console.log("Widget loaded for store:", storeId);
 
-  // 2️⃣ Create wrapper and shadow DOM
+
+  // ========================================
+  // END STORE ID CONFIGURATION FUNCTIONALITY
+  // ========================================
+
+
+  // ========================================
+  // SHADOW DOM SETUP FUNCTIONALITY
+  // ========================================
+  // Create wrapper element and attach shadow DOM for style isolation
   const wrapper = document.createElement("div");
   wrapper.id = "chatbot-widget-root";
   document.body.appendChild(wrapper);
 
+  // API call to n8n webhook (for future integration)
   fetch("https://n8n.srv1196634.hstgr.cloud/webhook/body")
   .then(response => response.json())
   .then(data => {
@@ -18,72 +37,117 @@
   .catch(error => {
     console.error("Error fetching response from n8n server:", error);
   });
-  const shadow = wrapper.attachShadow({ mode: "open" }); // ✅ must be here
+  
+  const shadow = wrapper.attachShadow({ mode: "open" }); // Create shadow DOM
 
-  // 3️⃣ Load CSS into shadow
+
+  // ========================================
+  // END SHADOW DOM SETUP FUNCTIONALITY
+  // ========================================
+
+
+  // ========================================
+  // CSS LOADING FUNCTIONALITY
+  // ========================================
+  // Load CSS stylesheet into shadow DOM
   const style = document.createElement("link");
   style.rel = "stylesheet";
-  style.href = "widget.css"; // adjust path if needed
+  style.href = "widget.css"; // CSS file path
   shadow.appendChild(style);
 
-      // 4️⃣ Load HTML
-      fetch("ui.html") // adjust path if needed
-        .then(res => res.text())
-        .then(html => {
-          shadow.innerHTML += html; // or = html
 
-          // ✅ Now shadow exists here
-          const bubble = shadow.querySelector("#chat-bubble");
-          const chatIcon = shadow.querySelector("#chat-icon");
-          const chatWindow = shadow.querySelector("#chat-window");
-          const closeBtn = shadow.querySelector("#close-btn");
-          const sendMessageBtn = shadow.querySelector(".fugah-send-button");
-          const phoneInput = shadow.querySelector("#phone-input");
-          const customPlaceholder = shadow.querySelector("#custom-placeholder");
-          const mainHomeContainer = shadow.querySelector(".main-home-container");
-          const mainMessageContainer = shadow.querySelector(".main-message-container");
-          const mainMessageDetailContainer = shadow.querySelector(".main-message-detail-container");
-          const messageCloseBtn = shadow.querySelector("#message-close-btn");
-          const messageDetailBackBtn = shadow.querySelector("#message-detail-back-btn");
-          const fugahMessageDetailDropdownIcon = shadow.querySelector("#fugah-message-detail-dropdown-icon");
-          const fugahMessageDetailDropdown = shadow.querySelector("#fugah-message-detail-dropdown");
-          const closeChatDetailMenuItem = shadow.querySelector("#close-chat-detail-menu-item");
-          const createTicketDetailMenuItem = shadow.querySelector("#create-ticket-detail-menu-item");
-          const messageDetailInput = shadow.querySelector("#message-detail-input");
-          const messageDetailSendBtn = shadow.querySelector("#message-detail-send-btn");
-          const messageDetailMessages = shadow.querySelector("#message-detail-messages");
-          const messageItems = shadow.querySelectorAll(".message-item");
-          const footerTabItems = shadow.querySelectorAll(".fugah-footer-tab-item");
-          const fugahFooter = shadow.querySelector("#fugah-footer");
-          
-          // Helper function to get asset path
-          // In shadow DOM, image src is resolved relative to the document URL
-          const getAssetPath = (filename) => {
-            // Since we're at /test/index.html, assets are at ../assets/
-            return `../assets/${filename}`;
-          };
-          
-          // Fix initial icon path
-          if (chatIcon) {
-            chatIcon.src = getAssetPath("message.png");
-          }
-          
-          // Fix initial arrow paths
-          const backArrow = shadow.querySelector("#message-detail-back-btn");
-          const messageListArrows = shadow.querySelectorAll(".message-item img");
-          if (backArrow) {
-            backArrow.src = getAssetPath("right-arrow.png");
-          }
-          // messageListArrows will be set correctly by changeTheme() function
+  // ========================================
+  // END CSS LOADING FUNCTIONALITY
+  // ========================================
 
+
+  // ========================================
+  // HTML LOADING AND DOM ELEMENT SELECTION FUNCTIONALITY
+  // ========================================
+  // Load HTML template and initialize all DOM elements
+  fetch("ui.html") // Load HTML template
+    .then(res => res.text())
+    .then(html => {
+      shadow.innerHTML += html; // Inject HTML into shadow DOM
+
+      // Select all required DOM elements from shadow DOM
+      const bubble = shadow.querySelector("#chat-bubble");
+      const chatIcon = shadow.querySelector("#chat-icon");
+      const chatWindow = shadow.querySelector("#chat-window");
+      const closeBtn = shadow.querySelector("#close-btn");
+      const sendMessageBtn = shadow.querySelector(".fugah-send-button");
+      const phoneInput = shadow.querySelector("#phone-input");
+      const customPlaceholder = shadow.querySelector("#custom-placeholder");
+      const mainHomeContainer = shadow.querySelector(".main-home-container");
+      const mainMessageContainer = shadow.querySelector(".main-message-container");
+      const mainMessageDetailContainer = shadow.querySelector(".main-message-detail-container");
+      const messageCloseBtn = shadow.querySelector("#message-close-btn");
+      const messageDetailBackBtn = shadow.querySelector("#message-detail-back-btn");
+      const fugahMessageDetailDropdownIcon = shadow.querySelector("#fugah-message-detail-dropdown-icon");
+      const fugahMessageDetailDropdown = shadow.querySelector("#fugah-message-detail-dropdown");
+      const closeChatDetailMenuItem = shadow.querySelector("#close-chat-detail-menu-item");
+      const createTicketDetailMenuItem = shadow.querySelector("#create-ticket-detail-menu-item");
+      const messageDetailInput = shadow.querySelector("#message-detail-input");
+      const messageDetailSendBtn = shadow.querySelector("#message-detail-send-btn");
+      const messageDetailMessages = shadow.querySelector("#message-detail-messages");
+      const messageItems = shadow.querySelectorAll(".message-item");
+      const footerTabItems = shadow.querySelectorAll(".fugah-footer-tab-item");
+      const fugahFooter = shadow.querySelector("#fugah-footer");
+
+
+      // ========================================
+      // END HTML LOADING AND DOM ELEMENT SELECTION FUNCTIONALITY
+      // ========================================
+
+
+      // ========================================
+      // ASSET PATH HELPER FUNCTIONALITY
+      // ========================================
+      // Helper function to get correct asset paths in shadow DOM
+      const getAssetPath = (filename) => {
+        // Since we're at /test/index.html, assets are at ../assets/
+        return `../assets/${filename}`;
+      };
+
+
+      // ========================================
+      // END ASSET PATH HELPER FUNCTIONALITY
+      // ========================================
+
+
+      // ========================================
+      // INITIAL ICON SETUP FUNCTIONALITY
+      // ========================================
+      // Set initial icon paths for chat bubble and arrows
+      if (chatIcon) {
+        chatIcon.src = getAssetPath("message.png");
+      }
+      
+      // Fix initial arrow paths
+      const backArrow = shadow.querySelector("#message-detail-back-btn");
+      const messageListArrows = shadow.querySelectorAll(".message-item img");
+      if (backArrow) {
+        backArrow.src = getAssetPath("right-arrow.png");
+      }
+      // messageListArrows will be set correctly by changeTheme() function
+
+
+      // ========================================
+      // END INITIAL ICON SETUP FUNCTIONALITY
+      // ========================================
+
+
+      // ========================================
+      // CHAT WINDOW TOGGLE FUNCTIONALITY
+      // ========================================
+      // Handle opening and closing of chat window with icon switching
       let isOpen = false;
 
-      // Toggle chat window
       const toggleChat = () => {
         isOpen = !isOpen;
         chatWindow.style.display = isOpen ? "flex" : "none";
         
-        // Toggle icon between message and cross
+        // Toggle icon between message and cross based on current theme
         if (isOpen) {
           // Get current theme to set correct X icon
           const currentTheme = chatWindow.classList.toString().match(/theme-(\w+)/);
@@ -118,7 +182,7 @@
           chatIcon.src = xIconPath;
           bubble.classList.add("chat-open");
         } else {
-          // Get current theme to set correct icon
+          // Get current theme to set correct message icon
           const currentTheme = chatWindow.classList.toString().match(/theme-(\w+)/);
           const themeName = currentTheme ? currentTheme[1] : 'black';
           
@@ -152,10 +216,21 @@
         }
       };
 
-      // Open chat from bubble
+
+      // ========================================
+      // END CHAT WINDOW TOGGLE FUNCTIONALITY
+      // ========================================
+
+
+      // ========================================
+      // CHAT WINDOW EVENT LISTENERS FUNCTIONALITY
+      // ========================================
+      // Add event listeners for opening and closing chat window
+      
+      // Open chat from bubble click
       bubble.addEventListener("click", toggleChat);
 
-      // Close chat from header button
+      // Close chat from header close button
       if (closeBtn) {
         closeBtn.addEventListener("click", (e) => {
           console.log("Close button clicked");
@@ -183,7 +258,16 @@
         }
       });
 
-      // Handle custom placeholder behavior
+
+      // ========================================
+      // END CHAT WINDOW EVENT LISTENERS FUNCTIONALITY
+      // ========================================
+
+
+      // ========================================
+      // CUSTOM PLACEHOLDER FUNCTIONALITY
+      // ========================================
+      // Handle custom placeholder behavior for phone input with mixed styling
       if (phoneInput && customPlaceholder) {
         phoneInput.addEventListener("input", () => {
           if (phoneInput.value.length > 0) {
@@ -206,7 +290,16 @@
         });
       }
 
-      // Send message button - just switch to message tab like footer message icon
+
+      // ========================================
+      // END CUSTOM PLACEHOLDER FUNCTIONALITY
+      // ========================================
+
+
+      // ========================================
+      // MAIN SEND BUTTON FUNCTIONALITY
+      // ========================================
+      // Handle main send button click - switches to message tab
       if (sendMessageBtn) {
         sendMessageBtn.addEventListener("click", () => {
           // Switch to message tab (same as footer message icon)
@@ -214,7 +307,7 @@
         });
       }
 
-      // Phone input enter key
+      // Handle phone input enter key
       if (phoneInput) {
         phoneInput.addEventListener("keydown", e => {
           if (e.key === "Enter" && sendMessageBtn) {
@@ -223,7 +316,16 @@
         });
       }
 
-      // Tab switching functionality
+
+      // ========================================
+      // END MAIN SEND BUTTON FUNCTIONALITY
+      // ========================================
+
+
+      // ========================================
+      // TAB SWITCHING FUNCTIONALITY
+      // ========================================
+      // Handle switching between home and message tabs with proper image updates
       function switchTab(tabName) {
         // Remove active class from all tabs
         footerTabItems.forEach(item => {
@@ -299,7 +401,16 @@
         }
       }
 
-      // Function to open message detail
+
+      // ========================================
+      // END TAB SWITCHING FUNCTIONALITY
+      // ========================================
+
+
+      // ========================================
+      // MESSAGE DETAIL NAVIGATION FUNCTIONALITY
+      // ========================================
+      // Handle opening and closing of message detail view
       function openMessageDetail(messageId) {
         // Hide message list container
         if (mainMessageContainer) mainMessageContainer.style.display = "none";
@@ -316,7 +427,16 @@
         }
       }
 
-      // Function to show loading indicator
+
+      // ========================================
+      // END MESSAGE DETAIL NAVIGATION FUNCTIONALITY
+      // ========================================
+
+
+      // ========================================
+      // LOADING INDICATOR FUNCTIONALITY
+      // ========================================
+      // Show and remove loading indicators for bot responses
       function showLoadingIndicator() {
         if (!messageDetailMessages) return null;
         
@@ -352,7 +472,6 @@
         return messageDiv;
       }
 
-      // Function to remove loading indicator
       function removeLoadingIndicator() {
         if (!messageDetailMessages) return;
         const loadingIndicator = messageDetailMessages.querySelector(".chat-message-loading");
@@ -361,7 +480,16 @@
         }
       }
 
-      // Helper function to format date and time
+
+      // ========================================
+      // END LOADING INDICATOR FUNCTIONALITY
+      // ========================================
+
+
+      // ========================================
+      // DATE TIME FORMATTING FUNCTIONALITY
+      // ========================================
+      // Format current date and time in 12-hour format with AM/PM
       function formatDateTime() {
         const now = new Date();
         const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -380,7 +508,16 @@
         return `${day} ${month} ${year}, ${hours}:${minutes} ${ampm}`;
       }
 
-      // Helper function to play message sound
+
+      // ========================================
+      // END DATE TIME FORMATTING FUNCTIONALITY
+      // ========================================
+
+
+      // ========================================
+      // MESSAGE SOUND FUNCTIONALITY
+      // ========================================
+      // Play sound notification when messages are sent or received
       function playMessageSound() {
         try {
           const audio = new Audio(getAssetPath("message.mp3"));
@@ -393,7 +530,16 @@
         }
       }
 
-      // Function to add message to detail chat
+
+      // ========================================
+      // END MESSAGE SOUND FUNCTIONALITY
+      // ========================================
+
+
+      // ========================================
+      // MESSAGE CREATION FUNCTIONALITY
+      // ========================================
+      // Add messages to detail chat with date/time stamps and sound notifications
       function addDetailMessage(text, isUser = true) {
         if (!messageDetailMessages) return;
         
@@ -428,7 +574,16 @@
         }, 50);
       }
 
-      // Send message in detail chat
+
+      // ========================================
+      // END MESSAGE CREATION FUNCTIONALITY
+      // ========================================
+
+
+      // ========================================
+      // MESSAGE SENDING FUNCTIONALITY
+      // ========================================
+      // Handle sending messages in detail chat with validation and bot responses
       function sendDetailMessage() {
         if (!messageDetailInput || !messageDetailSendBtn) return;
         
@@ -456,7 +611,16 @@
         }, 1500);
       }
 
-      // Add event listeners for detail chat
+
+      // ========================================
+      // END MESSAGE SENDING FUNCTIONALITY
+      // ========================================
+
+
+      // ========================================
+      // MESSAGE DETAIL EVENT LISTENERS FUNCTIONALITY
+      // ========================================
+      // Add event listeners for message detail input and send button
       if (messageDetailSendBtn) {
         messageDetailSendBtn.addEventListener("click", sendDetailMessage);
       }
@@ -474,7 +638,16 @@
         });
       }
 
-      // Function to toggle message detail send button active/inactive state
+
+      // ========================================
+      // END MESSAGE DETAIL EVENT LISTENERS FUNCTIONALITY
+      // ========================================
+
+
+      // ========================================
+      // SEND BUTTON STATE MANAGEMENT FUNCTIONALITY
+      // ========================================
+      // Toggle message detail send button active/inactive state based on input content
       function toggleMessageDetailSendButtonState() {
         if (!messageDetailInput || !messageDetailSendBtn) return;
         
@@ -492,7 +665,16 @@
         messageDetailSendBtn.classList.add("inactive");
       }
 
-      // Function to go back to message list
+
+      // ========================================
+      // END SEND BUTTON STATE MANAGEMENT FUNCTIONALITY
+      // ========================================
+
+
+      // ========================================
+      // MESSAGE LIST NAVIGATION FUNCTIONALITY
+      // ========================================
+      // Handle navigation back to message list from detail view
       function goBackToMessageList() {
         if (mainMessageContainer) mainMessageContainer.style.display = "block";
         if (mainMessageDetailContainer) mainMessageDetailContainer.style.display = "none";
@@ -513,7 +695,16 @@
         });
       }
 
-      // Toggle message detail dropdown menu
+
+      // ========================================
+      // END MESSAGE LIST NAVIGATION FUNCTIONALITY
+      // ========================================
+
+
+      // ========================================
+      // DROPDOWN MENU FUNCTIONALITY
+      // ========================================
+      // Handle message detail dropdown menu toggle and outside click closing
       if (fugahMessageDetailDropdownIcon) {
         fugahMessageDetailDropdownIcon.addEventListener("click", (e) => {
           e.stopPropagation();
@@ -531,7 +722,16 @@
         }
       });
 
-      // Close chat from detail menu item
+
+      // ========================================
+      // END DROPDOWN MENU FUNCTIONALITY
+      // ========================================
+
+
+      // ========================================
+      // DROPDOWN MENU ACTIONS FUNCTIONALITY
+      // ========================================
+      // Handle dropdown menu item actions (close chat, create ticket)
       if (closeChatDetailMenuItem) {
         closeChatDetailMenuItem.addEventListener("click", (e) => {
           e.stopPropagation();
@@ -540,7 +740,6 @@
         });
       }
 
-      // Create ticket from detail menu item
       if (createTicketDetailMenuItem) {
         createTicketDetailMenuItem.addEventListener("click", (e) => {
           e.stopPropagation();
@@ -550,7 +749,16 @@
         });
       }
 
-      // Add click handlers to message items
+
+      // ========================================
+      // END DROPDOWN MENU ACTIONS FUNCTIONALITY
+      // ========================================
+
+
+      // ========================================
+      // MESSAGE ITEM CLICK HANDLERS FUNCTIONALITY
+      // ========================================
+      // Add click handlers to message items for opening detail view
       messageItems.forEach(item => {
         item.addEventListener("click", () => {
           const messageId = item.getAttribute("data-message-id");
@@ -562,7 +770,16 @@
         item.style.cursor = "pointer";
       });
 
-      // Add click handlers to footer tabs
+
+      // ========================================
+      // END MESSAGE ITEM CLICK HANDLERS FUNCTIONALITY
+      // ========================================
+
+
+      // ========================================
+      // FOOTER TAB CLICK HANDLERS FUNCTIONALITY
+      // ========================================
+      // Add click handlers to footer tabs for tab switching
       footerTabItems.forEach(item => {
         item.addEventListener("click", () => {
           const tabType = item.getAttribute("data-tab");
@@ -570,8 +787,16 @@
         });
       });
 
-      // Initialize: ensure home container is visible and message container is hidden
-      // Home tab should be active by default - this will also set correct images and colors
+
+      // ========================================
+      // END FOOTER TAB CLICK HANDLERS FUNCTIONALITY
+      // ========================================
+
+
+      // ========================================
+      // INITIAL DISPLAY STATE FUNCTIONALITY
+      // ========================================
+      // Initialize display states and set home tab as active by default
       if (mainHomeContainer) {
         mainHomeContainer.style.display = "flex";
       }
@@ -585,7 +810,16 @@
       // Initialize tab state (Home active by default)
       switchTab("home");
 
-      // Theme switching function
+
+      // ========================================
+      // END INITIAL DISPLAY STATE FUNCTIONALITY
+      // ========================================
+
+
+      // ========================================
+      // THEME SWITCHING FUNCTIONALITY
+      // ========================================
+      // Main theme switching function that updates all UI elements based on selected theme
       function changeTheme(themeName) {
         const chatWindow = shadow.querySelector("#chat-window");
         const chatIcon = shadow.querySelector("#chat-icon");
@@ -606,7 +840,7 @@
           // Add the new theme class
           chatWindow.classList.add(`theme-${themeName}`);
           
-          // Change chat bubble icon based on theme
+          // Change chat bubble icon based on theme and current state (open/closed)
           if (chatIcon) {
             let iconPath;
             
@@ -667,7 +901,7 @@
             chatIcon.src = iconPath;
           }
           
-          // Change send button icon based on theme
+          // Change message detail send button icon based on theme
           if (sendButton) {
             let sendButtonPath;
             switch(themeName) {
@@ -727,7 +961,7 @@
             mainSendButton.src = mainSendIconPath;
           }
           
-          // Change footer tab images based on theme
+          // Change footer tab images based on theme and active state
           if (footerTabItems && footerTabItems.length > 0) {
             footerTabItems.forEach(item => {
               const tabType = item.getAttribute("data-tab");
@@ -778,6 +1012,7 @@
               console.log("Set message detail back button to right-arrow.png for theme:", themeName);
             }
           }
+          
           // Set message list arrows for ALL users based on theme
           const messageListArrows = shadow.querySelectorAll(".message-item img");
           console.log(`Found ${messageListArrows.length} message list arrows for theme: ${themeName}`);
@@ -876,10 +1111,28 @@
         }
       }
 
-      // Expose theme changing function globally
+
+      // ========================================
+      // END THEME SWITCHING FUNCTIONALITY
+      // ========================================
+
+
+      // ========================================
+      // GLOBAL THEME FUNCTION EXPOSURE FUNCTIONALITY
+      // ========================================
+      // Expose theme changing function globally for external access
       window.changeChatbotTheme = changeTheme;
 
-      // Set initial theme if specified (with small delay to ensure DOM is ready)
+
+      // ========================================
+      // END GLOBAL THEME FUNCTION EXPOSURE FUNCTIONALITY
+      // ========================================
+
+
+      // ========================================
+      // INITIAL THEME SETUP FUNCTIONALITY
+      // ========================================
+      // Set initial theme if specified in script tag data attribute
       const scriptTag = document.querySelector('script[data-theme]');
       if (scriptTag) {
         const initialTheme = scriptTag.getAttribute('data-theme');
@@ -890,7 +1143,16 @@
         }
       }
 
-      // Add message function
+
+      // ========================================
+      // END INITIAL THEME SETUP FUNCTIONALITY
+      // ========================================
+
+
+      // ========================================
+      // MESSAGE ADDING UTILITY FUNCTIONALITY
+      // ========================================
+      // Utility function to add messages to main message container (for future use)
       function addMessage(text, type) {
         if (!mainMessageContainer) return;
         
@@ -907,6 +1169,12 @@
         mainMessageContainer.appendChild(messageDiv);
         mainMessageContainer.scrollTop = mainMessageContainer.scrollHeight;
       }
+
+
+      // ========================================
+      // END MESSAGE ADDING UTILITY FUNCTIONALITY
+      // ========================================
+
     })
     .catch(err => console.error("Failed to load ui.html:", err));
 

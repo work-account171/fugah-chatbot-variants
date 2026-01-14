@@ -1,4 +1,7 @@
-/* Latin characters */
+/* ========================================
+   FONT DEFINITIONS
+   ======================================== */
+/* Custom Rubik font for Latin characters */
 @font-face {
   font-family: "RubikForce";
   src: url("https://fonts.gstatic.com/s/rubik/v28/iJWKBXyIfDnIV7nBrXw.woff2")
@@ -7,7 +10,7 @@
   font-display: swap;
 }
 
-/* Arabic characters */
+/* Custom Rubik font for Arabic characters */
 @font-face {
   font-family: "RubikForce";
   src: url("https://fonts.gstatic.com/s/rubikarabic/v4/1Ptvg83HX_SGhgqk0gotcqA.woff2")
@@ -16,7 +19,7 @@
   font-display: swap;
 }
 
-/* Apply to chatbot */
+/* Apply Rubik font to entire chatbot widget */
 #chat-window,
 #chat-window * {
   font-family: "RubikForce",
@@ -25,8 +28,15 @@
 }
 
 
+/* ========================================
+   END FONT DEFINITIONS
+   ======================================== */
 
-/* Geometric pattern background */
+
+/* ========================================
+   ANIMATIONS
+   ======================================== */
+/* Geometric pattern background animation */
 @keyframes patternShift {
   0% {
     background-position: 0 0;
@@ -35,6 +45,17 @@
     background-position: 40px 40px;
   }
 }
+
+
+/* ========================================
+   END ANIMATIONS
+   ======================================== */
+
+
+/* ========================================
+   CHAT BUBBLE FUNCTIONALITY
+   ======================================== */
+/* Main floating chat bubble positioned at bottom right */
 #chat-bubble {
   position: fixed;
   bottom: 20px;
@@ -49,23 +70,27 @@
   z-index: 10000;
   transition: transform 0.2s ease, background-color 0.2s ease, padding 0.2s ease;
 }
+
+/* Chat bubble image styling */
 #chat-bubble img {
   width: 100%;
   height: 41px;
   object-fit: contain;
 }
 
+/* Chat bubble hover effect */
 #chat-bubble:hover {
   transform: scale(1.05);
 }
 
+/* Chat icon within bubble */
 #chat-bubble #chat-icon {
   width: 48px;
   height: 48px;
   object-fit: contain;
 }
 
-/* When chatbot is open (showing X icon) */
+/* Chat bubble when chatbot is open (showing X icon) */
 #chat-bubble.chat-open {
   background-color: white;
   border-radius: 100%;
@@ -73,11 +98,17 @@
   box-sizing: border-box;
 }
 
+/* Chat icon when bubble is open */
 #chat-bubble.chat-open #chat-icon {
   width: 32px;
   height: 32px;
   object-fit: cover;
 }
+
+
+/* ========================================
+   END CHAT BUBBLE FUNCTIONALITY
+   ======================================== */
 
 #chat-window {
   position: fixed;

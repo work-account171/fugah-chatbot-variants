@@ -1,18 +1,25 @@
+<!-- ========================================
+     FUGAH CHATBOT WIDGET - HTML TEMPLATE
+     ======================================== -->
+<!-- This file contains the HTML structure for the Fugah chatbot widget
+     including chat bubble, main window, message containers, and footer -->
+
 <!-- ui.html -->
+<!-- Font imports (commented out - fonts loaded via index.html) -->
 <!-- <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Rubik:ital,wght@0,300..900;1,300..900&display=swap" rel="stylesheet"> -->
 
-
+<!-- Arabic font imports (commented out - fonts loaded via index.html) -->
 <!-- <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Rubik+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet"> -->
 
 
-
-
-
-
+<!-- ========================================
+     CHAT BUBBLE FUNCTIONALITY
+     ======================================== -->
+<!-- Floating chat bubble that opens/closes the main chat window -->
 <div id="chat-bubble">
   <img
     id="chat-icon"
@@ -20,8 +27,18 @@
     alt="Chat"
   />
 </div>
- <!-- fetching response from n8n server -->
- <script>
+
+
+<!-- ========================================
+     END CHAT BUBBLE FUNCTIONALITY
+     ======================================== -->
+
+
+<!-- ========================================
+     N8N WEBHOOK INTEGRATION FUNCTIONALITY
+     ======================================== -->
+<!-- Script for fetching response from n8n server (for future integration) -->
+<script>
   fetch("https://n8n.srv1196634.hstgr.cloud/webhook/body")
   .then(response => response.json())
   .then(data => {
@@ -31,121 +48,184 @@
     console.error("Error fetching response from n8n server:", error);
   });
 </script>
+
+
+<!-- ========================================
+     END N8N WEBHOOK INTEGRATION FUNCTIONALITY
+     ======================================== -->
+
+
+<!-- ========================================
+     MAIN CHAT WINDOW FUNCTIONALITY
+     ======================================== -->
+<!-- Main chat window container with all chat functionality -->
 <div id="chat-window">
-  
   <div id="chat-container">
-    <!-- Header with close button -->
-   
+    <div id="fugah-main-container">
 
-    <!-- Welcome section -->
 
-    <div id="fugah-main-container" >
-      
-      
-
-     <!-- main section -->
-      <div id="fugah-main-content" class="main-home-container" >
+      <!-- ========================================
+           HOME CONTAINER FUNCTIONALITY
+           ======================================== -->
+      <!-- Main home screen with welcome message and phone input -->
+      <div id="fugah-main-content" class="main-home-container">
+        <!-- Header with close button -->
         <div id="chat-header">
           <button id="close-btn" class="close-button">
             <img src="../assets/white-exit-button.png" alt="Close" />
           </button>
         </div>
-      <div class="fugah-flex-col-end">
-        <h1 class="welcome-title">👋 مرحبا عزيزي العميل</h1>
-        <h1 class="welcome-title">كيف يمكننا مساعدتك</h1>
-      </div>
-      <div id="fugah-body" >
-        <div class="fugah-number-div">
-          <label for="phone-input">رقم الهاتف</label>
-          <div class="phone-input-wrapper">
-            <input type="tel" id="phone-input" placeholder="" />
-            <div class="custom-placeholder" id="custom-placeholder">
-              <span class="country-code">+966</span>
-              <span class="number-format">5xxxxxxxx</span>
+        
+        <!-- Welcome message section -->
+        <div class="fugah-flex-col-end">
+          <h1 class="welcome-title">👋 مرحبا عزيزي العميل</h1>
+          <h1 class="welcome-title">كيف يمكننا مساعدتك</h1>
+        </div>
+        
+        <!-- Phone input and send button section -->
+        <div id="fugah-body">
+          <!-- Phone number input with custom placeholder -->
+          <div class="fugah-number-div">
+            <label for="phone-input">رقم الهاتف</label>
+            <div class="phone-input-wrapper">
+              <input type="tel" id="phone-input" placeholder="" />
+              <!-- Custom placeholder with mixed styling for +966 and 5xxxxxxxx -->
+              <div class="custom-placeholder" id="custom-placeholder">
+                <span class="country-code">+966</span>
+                <span class="number-format">5xxxxxxxx</span>
+              </div>
             </div>
           </div>
+          
+          <!-- Main send message button -->
+          <button class="fugah-send-button fugah-flex-between">
+            <img src="../assets/send-icon.png" alt="Send" />
+            <p>أرسل لنا رسالة</p>
+          </button>
         </div>
-        <button class="fugah-send-button fugah-flex-between">
-          <img src="../assets/send-icon.png" alt="Send" />
-          <p>أرسل لنا رسالة</p>
-        </button>
       </div>
-      </div>
+
+
+      <!-- ========================================
+           END HOME CONTAINER FUNCTIONALITY
+           ======================================== -->
+
+
+      <!-- ========================================
+           MESSAGE LIST CONTAINER FUNCTIONALITY
+           ======================================== -->
+      <!-- Message list showing conversation history -->
       <div class="main-message-container" style="display: none;">
+        <!-- Header with close button and title -->
         <div class="flex-1">
           <img id="message-close-btn" src="../assets/X.png" alt="close icon" class="message-close-icon" />
           <p>تاريخ الدردشة</p>
         </div>
+        
+        <!-- Message items container -->
         <div class="message-container">
-          <div class="message-item" data-message-id="1">
-           <div class="fugah-message-content">
-            <p class="fugah-message-heading">إذا كنت لا تزال بحاجة إلى أي مساعدة۔۔</p>
-            <div class="fugah-message-date-time">
-              <p class="date">19 Nov 2025</p>
-              <p class="time">03:53</p>
-            </div>
-           </div>
-           <img src="../assets/right-arrow.png" alt="message right" />
-          </div>
+          <!-- First message item -->
           <div class="message-item" data-message-id="1">
             <div class="fugah-message-content">
-             <p class="fugah-message-heading">إذا كنت لا تزال بحاجة إلى أي مساعدة۔۔</p>
-             <div class="fugah-message-date-time">
-               <p class="date">19 Nov 2025</p>
-               <p class="time">03:53</p>
-             </div>
+              <p class="fugah-message-heading">إذا كنت لا تزال بحاجة إلى أي مساعدة۔۔</p>
+              <div class="fugah-message-date-time">
+                <p class="date">19 Nov 2025</p>
+                <p class="time">03:53</p>
+              </div>
             </div>
             <img src="../assets/right-arrow.png" alt="message right" />
-           </div>
-        </div>          
+          </div>
+          
+          <!-- Second message item -->
+          <div class="message-item" data-message-id="1">
+            <div class="fugah-message-content">
+              <p class="fugah-message-heading">إذا كنت لا تزال بحاجة إلى أي مساعدة۔۔</p>
+              <div class="fugah-message-date-time">
+                <p class="date">19 Nov 2025</p>
+                <p class="time">03:53</p>
+              </div>
+            </div>
+            <img src="../assets/right-arrow.png" alt="message right" />
+          </div>
+        </div>
       </div>
-      <!-- Message Detail Container -->
+
+
+      <!-- ========================================
+           END MESSAGE LIST CONTAINER FUNCTIONALITY
+           ======================================== -->
+
+
+      <!-- ========================================
+           MESSAGE DETAIL CONTAINER FUNCTIONALITY
+           ======================================== -->
+      <!-- Detailed chat view for individual conversations -->
       <div class="main-message-detail-container" style="display: none;">
+        <!-- Header with back button, title, and dropdown menu -->
         <div class="flex-1">
           <img id="message-detail-back-btn" src="../assets/right-arrow.png" alt="back icon" class="message-back-icon" />
           <div class="fugah-message-detail-header">
-            <img id="fugah-message-detail-icon" src="../assets/fugah-messsage-icon.png" alt="fugah message icon"  />
+            <img id="fugah-message-detail-icon" src="../assets/fugah-messsage-icon.png" alt="fugah message icon" />
             <p>الدردشة<p>
-              <img id="fugah-message-detail-dropdown-icon" src="../assets/fugah-menue-dropdown.png" alt="three dots icon" class="fugah-dropdown-trigger" />
+            <img id="fugah-message-detail-dropdown-icon" src="../assets/fugah-menue-dropdown.png" alt="three dots icon" class="fugah-dropdown-trigger" />
           </div>
+          
+          <!-- Dropdown menu for chat actions -->
           <div id="fugah-message-detail-dropdown" class="fugah-message-detail-dropdown" style="display: none;">
+            <!-- Close chat option -->
             <button class="fugah-dropdown-item" id="close-chat-detail-menu-item">
               <img src="../assets/fugah-close-icon.png" alt="Close" />
               <span>إغلاق الدردشة</span>
             </button>
+            <!-- Create ticket option -->
             <button class="fugah-dropdown-item" id="create-ticket-detail-menu-item">
               <img src="../assets/fugah-ticket-icon.png" alt="Ticket" />
               <span>رفع تذكرة</span>
             </button>
           </div>
         </div>
+        
+        <!-- Chat messages and input section -->
         <div class="message-detail-chat">
+          <!-- Messages container with demo messages -->
           <div class="message-detail-messages" id="message-detail-messages">
-            <!-- Demo messages -->
+            <!-- Demo bot message -->
             <div class="chat-message chat-message-bot">
               <div class="chat-message-content">
                 <p>مرحباً! كيف يمكنني مساعدتك اليوم؟</p>
               </div>
             </div>
+            
+            <!-- Demo user message -->
             <div class="chat-message chat-message-user">
               <div class="chat-message-content">
                 <p>أحتاج إلى مساعدة في طلبي</p>
               </div>
             </div>
+            
+            <!-- Demo bot response -->
             <div class="chat-message chat-message-bot">
               <div class="chat-message-content">
                 <p>بالطبع، سأكون سعيداً لمساعدتك. ما هو رقم الطلب الخاص بك؟</p>
               </div>
             </div>
           </div>
+          
+          <!-- Message input container -->
           <div class="message-detail-input-container">
             <div class="message-detail-input-wrapper">
+              <!-- Text input for typing messages -->
               <input type="text" id="message-detail-input" class="message-detail-input" placeholder="اكتب هنا" />
+              
+              <!-- Actions row with file upload and send button -->
               <div class="message-detail-actions-row">
+                <!-- File upload button -->
                 <label for="message-detail-file-input" class="message-detail-file-label">
                   <img id="file-upload-icon" src="../assets/fugah-file-icon.png" alt="Upload file" />
                 </label>
                 <input type="file" id="message-detail-file-input" class="message-detail-file-input" style="display: none;" />
+                
+                <!-- Send message button -->
                 <button id="message-detail-send-btn" class="message-detail-send-btn">
                   <img src="../assets/fugah-send-button.png" alt="Send" />
                 </button>
@@ -154,26 +234,52 @@
           </div>
         </div>
       </div>
+
+
+      <!-- ========================================
+           END MESSAGE DETAIL CONTAINER FUNCTIONALITY
+           ======================================== -->
+
+
+      <!-- ========================================
+           FOOTER FUNCTIONALITY
+           ======================================== -->
+      <!-- Footer with navigation tabs and branding -->
       <div id="fugah-footer">
-      <div id="fugah-footer-tab">
-        <div class="fugah-footer-tab-item" data-tab="message">
-          <img src="../assets/inactive-message-footer.png" alt="message inactive" />
-          <p>Message</p>
+        <!-- Footer navigation tabs -->
+        <div id="fugah-footer-tab">
+          <!-- Message tab -->
+          <div class="fugah-footer-tab-item" data-tab="message">
+            <img src="../assets/inactive-message-footer.png" alt="message inactive" />
+            <p>Message</p>
+          </div>
+          
+          <!-- Home tab (active by default) -->
+          <div class="fugah-footer-tab-item active" data-tab="home">
+            <img src="../assets/active-home-footer.png" alt="home active" />
+            <p>Home</p>
+          </div>
         </div>
-        <div class="fugah-footer-tab-item active" data-tab="home">
-          <img src="../assets/active-home-footer.png" alt="home active" />
-          <p>Home</p>
+        
+        <!-- Footer branding with clickable link -->
+        <div id="fugah-footer-end">
+          <a href="https://spiky-evolution-854328.framer.app/" target="_blank" rel="noopener noreferrer" style="display: flex; align-items: center; gap: 6px; text-decoration: none; color: inherit;">
+            <img id="footer-logo" src="../assets/fugah-footer-end.png" alt="Fugah Logo" />
+            <p> AI مدعوم من فقاعة </p>
+          </a>
         </div>
       </div>
-      <div id="fugah-footer-end">
-        <a href="https://spiky-evolution-854328.framer.app/" target="_blank" rel="noopener noreferrer" style="display: flex; align-items: center; gap: 6px; text-decoration: none; color: inherit;">
-          <img id="footer-logo" src="../assets/fugah-footer-end.png" alt="Fugah Logo" />
-          <p> AI مدعوم من فقاعة </p>
-        </a>
-      </div>
-      </div>
-    </div>
-      
+
+
+      <!-- ========================================
+           END FOOTER FUNCTIONALITY
+           ======================================== -->
+
     </div>
   </div>
 </div>
+
+
+<!-- ========================================
+     END MAIN CHAT WINDOW FUNCTIONALITY
+     ======================================== -->

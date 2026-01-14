@@ -70,11 +70,11 @@
           
           // Fix initial arrow paths
           const backArrow = shadow.querySelector("#message-detail-back-btn");
-          const messageListArrow = shadow.querySelector(".message-item img");
+          const messageListArrows = shadow.querySelectorAll(".message-item img");
           if (backArrow) {
             backArrow.src = getAssetPath("right-arrow.png");
           }
-          // messageListArrow will be set correctly by changeTheme() function
+          // messageListArrows will be set correctly by changeTheme() function
 
       let isOpen = false;
 
@@ -430,10 +430,7 @@
 
       // Send message in detail chat
       function sendDetailMessage() {
-        if (!messageDetailInput || !messageDetailSendBtn) return;
-        
-        // Don't send if button is inactive
-        if (messageDetailSendBtn.classList.contains("inactive")) return;
+        if (!messageDetailInput) return;
         
         const message = messageDetailInput.value.trim();
         if (!message) return;
@@ -443,9 +440,6 @@
         
         // Clear input
         messageDetailInput.value = "";
-        
-        // Update send button state
-        toggleSendButtonState();
         
         // Show loading indicator
         showLoadingIndicator();
@@ -467,29 +461,6 @@
             sendDetailMessage();
           }
         });
-
-        // Toggle send button state based on input content
-        messageDetailInput.addEventListener("input", () => {
-          toggleSendButtonState();
-        });
-      }
-
-      // Function to toggle send button active/inactive state
-      function toggleSendButtonState() {
-        if (!messageDetailInput || !messageDetailSendBtn) return;
-        
-        const hasText = messageDetailInput.value.trim().length > 0;
-        
-        if (hasText) {
-          messageDetailSendBtn.classList.remove("inactive");
-        } else {
-          messageDetailSendBtn.classList.add("inactive");
-        }
-      }
-
-      // Initialize send button as inactive
-      if (messageDetailSendBtn) {
-        messageDetailSendBtn.classList.add("inactive");
       }
 
       // Function to go back to message list
@@ -499,10 +470,7 @@
         // Remove detail-active class from footer (tabs should be visible in message list)
         if (fugahFooter) fugahFooter.classList.remove("detail-active");
         // Clear input when going back
-        if (messageDetailInput) {
-          messageDetailInput.value = "";
-          toggleSendButtonState();
-        }
+        if (messageDetailInput) messageDetailInput.value = "";
       }
 
       // Add click handler to message detail back button
@@ -593,7 +561,7 @@
         const mainSendButton = shadow.querySelector(".fugah-send-button img");
         const footerTabItems = shadow.querySelectorAll(".fugah-footer-tab-item");
         const backArrow = shadow.querySelector("#message-detail-back-btn");
-        const messageListArrow = shadow.querySelector(".message-item img");
+        const messageListArrows = shadow.querySelectorAll(".message-item img");
         const messageCloseBtn = shadow.querySelector("#message-close-btn");
         const footerLogo = shadow.querySelector("#footer-logo");
         const fileUploadIcon = shadow.querySelector("#file-upload-icon");
@@ -778,16 +746,18 @@
               console.log("Set message detail back button to right-arrow.png for theme:", themeName);
             }
           }
-          // Set message list arrow based on theme
-          if (messageListArrow) {
+          // Set message list arrows for ALL users based on theme
+          const messageListArrows = shadow.querySelectorAll(".message-item img");
+          console.log(`Found ${messageListArrows.length} message list arrows for theme: ${themeName}`);
+          messageListArrows.forEach((arrow, index) => {
             if (themeName === 'black') {
-              messageListArrow.src = getAssetPath("arrow-for-black1.png");
-              console.log("Set message list arrow to arrow-for-black1.png for black theme");
+              arrow.src = getAssetPath("arrow-for-black1.png");
+              console.log(`Set message list arrow ${index + 1} to arrow-for-black1.png for black theme`);
             } else {
-              messageListArrow.src = getAssetPath("right-arrow.png");
-              console.log("Set message list arrow to right-arrow.png for theme:", themeName);
+              arrow.src = getAssetPath("right-arrow.png");
+              console.log(`Set message list arrow ${index + 1} to right-arrow.png for theme: ${themeName}`);
             }
-          }
+          });
           
           // Set message close button icon based on theme
           if (messageCloseBtn) {
@@ -877,12 +847,14 @@
       // Expose theme changing function globally
       window.changeChatbotTheme = changeTheme;
 
-      // Set initial theme if specified
+      // Set initial theme if specified (with small delay to ensure DOM is ready)
       const scriptTag = document.querySelector('script[data-theme]');
       if (scriptTag) {
         const initialTheme = scriptTag.getAttribute('data-theme');
         if (initialTheme) {
-          changeTheme(initialTheme);
+          setTimeout(() => {
+            changeTheme(initialTheme);
+          }, 100);
         }
       }
 

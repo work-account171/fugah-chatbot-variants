@@ -167,16 +167,16 @@
               xIconPath = getAssetPath("X-red.png");
               break;
             case 'blue':
-              xIconPath = getAssetPath("X-blue.png");
+              xIconPath = getAssetPath("X-cyan.png");
               break;
             case 'yellow':
               xIconPath = getAssetPath("X-yellow.png");
               break;
             case 'cyan':
-              xIconPath = getAssetPath("X-cyan.png");
+              xIconPath = getAssetPath("x-blue.png");
               break;
             case 'white':
-              xIconPath = getAssetPath("X-white.png");
+              xIconPath = getAssetPath("X.png");
               break;
             case 'black':
             default:
@@ -277,13 +277,25 @@
       // ========================================
       // Handle fixed country code that always stays visible
       if (phoneInput) {
+        // Function to show/hide placeholder based on input content
+        const updatePlaceholderVisibility = () => {
+          if (customPlaceholder) {
+            const value = phoneInput.value;
+            // Show placeholder if only country code exists (e.g., "+966 "), hide if there are digits after it
+            const phoneNumber = value.match(/^\+\d{1,4}\s(.+)/);
+            if (phoneNumber && phoneNumber[1].trim().length > 0) {
+              customPlaceholder.style.display = "none";
+            } else {
+              customPlaceholder.style.display = "block";
+            }
+          }
+        };
+        
         // Always start with +966 and position cursor after it
         phoneInput.value = "+966 ";
         
-        // Hide custom placeholder since we're using real input value
-        if (customPlaceholder) {
-          customPlaceholder.style.display = "none";
-        }
+        // Show placeholder initially since no digits are entered yet
+        updatePlaceholderVisibility();
         
         phoneInput.addEventListener("input", (e) => {
           let value = e.target.value;
@@ -294,6 +306,7 @@
             setTimeout(() => {
               phoneInput.setSelectionRange(5, 5);
             }, 0);
+            updatePlaceholderVisibility();
             return;
           }
           
@@ -329,12 +342,16 @@
                 }, 0);
               }
             }
+            
+            // Update placeholder visibility after value changes
+            updatePlaceholderVisibility();
           } else {
             // Fallback to default format
             phoneInput.value = "+966 ";
             setTimeout(() => {
               phoneInput.setSelectionRange(5, 5);
             }, 0);
+            updatePlaceholderVisibility();
           }
         });
 
@@ -384,6 +401,7 @@
               phoneInput.setSelectionRange(5, 5);
             }, 0);
           }
+          updatePlaceholderVisibility();
         });
 
         phoneInput.addEventListener("blur", () => {
@@ -391,6 +409,7 @@
           if (!phoneInput.value.match(/^\+\d{1,4}\s/)) {
             phoneInput.value = "+966 ";
           }
+          updatePlaceholderVisibility();
         });
 
         phoneInput.addEventListener("click", (e) => {
@@ -401,6 +420,7 @@
               phoneInput.setSelectionRange(5, 5);
             }, 0);
           }
+          updatePlaceholderVisibility();
         });
 
         // Handle paste events
@@ -417,6 +437,7 @@
           setTimeout(() => {
             phoneInput.setSelectionRange(phoneInput.value.length, phoneInput.value.length);
           }, 0);
+          updatePlaceholderVisibility();
         });
       }
 
@@ -1263,13 +1284,13 @@
                   iconPath = getAssetPath("X-red.png");
                   break;
                 case 'blue':
-                  iconPath = getAssetPath("X-cyan.png");
+                  iconPath = getAssetPath("x-blue.png");
                   break;
                 case 'yellow':
                   iconPath = getAssetPath("X-yellow.png");
                   break;
                 case 'cyan':
-                  iconPath = getAssetPath("x-blue.png");
+                  iconPath = getAssetPath("X-cyan.png");
                   break;
                 case 'white':
                   iconPath = getAssetPath("X.png");

@@ -85,10 +85,10 @@
       const ratingBackBtn = shadow.querySelector("#rating-back-btn");
           const messageCloseBtn = shadow.querySelector("#message-close-btn");
           const messageDetailBackBtn = shadow.querySelector("#message-detail-back-btn");
-      const fugahMessageDetailDropdownIcon = shadow.querySelector("#fugah-message-detail-dropdown-icon");
-      const fugahMessageDetailDropdown = shadow.querySelector("#fugah-message-detail-dropdown");
-      const closeChatDetailMenuItem = shadow.querySelector("#close-chat-detail-menu-item");
-      const createTicketDetailMenuItem = shadow.querySelector("#create-ticket-detail-menu-item");
+          const fugahMessageDetailDropdownIcon = shadow.querySelector("#fugah-message-detail-dropdown-icon");
+          const fugahMessageDetailDropdown = shadow.querySelector("#fugah-message-detail-dropdown");
+          const closeChatDetailMenuItem = shadow.querySelector("#close-chat-detail-menu-item");
+          const createTicketDetailMenuItem = shadow.querySelector("#create-ticket-detail-menu-item");
       const fugahRatingDropdownIcon = shadow.querySelector("#fugah-rating-dropdown-icon");
       const fugahRatingDropdown = shadow.querySelector("#fugah-rating-dropdown");
       const closeRatingMenuItem = shadow.querySelector("#close-rating-menu-item");

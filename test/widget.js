@@ -213,6 +213,9 @@
           }
           chatIcon.src = iconPath;
           bubble.classList.remove("chat-open");
+          
+          // Stop timestamp updates when chat is closed
+          stopTimestampUpdates();
         }
       };
 
@@ -265,28 +268,150 @@
 
 
       // ========================================
-      // CUSTOM PLACEHOLDER FUNCTIONALITY
+      // FIXED COUNTRY CODE DISPLAY FUNCTIONALITY
       // ========================================
-      // Handle custom placeholder behavior for phone input with mixed styling
-      if (phoneInput && customPlaceholder) {
-        phoneInput.addEventListener("input", () => {
-          if (phoneInput.value.length > 0) {
-            customPlaceholder.style.display = "none";
+      // Handle fixed country code that always stays visible
+      if (phoneInput) {
+        // Always start with +966 and position cursor after it
+        phoneInput.value = "+966 ";
+        
+        // Hide custom placeholder since we're using real input value
+        if (customPlaceholder) {
+          customPlaceholder.style.display = "none";
+        }
+        
+        phoneInput.addEventListener("input", (e) => {
+          let value = e.target.value;
+          
+          // Ensure it always starts with + and has proper format
+          if (!value.startsWith("+")) {
+            phoneInput.value = "+966 ";
+            setTimeout(() => {
+              phoneInput.setSelectionRange(5, 5);
+            }, 0);
+            return;
+          }
+          
+          // Parse the country code and phone number
+          const match = value.match(/^\+(\d{0,4})\s*(.*)/);
+          if (match) {
+            let countryCode = match[1];
+            let phoneNumber = match[2];
+            
+            // Ensure country code is not empty, default to 966
+            if (countryCode === "") {
+              countryCode = "966";
+            }
+            
+            // Clean phone number (only digits)
+            phoneNumber = phoneNumber.replace(/[^\d]/g, '');
+            
+            // Reconstruct the value
+            const newValue = `+${countryCode} ${phoneNumber}`;
+            
+            if (value !== newValue) {
+              const cursorPos = phoneInput.selectionStart;
+              phoneInput.value = newValue;
+              
+              // Maintain cursor position appropriately
+              if (cursorPos <= 4) {
+                setTimeout(() => {
+                  phoneInput.setSelectionRange(cursorPos, cursorPos);
+                }, 0);
+              } else {
+                setTimeout(() => {
+                  phoneInput.setSelectionRange(phoneInput.value.length, phoneInput.value.length);
+                }, 0);
+              }
+            }
           } else {
-            customPlaceholder.style.display = "flex";
+            // Fallback to default format
+            phoneInput.value = "+966 ";
+            setTimeout(() => {
+              phoneInput.setSelectionRange(5, 5);
+            }, 0);
+          }
+        });
+
+        phoneInput.addEventListener("keydown", (e) => {
+          const cursorPos = phoneInput.selectionStart;
+          const value = phoneInput.value;
+          
+          // Allow editing country code (positions 1-3) but protect + and space
+          if (cursorPos === 0) {
+            // Prevent editing the + sign
+            if (e.key === "Backspace" || e.key === "Delete" || (e.key.length === 1 && e.key !== "+")) {
+              e.preventDefault();
+              phoneInput.setSelectionRange(1, 1);
+              return;
+            }
+          } else if (cursorPos >= 1 && cursorPos <= 3) {
+            // Allow editing country code digits
+            if (e.key.length === 1 && /\d/.test(e.key)) {
+              // Allow digit input in country code area
+              return;
+            } else if (e.key === "Backspace") {
+              // Allow backspace in country code area
+              return;
+            } else if (e.key !== "ArrowLeft" && e.key !== "ArrowRight" && e.key !== "Tab") {
+              e.preventDefault();
+              return;
+            }
+          } else if (cursorPos === 4) {
+            // Protect the space after country code
+            if (e.key === "Backspace" || e.key === "Delete" || (e.key.length === 1 && e.key !== " ")) {
+              e.preventDefault();
+              return;
+            }
+          }
+          
+          // Handle Enter key
+          if (e.key === "Enter" && sendMessageBtn) {
+            sendMessageBtn.click();
           }
         });
 
         phoneInput.addEventListener("focus", () => {
-          if (phoneInput.value.length === 0) {
-            customPlaceholder.style.display = "none";
+          // Ensure proper format exists
+          if (!phoneInput.value.match(/^\+\d{1,4}\s/)) {
+            phoneInput.value = "+966 ";
+            setTimeout(() => {
+              phoneInput.setSelectionRange(5, 5);
+            }, 0);
           }
         });
 
         phoneInput.addEventListener("blur", () => {
-          if (phoneInput.value.length === 0) {
-            customPlaceholder.style.display = "flex";
+          // Ensure proper format on blur
+          if (!phoneInput.value.match(/^\+\d{1,4}\s/)) {
+            phoneInput.value = "+966 ";
           }
+        });
+
+        phoneInput.addEventListener("click", (e) => {
+          // Allow clicking anywhere, but ensure proper format
+          if (!phoneInput.value.match(/^\+\d{1,4}\s/)) {
+            phoneInput.value = "+966 ";
+            setTimeout(() => {
+              phoneInput.setSelectionRange(5, 5);
+            }, 0);
+          }
+        });
+
+        // Handle paste events
+        phoneInput.addEventListener("paste", (e) => {
+          e.preventDefault();
+          const pastedText = (e.clipboardData || window.clipboardData).getData('text');
+          const numbers = pastedText.replace(/[^\d]/g, '');
+          
+          // Always append numbers after "+966 "
+          const currentNumbers = phoneInput.value.substring(5);
+          phoneInput.value = "+966 " + currentNumbers + numbers;
+          
+          // Position cursor at the end
+          setTimeout(() => {
+            phoneInput.setSelectionRange(phoneInput.value.length, phoneInput.value.length);
+          }, 0);
         });
       }
 
@@ -419,6 +544,15 @@
         // Add detail-active class on footer (tabs should be hidden in detail view)
         if (fugahFooter) fugahFooter.classList.add("detail-active");
         
+        // Start timestamp updates for the last message
+        startTimestampUpdates();
+        
+        // Only show timestamp if there are existing messages and the last one is from bot
+        const lastMessage = messageDetailMessages?.querySelector(".chat-message:last-child");
+        if (lastMessage && lastMessage.classList.contains("chat-message-bot")) {
+          updateLastMessageTimestamp();
+        }
+        
         // Scroll to bottom of messages
         if (messageDetailMessages) {
           setTimeout(() => {
@@ -444,6 +578,12 @@
         const existingLoading = messageDetailMessages.querySelector(".chat-message-loading");
         if (existingLoading) {
           existingLoading.remove();
+        }
+        
+        // Remove timestamp when bot starts typing
+        const existingTimestamp = messageDetailMessages.querySelector(".last-message-timestamp");
+        if (existingTimestamp) {
+          existingTimestamp.remove();
         }
         
         const messageDiv = document.createElement("div");
@@ -539,8 +679,8 @@
       // ========================================
       // MESSAGE CREATION FUNCTIONALITY
       // ========================================
-      // Add messages to detail chat with date/time stamps and sound notifications
-      function addDetailMessage(text, isUser = true) {
+      // Add messages to detail chat without individual timestamps
+      function addDetailMessage(text, isUser = true, updateTimestamp = false) {
         if (!messageDetailMessages) return;
         
         // Remove loading indicator if it exists
@@ -559,11 +699,15 @@
         messageDiv.appendChild(contentDiv);
         messageDetailMessages.appendChild(messageDiv);
         
-        // Add date/time for both user and bot messages - outside the message container
-        const dateTimeDiv = document.createElement("div");
-        dateTimeDiv.className = `chat-message-datetime ${isUser ? "user-datetime" : "bot-datetime"}`;
-        dateTimeDiv.textContent = formatDateTime();
-        messageDetailMessages.appendChild(dateTimeDiv);
+        // Only update timestamp when explicitly requested (for bot messages)
+        if (updateTimestamp) {
+          // Remove existing timestamp first
+          const existingTimestamp = messageDetailMessages.querySelector(".last-message-timestamp");
+          if (existingTimestamp) {
+            existingTimestamp.remove();
+          }
+          updateLastMessageTimestamp();
+        }
         
         // Play message sound notification
         playMessageSound();
@@ -572,6 +716,51 @@
         setTimeout(() => {
           messageDetailMessages.scrollTop = messageDetailMessages.scrollHeight;
         }, 50);
+      }
+
+
+      // Function to update the last message timestamp
+      function updateLastMessageTimestamp() {
+        if (!messageDetailMessages) return;
+        
+        // Remove existing timestamp
+        const existingTimestamp = messageDetailMessages.querySelector(".last-message-timestamp");
+        if (existingTimestamp) {
+          existingTimestamp.remove();
+        }
+        
+        // Add new timestamp for the last message
+        const timestampDiv = document.createElement("div");
+        timestampDiv.className = "last-message-timestamp chat-message-datetime";
+        timestampDiv.textContent = formatDateTime();
+        messageDetailMessages.appendChild(timestampDiv);
+      }
+
+      // Variable to store the timestamp update interval
+      let timestampUpdateInterval = null;
+
+      // Function to start the 5-minute timestamp update
+      function startTimestampUpdates() {
+        // Clear any existing interval
+        if (timestampUpdateInterval) {
+          clearInterval(timestampUpdateInterval);
+        }
+        
+        // Update timestamp every 5 minutes (300,000 milliseconds)
+        timestampUpdateInterval = setInterval(() => {
+          const lastTimestamp = messageDetailMessages?.querySelector(".last-message-timestamp");
+          if (lastTimestamp) {
+            lastTimestamp.textContent = formatDateTime();
+          }
+        }, 300000); // 5 minutes
+      }
+
+      // Function to stop timestamp updates
+      function stopTimestampUpdates() {
+        if (timestampUpdateInterval) {
+          clearInterval(timestampUpdateInterval);
+          timestampUpdateInterval = null;
+        }
       }
 
 
@@ -593,8 +782,8 @@
         const message = messageDetailInput.value.trim();
         if (!message) return;
         
-        // Add user message
-        addDetailMessage(message, true);
+        // Add user message (without timestamp update)
+        addDetailMessage(message, true, false);
         
         // Clear input
         messageDetailInput.value = "";
@@ -607,7 +796,8 @@
         
         // Simulate bot response (after delay)
         setTimeout(() => {
-          addDetailMessage("شكراً لك! سأقوم بالرد عليك قريباً.", false);
+          // Add bot message with timestamp update
+          addDetailMessage("شكراً لك! سأقوم بالرد عليك قريباً.", false, true);
         }, 1500);
       }
 
@@ -680,6 +870,10 @@
         if (mainMessageDetailContainer) mainMessageDetailContainer.style.display = "none";
         // Remove detail-active class from footer (tabs should be visible in message list)
         if (fugahFooter) fugahFooter.classList.remove("detail-active");
+        
+        // Stop timestamp updates when leaving message detail view
+        stopTimestampUpdates();
+        
         // Clear input when going back
         if (messageDetailInput) {
           messageDetailInput.value = "";

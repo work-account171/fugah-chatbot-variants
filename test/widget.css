@@ -85,8 +85,8 @@
 
 /* Chat icon within bubble */
 #chat-bubble #chat-icon {
-  width: 48px;
-  height: 48px;
+  width: 64px;
+  height: 64px;
   object-fit: contain;
 }
 
@@ -401,6 +401,8 @@ border-radius: 16px;
   font-size: 16px;
   box-sizing: border-box;
   text-align: left;
+  direction: ltr !important;
+  font-family: monospace, sans-serif;
 }
 
 .fugah-number-div input::placeholder {
@@ -827,6 +829,15 @@ border-radius: 16px;
 .chat-message-datetime.bot-datetime {
   text-align: left;
   padding-left: 16px;
+}
+
+/* Last message timestamp styling */
+.last-message-timestamp {
+  font-size: 12px;
+  color: #666;
+  text-align: center;
+  
+  font-style: italic;
 }
 
 .chat-message-user .chat-message-content {

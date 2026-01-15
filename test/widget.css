@@ -894,7 +894,7 @@ border-radius: 16px;
   flex: 1;
   min-height: 0;
   overflow-y: auto;
-  padding: clamp(15px, 4vh, 40px);
+  padding: clamp(15px, 4vh, 35px);
   display: flex;
   flex-direction: column;
   gap: clamp(12px, 1.5vh, 16px);

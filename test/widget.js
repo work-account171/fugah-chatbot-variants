@@ -66,34 +66,39 @@
   // ========================================
   // Load HTML template and initialize all DOM elements
   fetch("ui.html") // Load HTML template
-    .then(res => res.text())
-    .then(html => {
+        .then(res => res.text())
+        .then(html => {
       shadow.innerHTML += html; // Inject HTML into shadow DOM
 
       // Select all required DOM elements from shadow DOM
-      const bubble = shadow.querySelector("#chat-bubble");
-      const chatIcon = shadow.querySelector("#chat-icon");
-      const chatWindow = shadow.querySelector("#chat-window");
-      const closeBtn = shadow.querySelector("#close-btn");
-      const sendMessageBtn = shadow.querySelector(".fugah-send-button");
-      const phoneInput = shadow.querySelector("#phone-input");
+          const bubble = shadow.querySelector("#chat-bubble");
+          const chatIcon = shadow.querySelector("#chat-icon");
+          const chatWindow = shadow.querySelector("#chat-window");
+          const closeBtn = shadow.querySelector("#close-btn");
+          const sendMessageBtn = shadow.querySelector(".fugah-send-button");
+          const phoneInput = shadow.querySelector("#phone-input");
       const customPlaceholder = shadow.querySelector("#custom-placeholder");
-      const mainHomeContainer = shadow.querySelector(".main-home-container");
-      const mainMessageContainer = shadow.querySelector(".main-message-container");
-      const mainMessageDetailContainer = shadow.querySelector(".main-message-detail-container");
-      const messageCloseBtn = shadow.querySelector("#message-close-btn");
-      const messageDetailBackBtn = shadow.querySelector("#message-detail-back-btn");
+          const mainHomeContainer = shadow.querySelector(".main-home-container");
+          const mainMessageContainer = shadow.querySelector(".main-message-container");
+          const mainMessageDetailContainer = shadow.querySelector(".main-message-detail-container");
+      const mainRatingContainer = shadow.querySelector(".main-rating-container");
+      const ratingBackBtn = shadow.querySelector("#rating-back-btn");
+          const messageCloseBtn = shadow.querySelector("#message-close-btn");
+          const messageDetailBackBtn = shadow.querySelector("#message-detail-back-btn");
       const fugahMessageDetailDropdownIcon = shadow.querySelector("#fugah-message-detail-dropdown-icon");
       const fugahMessageDetailDropdown = shadow.querySelector("#fugah-message-detail-dropdown");
       const closeChatDetailMenuItem = shadow.querySelector("#close-chat-detail-menu-item");
       const createTicketDetailMenuItem = shadow.querySelector("#create-ticket-detail-menu-item");
-      const messageDetailInput = shadow.querySelector("#message-detail-input");
-      const messageDetailSendBtn = shadow.querySelector("#message-detail-send-btn");
-      const messageDetailMessages = shadow.querySelector("#message-detail-messages");
-      const messageItems = shadow.querySelectorAll(".message-item");
-      const footerTabItems = shadow.querySelectorAll(".fugah-footer-tab-item");
-      const fugahFooter = shadow.querySelector("#fugah-footer");
-
+      const fugahRatingDropdownIcon = shadow.querySelector("#fugah-rating-dropdown-icon");
+      const fugahRatingDropdown = shadow.querySelector("#fugah-rating-dropdown");
+      const closeRatingMenuItem = shadow.querySelector("#close-rating-menu-item");
+          const messageDetailInput = shadow.querySelector("#message-detail-input");
+          const messageDetailSendBtn = shadow.querySelector("#message-detail-send-btn");
+          const messageDetailMessages = shadow.querySelector("#message-detail-messages");
+          const messageItems = shadow.querySelectorAll(".message-item");
+          const footerTabItems = shadow.querySelectorAll(".fugah-footer-tab-item");
+          const fugahFooter = shadow.querySelector("#fugah-footer");
+          
 
       // ========================================
       // END HTML LOADING AND DOM ELEMENT SELECTION FUNCTIONALITY
@@ -104,11 +109,11 @@
       // ASSET PATH HELPER FUNCTIONALITY
       // ========================================
       // Helper function to get correct asset paths in shadow DOM
-      const getAssetPath = (filename) => {
-        // Since we're at /test/index.html, assets are at ../assets/
-        return `../assets/${filename}`;
-      };
-
+          const getAssetPath = (filename) => {
+            // Since we're at /test/index.html, assets are at ../assets/
+            return `../assets/${filename}`;
+          };
+          
 
       // ========================================
       // END ASSET PATH HELPER FUNCTIONALITY
@@ -119,10 +124,10 @@
       // INITIAL ICON SETUP FUNCTIONALITY
       // ========================================
       // Set initial icon paths for chat bubble and arrows
-      if (chatIcon) {
-        chatIcon.src = getAssetPath("message.png");
-      }
-      
+          if (chatIcon) {
+            chatIcon.src = getAssetPath("message.png");
+          }
+
       // Fix initial arrow paths
       const backArrow = shadow.querySelector("#message-detail-back-btn");
       const messageListArrows = shadow.querySelectorAll(".message-item img");
@@ -460,7 +465,7 @@
         // Get current theme to use correct images
         const currentTheme = chatWindow.classList.toString().match(/theme-(\w+)/);
         const themeName = currentTheme ? currentTheme[1] : 'default';
-        
+
         // Find and activate the clicked tab
         footerTabItems.forEach(item => {
           const tabType = item.getAttribute("data-tab");
@@ -475,14 +480,14 @@
               if (themeName === 'black') {
                 img.src = getAssetPath("active-message-footer-black.png");
               } else {
-                img.src = getAssetPath("active-message-footer.png");
+              img.src = getAssetPath("active-message-footer.png");
               }
               img.alt = "message active";
             } else if (tabName === "home") {
               if (themeName === 'black') {
                 img.src = getAssetPath("active-home-footer-black.png");
               } else {
-                img.src = getAssetPath("active-home-footer.png");
+              img.src = getAssetPath("active-home-footer.png");
               }
               img.alt = "home active";
             }
@@ -492,7 +497,7 @@
               if (themeName === 'black') {
                 img.src = getAssetPath("inactive-message-footer-black.png.png");
               } else {
-                img.src = getAssetPath("inactive-message-footer.png");
+              img.src = getAssetPath("inactive-message-footer.png");
               }
               img.alt = "message inactive";
               console.log(`Setting inactive message image for theme ${themeName}:`, img.src);
@@ -513,12 +518,14 @@
           if (mainHomeContainer) mainHomeContainer.style.display = "flex";
           if (mainMessageContainer) mainMessageContainer.style.display = "none";
           if (mainMessageDetailContainer) mainMessageDetailContainer.style.display = "none";
+          if (mainRatingContainer) mainRatingContainer.style.display = "none";
           // Remove detail-active class from footer
           if (fugahFooter) fugahFooter.classList.remove("detail-active");
         } else if (tabName === "message") {
           if (mainHomeContainer) mainHomeContainer.style.display = "none";
           if (mainMessageContainer) mainMessageContainer.style.display = "block";
           if (mainMessageDetailContainer) mainMessageDetailContainer.style.display = "none";
+          if (mainRatingContainer) mainRatingContainer.style.display = "none";
           // Remove detail-active class from footer (tabs should be visible in message list)
           if (fugahFooter) fugahFooter.classList.remove("detail-active");
           // Reset to message list when switching tabs
@@ -788,6 +795,9 @@
         // Clear input
         messageDetailInput.value = "";
         
+        // Reset textarea height
+        autoResizeTextarea();
+        
         // Update send button state
         toggleMessageDetailSendButtonState();
         
@@ -818,14 +828,55 @@
       if (messageDetailInput) {
         messageDetailInput.addEventListener("keydown", (e) => {
           if (e.key === "Enter") {
+            if (e.shiftKey) {
+              // Shift+Enter: Allow new line (default behavior)
+              return;
+            } else {
+              // Enter: Send message
+              e.preventDefault();
             sendDetailMessage();
+            }
+          }
+          
+          // Allow all arrow keys and navigation keys for proper textarea navigation
+          if (e.key === "ArrowUp" || e.key === "ArrowDown" || 
+              e.key === "ArrowLeft" || e.key === "ArrowRight" ||
+              e.key === "Home" || e.key === "End" || 
+              e.key === "PageUp" || e.key === "PageDown") {
+            // Allow default behavior for navigation keys
+            return;
           }
         });
 
-        // Toggle send button state based on input content
+        // Auto-resize textarea function
+        function autoResizeTextarea() {
+          if (!messageDetailInput) return;
+          
+          // Store current cursor position
+          const cursorPos = messageDetailInput.selectionStart;
+          const cursorEnd = messageDetailInput.selectionEnd;
+          
+          // Reset height to auto to get the correct scrollHeight
+          messageDetailInput.style.height = 'auto';
+          
+          // Set height based on content, with min and max limits
+          const newHeight = Math.min(Math.max(messageDetailInput.scrollHeight, 20), 100);
+          messageDetailInput.style.height = newHeight + 'px';
+          
+          // Restore cursor position after resize
+          messageDetailInput.setSelectionRange(cursorPos, cursorEnd);
+        }
+
+        // Toggle send button state based on input content and auto-resize
         messageDetailInput.addEventListener("input", () => {
           toggleMessageDetailSendButtonState();
+          autoResizeTextarea();
         });
+
+        // Initialize textarea size
+        if (messageDetailInput) {
+          autoResizeTextarea();
+        }
       }
 
 
@@ -868,8 +919,12 @@
       function goBackToMessageList() {
         if (mainMessageContainer) mainMessageContainer.style.display = "block";
         if (mainMessageDetailContainer) mainMessageDetailContainer.style.display = "none";
+        if (mainRatingContainer) mainRatingContainer.style.display = "none";
         // Remove detail-active class from footer (tabs should be visible in message list)
         if (fugahFooter) fugahFooter.classList.remove("detail-active");
+        
+        // Reset emoji selection when leaving rating screen
+        resetRatingEmojis();
         
         // Stop timestamp updates when leaving message detail view
         stopTimestampUpdates();
@@ -886,6 +941,111 @@
         messageDetailBackBtn.addEventListener("click", (e) => {
           e.stopPropagation();
           goBackToMessageList();
+        });
+      }
+
+      // Add click handler to rating screen back button
+      if (ratingBackBtn) {
+        ratingBackBtn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          
+          // Reset emoji selection when leaving rating screen
+          resetRatingEmojis();
+          
+          // Hide rating container
+          if (mainRatingContainer) {
+            mainRatingContainer.style.display = "none";
+          }
+          
+          // Show message detail container
+          if (mainMessageDetailContainer) {
+            mainMessageDetailContainer.style.display = "flex";
+          }
+          
+          // Keep detail-active class on footer (tabs should be hidden)
+          if (fugahFooter) {
+            fugahFooter.classList.add("detail-active");
+          }
+        });
+      }
+
+      // Function to reset emoji selection
+      function resetRatingEmojis() {
+        const ratingEmojis = shadow.querySelectorAll(".rating-emoji");
+        ratingEmojis.forEach((emoji) => {
+          emoji.classList.remove("selected");
+          if (emoji.dataset.originalSrc) {
+            emoji.src = emoji.dataset.originalSrc;
+          }
+        });
+      }
+
+      // Function to setup emoji hover and click functionality
+      function setupRatingEmojis() {
+        // Reset any previous selection first
+        resetRatingEmojis();
+        
+        const ratingEmojis = shadow.querySelectorAll(".rating-emoji");
+        let selectedRating = null;
+        
+        // Helper function to check if any emoji is currently selected
+        function hasSelectedEmoji() {
+          return Array.from(ratingEmojis).some(e => e.classList.contains("selected"));
+        }
+        
+        // Helper function to get the currently selected emoji
+        function getSelectedEmoji() {
+          return Array.from(ratingEmojis).find(e => e.classList.contains("selected"));
+        }
+        
+        ratingEmojis.forEach((emoji) => {
+          const rating = emoji.getAttribute("data-rating");
+          
+          // Get current src and create active src path
+          const currentSrc = emoji.src;
+          // Extract the path and replace emoji-X with active-emoji-X
+          const originalSrc = currentSrc.includes("emoji-") ? currentSrc : getAssetPath(`emoji-${rating}.png`);
+          const activeSrc = originalSrc.replace(/emoji-(\d+)\.png/, "active-emoji-$1.png");
+          
+          // Store original and active sources
+          emoji.dataset.originalSrc = originalSrc;
+          emoji.dataset.activeSrc = activeSrc;
+          
+          // Ensure initial src is set correctly
+          if (!emoji.src.includes("emoji-")) {
+            emoji.src = originalSrc;
+          }
+          
+          // Hover event - always show active emoji on hover
+          emoji.addEventListener("mouseenter", () => {
+            // Always show active version on hover, regardless of selection
+            emoji.src = activeSrc;
+          });
+          
+          // Mouse leave event - revert to original if not selected, keep active if selected
+          emoji.addEventListener("mouseleave", () => {
+            // If this emoji is selected, keep it active
+            if (emoji.classList.contains("selected")) {
+              emoji.src = activeSrc;
+            } else {
+              // If not selected, revert to original
+              emoji.src = originalSrc;
+            }
+          });
+          
+          // Click event - select emoji and keep it active (only one at a time)
+          emoji.addEventListener("click", () => {
+            // Remove selected class from all emojis and revert to original
+            ratingEmojis.forEach((e) => {
+              e.classList.remove("selected");
+              e.src = e.dataset.originalSrc;
+            });
+            
+            // Add selected class to clicked emoji and set to active
+            emoji.classList.add("selected");
+            emoji.src = activeSrc;
+            selectedRating = rating;
+          });
         });
       }
 
@@ -907,11 +1067,28 @@
         });
       }
 
+      // Handle rating dropdown menu toggle
+      if (fugahRatingDropdownIcon) {
+        fugahRatingDropdownIcon.addEventListener("click", (e) => {
+          e.stopPropagation();
+          const isVisible = fugahRatingDropdown.style.display === "block";
+          fugahRatingDropdown.style.display = isVisible ? "none" : "block";
+        });
+      }
+
       // Close dropdown when clicking outside
       shadow.addEventListener("click", (e) => {
+        // Close message detail dropdown
         if (fugahMessageDetailDropdown && fugahMessageDetailDropdownIcon) {
           if (!fugahMessageDetailDropdown.contains(e.target) && !fugahMessageDetailDropdownIcon.contains(e.target)) {
             fugahMessageDetailDropdown.style.display = "none";
+          }
+        }
+        
+        // Close rating dropdown
+        if (fugahRatingDropdown && fugahRatingDropdownIcon) {
+          if (!fugahRatingDropdown.contains(e.target) && !fugahRatingDropdownIcon.contains(e.target)) {
+            fugahRatingDropdown.style.display = "none";
           }
         }
       });
@@ -938,8 +1115,45 @@
         createTicketDetailMenuItem.addEventListener("click", (e) => {
           e.stopPropagation();
           fugahMessageDetailDropdown.style.display = "none";
-          // Add your ticket creation logic here
-          console.log("Create ticket clicked from detail menu");
+          
+          // Copy messages from message detail to rating screen
+          const ratingMessages = shadow.querySelector("#rating-messages");
+          if (messageDetailMessages && ratingMessages) {
+            // Clone all messages from message detail
+            ratingMessages.innerHTML = messageDetailMessages.innerHTML;
+            
+            // Scroll to bottom of rating messages
+            setTimeout(() => {
+              ratingMessages.scrollTop = ratingMessages.scrollHeight;
+            }, 100);
+          }
+          
+          // Hide message detail container
+          if (mainMessageDetailContainer) {
+            mainMessageDetailContainer.style.display = "none";
+          }
+          
+          // Show rating container
+          if (mainRatingContainer) {
+            mainRatingContainer.style.display = "flex";
+          }
+          
+          // Add detail-active class on footer (tabs should be hidden in rating view)
+          if (fugahFooter) {
+            fugahFooter.classList.add("detail-active");
+          }
+          
+          // Setup emoji hover and click functionality
+          setupRatingEmojis();
+        });
+      }
+
+      // Close chat from rating menu item
+      if (closeRatingMenuItem) {
+        closeRatingMenuItem.addEventListener("click", (e) => {
+          e.stopPropagation();
+          fugahRatingDropdown.style.display = "none";
+          toggleChat();
         });
       }
 
@@ -1207,6 +1421,18 @@
             }
           }
           
+          // Set rating screen back button based on theme
+          const ratingBackButton = shadow.querySelector("#rating-back-btn");
+          if (ratingBackButton) {
+            if (themeName === 'black') {
+              ratingBackButton.src = getAssetPath("back-tick-black.png");
+              console.log("Set rating back button to back-tick-black.png for black theme");
+            } else {
+              ratingBackButton.src = getAssetPath("right-arrow.png");
+              console.log("Set rating back button to right-arrow.png for theme:", themeName);
+            }
+          }
+          
           // Set message list arrows for ALL users based on theme
           const messageListArrows = shadow.querySelectorAll(".message-item img");
           console.log(`Found ${messageListArrows.length} message list arrows for theme: ${themeName}`);
@@ -1261,6 +1487,18 @@
             } else {
               dropdownIcon.src = getAssetPath("fugah-menue-dropdown.png");
               console.log("Set dropdown icon to fugah-menue-dropdown.png for theme:", themeName);
+            }
+          }
+          
+          // Set rating dropdown icon based on theme
+          const ratingDropdownIcon = shadow.querySelector("#fugah-rating-dropdown-icon");
+          if (ratingDropdownIcon) {
+            if (themeName === 'black') {
+              ratingDropdownIcon.src = getAssetPath("white-dropdown.png");
+              console.log("Set rating dropdown icon to white-dropdown.png for black theme");
+            } else {
+              ratingDropdownIcon.src = getAssetPath("fugah-menue-dropdown.png");
+              console.log("Set rating dropdown icon to fugah-menue-dropdown.png for theme:", themeName);
             }
           }
           

@@ -215,7 +215,7 @@
           <div class="message-detail-input-container">
             <div class="message-detail-input-wrapper">
               <!-- Text input for typing messages -->
-              <input type="text" id="message-detail-input" class="message-detail-input" placeholder="اكتب هنا" />
+              <textarea id="message-detail-input" class="message-detail-input" placeholder="اكتب هنا" rows="1"></textarea>
               
               <!-- Actions row with file upload and send button -->
               <div class="message-detail-actions-row">
@@ -238,6 +238,64 @@
 
       <!-- ========================================
            END MESSAGE DETAIL CONTAINER FUNCTIONALITY
+           ======================================== -->
+
+
+      <!-- ========================================
+           RATING SCREEN CONTAINER FUNCTIONALITY
+           ======================================== -->
+      <!-- Rating screen for ticket creation with emoji rating -->
+      <div class="main-message-detail-container main-rating-container" style="display: none;">
+        <!-- Header with back button, title (same as message detail) -->
+        <div class="flex-1">
+          <img id="rating-back-btn" src="../assets/right-arrow.png" alt="back icon" class="message-back-icon" />
+          <div class="fugah-message-detail-header">
+            <img id="fugah-rating-icon" src="../assets/fugah-messsage-icon.png" alt="fugah message icon" />
+            <p>الدردشة<p>
+              <img id="fugah-rating-dropdown-icon" src="../assets/fugah-menue-dropdown.png" alt="three dots icon" class="fugah-dropdown-trigger" />
+          </div>
+          
+          <!-- Dropdown menu for rating screen -->
+          <div id="fugah-rating-dropdown" class="fugah-message-detail-dropdown" style="display: none;">
+            <!-- Close chat option -->
+            <button class="fugah-dropdown-item" id="close-rating-menu-item">
+              <img src="../assets/fugah-close-icon.png" alt="Close" />
+              <span>إغلاق الدردشة</span>
+            </button>
+          </div>
+        </div>
+        
+        <!-- Chat messages and rating section -->
+        <div class="message-detail-chat">
+          <!-- Messages container (same as message detail) -->
+          <div class="message-detail-messages" id="rating-messages">
+            <!-- Messages will be copied here from message-detail-messages -->
+          </div>
+          
+          <!-- Rating container (styled like message-detail-input-container) -->
+          <div class="message-detail-input-container rating-input-container">
+            <div class="message-detail-input-wrapper rating-emoji-wrapper">
+              <!-- Rating title -->
+              <div class="rating-title">
+                <p>قيم محادثتك</p>
+              </div>
+              
+              <!-- Emoji container with 5 emojis -->
+              <div class="rating-emoji-container">
+                <img src="../assets/emoji-1.png" alt="Rating 1" class="rating-emoji" data-rating="1" />
+                <img src="../assets/emoji-2.png" alt="Rating 2" class="rating-emoji" data-rating="2" />
+                <img src="../assets/emoji-3.png" alt="Rating 3" class="rating-emoji" data-rating="3" />
+                <img src="../assets/emoji-4.png" alt="Rating 4" class="rating-emoji" data-rating="4" />
+                <img src="../assets/emoji-5.png" alt="Rating 5" class="rating-emoji" data-rating="5" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+      <!-- ========================================
+           END RATING SCREEN CONTAINER FUNCTIONALITY
            ======================================== -->
 
 

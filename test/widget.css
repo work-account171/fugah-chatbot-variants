@@ -28,8 +28,30 @@
 }
 
 
+
 /* ========================================
    END FONT DEFINITIONS
+   ======================================== */
+
+
+/* ========================================
+   PARAGRAPH RESET FOR HEADER FUNCTIONALITY
+   ======================================== */
+/* Reset default browser margins/padding for p tags in header only */
+.flex-1 p {
+  margin: 0;
+  padding: 0;
+}
+
+/* Reset margins/padding for dropdown icons in header */
+#fugah-message-detail-dropdown-icon,
+#fugah-rating-dropdown-icon {
+  margin-top: 10px;
+  padding: 0;
+}
+
+/* ========================================
+   END PARAGRAPH RESET FOR HEADER FUNCTIONALITY
    ======================================== */
 
 
@@ -370,15 +392,20 @@ border-radius: 16px;
     padding-bottom: clamp(12px, 1.5vh, 16px);
   }
   
+  .chat-rating-header {
+    padding-top: 12px;
+    padding-bottom: 12px;
+  }
+  
   .fugah-message-content {
     gap: clamp(6px, 0.8vh, 8px);
   }
   
   /* Individual Chat Screen Responsive Sizing */
   .main-message-detail-container {
-    min-height: 450px;
+    min-height: 525px;
     height: auto;
-    max-height: 75vh;
+    max-height: 83vh;
   }
   
   .message-detail-messages {
@@ -397,7 +424,7 @@ border-radius: 16px;
   
   .fugah-message-detail-header {
     gap: clamp(12px, 1.5vh, 15px);
-    padding: clamp(12px, 1.5vh, 16px) 20px;
+    padding: clamp(12px, 1.5vh, 16px) ;
   }
   
   .rating-emoji-wrapper {
@@ -747,8 +774,8 @@ border-radius: 16px;
   align-items: center;
   padding-left: 20px;
   padding-right: 20px;
-  padding-top: clamp(12px, 1.5vh, 16px);
-  padding-bottom: clamp(12px, 1.5vh, 16px);
+  padding-top: clamp(20px, 1.5vh, 16px);
+  padding-bottom: clamp(24px, 1.5vh, 16px);
   border: 1px solid rgba(34, 34, 34, 0.1);
   background-color: white;
   width: 100%;
@@ -757,6 +784,49 @@ border-radius: 16px;
   position: relative;
   cursor: pointer;
   flex-shrink: 0;
+}
+
+/* Header for rating and chat screens */
+.chat-rating-header {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  padding-left: 20px;
+  padding-right: 20px;
+  padding-top: 12px;
+  padding-bottom: 12px;
+  border: 1px solid rgba(34, 34, 34, 0.1);
+  background-color: white;
+  width: 100%;
+  height: fit-content;
+  box-sizing: border-box;
+  position: relative;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.chat-rating-header img {
+  width: 26px;
+  height: 26px;
+  object-fit: contain;
+}
+
+.chat-rating-header .message-back-icon {
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+.chat-rating-header .message-back-icon:hover {
+  opacity: 0.7;
+}
+
+.chat-rating-header p {
+  font-size: 20px;
+  font-weight: 500;
+  color: #222;
+  margin: 0;
+  padding: 0;
 }
 .flex-1 img {
   width: 26px;
@@ -867,9 +937,9 @@ border-radius: 16px;
   display: none;
   flex-direction: column;
   width: 100%;
-  min-height: 450px;
+  min-height: 525px;
   height: auto;
-  max-height: 75vh;
+  max-height: 83vh;
   box-sizing: border-box;
   background-color: #f0f0f0;
   overflow: hidden;
@@ -1553,6 +1623,16 @@ border-radius: 16px;
   font-weight: 600 !important;
 }
 
+.theme-yellow .chat-rating-header {
+  background-color: rgba(255,255,255,0.95) !important;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06) !important;
+}
+
+.theme-yellow .chat-rating-header p {
+  color: #333 !important;
+  font-weight: 600 !important;
+}
+
 .theme-yellow .fugah-message-heading {
   color: #333 !important;
 }
@@ -1745,6 +1825,16 @@ border-radius: 16px;
 }
 
 .theme-black .flex-1 p {
+  color: white !important;
+}
+
+.theme-black .chat-rating-header {
+  background-color: black !important;
+  color: white !important;
+  border-bottom: 1px solid rgba(204, 204, 204, 0.1) !important;
+}
+
+.theme-black .chat-rating-header p {
   color: white !important;
 }
 

@@ -358,7 +358,7 @@ border-radius: 16px;
   .fugah-main-content,
   #fugah-main-content {
     min-height: 450px;
-    height: auto;
+    height: 75vh;
     max-height: 75vh;
   }
   
@@ -378,7 +378,7 @@ border-radius: 16px;
   /* Message List Screen Responsive Sizing */
   .main-message-container {
     min-height: 450px;
-    height: auto;
+    height: 75vh;
     max-height: 75vh;
   }
   
@@ -403,9 +403,9 @@ border-radius: 16px;
   
   /* Individual Chat Screen Responsive Sizing */
   .main-message-detail-container {
-    min-height: 525px;
-    height: 83vh;
-    max-height: 83vh;
+    min-height: 450px;
+    height: 75vh;
+    max-height: 75vh;
   }
   
   .message-detail-messages {
@@ -708,7 +708,7 @@ border-radius: 16px;
   align-items: center;
   flex-direction: column;
   min-height: 450px;
-  height: auto;
+  height: 75vh;
   max-height: 75vh;
   overflow: hidden;
 }
@@ -720,7 +720,7 @@ border-radius: 16px;
   align-items: center;
   gap: clamp(35px, 4vh, 70px);
   min-height: 450px;
-  height: auto;
+  height: 75vh;
   max-height: 75vh;
   box-sizing: border-box;
   width: 100%;
@@ -748,7 +748,7 @@ border-radius: 16px;
   align-items: center;
   width: 100%;
   min-height: 450px;
-  height: auto;
+  height: 75vh;
   max-height: 75vh;
   box-sizing: border-box;
   overflow: hidden;
@@ -759,7 +759,7 @@ border-radius: 16px;
   flex-direction: column;
   width: 100%;
   min-height: 450px;
-  height: auto;
+  height: 75vh;
   max-height: 75vh;
   box-sizing: border-box;
   overflow-y: auto;
@@ -937,9 +937,9 @@ border-radius: 16px;
   display: none;
   flex-direction: column;
   width: 100%;
-  min-height: 525px;
-  height: 83vh;
-  max-height: 83vh;
+  min-height: 450px;
+  height: 75vh;
+  max-height: 75vh;
   box-sizing: border-box;
   background-color: #f0f0f0;
   overflow: hidden;
@@ -955,6 +955,7 @@ border-radius: 16px;
   flex-direction: column;
   flex: 1;
   min-height: 0;
+  max-height: 100%;
   background-color: #ffffff;
   overflow: hidden;
   width: 100%;
@@ -963,7 +964,9 @@ border-radius: 16px;
 .message-detail-messages {
   flex: 1;
   min-height: 0;
+  max-height: 100%;
   overflow-y: auto;
+  overflow-x: hidden;
   padding: clamp(15px, 3.5vh, 35px);
   display: flex;
   flex-direction: column;

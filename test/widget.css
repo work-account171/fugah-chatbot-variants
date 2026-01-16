@@ -404,7 +404,7 @@ border-radius: 16px;
   /* Individual Chat Screen Responsive Sizing */
   .main-message-detail-container {
     min-height: 525px;
-    height: auto;
+    height: 83vh;
     max-height: 83vh;
   }
   
@@ -938,7 +938,7 @@ border-radius: 16px;
   flex-direction: column;
   width: 100%;
   min-height: 525px;
-  height: auto;
+  height: 83vh;
   max-height: 83vh;
   box-sizing: border-box;
   background-color: #f0f0f0;

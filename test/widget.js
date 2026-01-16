@@ -665,14 +665,16 @@
         const month = months[now.getMonth()];
         const year = now.getFullYear();
         
-        // Convert to 12-hour format
+        // Convert to 12-hour format (NO SECONDS - only hours and minutes)
         let hours = now.getHours();
         const ampm = hours >= 12 ? 'PM' : 'AM';
         hours = hours % 12;
         hours = hours ? hours : 12; // 0 should be 12
         
+        // Get minutes only - explicitly NOT using getSeconds()
         const minutes = now.getMinutes().toString().padStart(2, '0');
         
+        // Return format: "16 Jan 2026, 2:57 PM" (NO SECONDS included)
         return `${day} ${month} ${year}, ${hours}:${minutes} ${ampm}`;
       }
 
@@ -727,14 +729,20 @@
         messageDiv.appendChild(contentDiv);
         messageDetailMessages.appendChild(messageDiv);
         
-        // Only update timestamp when explicitly requested (for bot messages)
+        // Handle timestamp based on message type
         if (updateTimestamp) {
-          // Remove existing timestamp first
+          // Bot message: Remove existing timestamp first, then add new one
           const existingTimestamp = messageDetailMessages.querySelector(".last-message-timestamp");
           if (existingTimestamp) {
             existingTimestamp.remove();
           }
           updateLastMessageTimestamp();
+        } else if (isUser) {
+          // User message: Remove timestamp immediately (timestamp only shows for bot messages)
+          const existingTimestamp = messageDetailMessages.querySelector(".last-message-timestamp");
+          if (existingTimestamp) {
+            existingTimestamp.remove();
+          }
         }
         
         // Play message sound notification
@@ -762,10 +770,18 @@
         timestampDiv.className = "last-message-timestamp chat-message-datetime";
         timestampDiv.textContent = formatDateTime();
         messageDetailMessages.appendChild(timestampDiv);
+        
+        // Store current minute and hour (no seconds) for 5-minute comparison
+        const now = new Date();
+        lastTimestampMinute = now.getMinutes();
+        lastTimestampHour = now.getHours();
       }
 
       // Variable to store the timestamp update interval
       let timestampUpdateInterval = null;
+      // Store the minute value when timestamp was last updated (only minutes, no seconds)
+      let lastTimestampMinute = null;
+      let lastTimestampHour = null;
 
       // Function to start the 5-minute timestamp update
       function startTimestampUpdates() {
@@ -774,13 +790,81 @@
           clearInterval(timestampUpdateInterval);
         }
         
-        // Update timestamp every 5 minutes (300,000 milliseconds)
-        timestampUpdateInterval = setInterval(() => {
-          const lastTimestamp = messageDetailMessages?.querySelector(".last-message-timestamp");
-          if (lastTimestamp) {
-            lastTimestamp.textContent = formatDateTime();
+        // Helper function to check and update timestamp
+        function checkAndUpdateTimestamp() {
+          if (!messageDetailMessages) return;
+          
+          // Get all actual chat messages (excluding timestamp and loading indicator)
+          const allMessages = Array.from(messageDetailMessages.children).filter(child => {
+            return child.classList.contains("chat-message") && 
+                   !child.classList.contains("last-message-timestamp") &&
+                   !child.classList.contains("chat-message-loading");
+          });
+          
+          const lastMessage = allMessages.length > 0 ? allMessages[allMessages.length - 1] : null;
+          const isLastMessageFromBot = lastMessage && lastMessage.classList.contains("chat-message-bot");
+          
+          if (isLastMessageFromBot) {
+            const now = new Date();
+            const currentHour = now.getHours();
+            const currentMinute = now.getMinutes();
+            
+            // Check if 5 minutes have passed (comparing only minutes and hours, ignoring seconds)
+            let shouldUpdate = false;
+            
+            if (lastTimestampMinute === null || lastTimestampHour === null) {
+              // First time, create timestamp
+              shouldUpdate = true;
+            } else {
+              // Calculate minutes difference (handling hour rollover)
+              let minutesDiff = 0;
+              if (currentHour === lastTimestampHour) {
+                // Same hour, simple subtraction
+                minutesDiff = currentMinute - lastTimestampMinute;
+              } else if (currentHour === lastTimestampHour + 1 || (currentHour === 0 && lastTimestampHour === 23)) {
+                // Next hour (or hour rollover from 23 to 0)
+                minutesDiff = (60 - lastTimestampMinute) + currentMinute;
+              } else {
+                // More than 1 hour difference, definitely update
+                shouldUpdate = true;
+              }
+              
+              // Update if 5 or more minutes have passed
+              if (minutesDiff >= 5) {
+                shouldUpdate = true;
+              }
+            }
+            
+            if (shouldUpdate) {
+              // Update or create timestamp
+              const lastTimestamp = messageDetailMessages.querySelector(".last-message-timestamp");
+              if (lastTimestamp) {
+                lastTimestamp.textContent = formatDateTime();
+              } else {
+                // Create timestamp if it doesn't exist
+                updateLastMessageTimestamp();
+              }
+              // Store current minute and hour (no seconds)
+              lastTimestampMinute = currentMinute;
+              lastTimestampHour = currentHour;
+            }
+          } else {
+            // Remove timestamp if last message is not from bot
+            const lastTimestamp = messageDetailMessages.querySelector(".last-message-timestamp");
+            if (lastTimestamp) {
+              lastTimestamp.remove();
+            }
+            lastTimestampMinute = null;
+            lastTimestampHour = null;
           }
-        }, 300000); // 5 minutes
+        }
+        
+        // Check every second for exact 5-minute updates (only compares minutes, ignores seconds)
+        // This ensures the timestamp updates exactly when the minute changes to be 5 minutes later
+        timestampUpdateInterval = setInterval(checkAndUpdateTimestamp, 1000); // 1 second
+        
+        // Also check immediately to ensure timestamp is shown if needed
+        checkAndUpdateTimestamp();
       }
 
       // Function to stop timestamp updates

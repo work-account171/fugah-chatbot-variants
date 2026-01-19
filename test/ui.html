@@ -88,11 +88,25 @@
           <div class="fugah-number-div">
             <label for="phone-input">رقم الهاتف</label>
             <div class="phone-input-wrapper">
-              <input type="tel" id="phone-input" placeholder="" />
-              <!-- Custom placeholder with mixed styling for +966 and 5xxxxxxxx -->
-              <div class="custom-placeholder" id="custom-placeholder">
-                <span class="number-format">5xxxxxxxx</span>
+              <!-- Country code dropdown -->
+              <div class="country-code-dropdown-wrapper">
+                <button type="button" class="country-code-dropdown-btn" id="country-code-btn">
+                  <span class="country-code-text" id="country-code-text">+966</span>
+                  <span class="dropdown-arrow">▼</span>
+                </button>
+                <div class="country-code-dropdown" id="country-code-dropdown" style="display: none;">
+                  <div class="country-list" id="country-list">
+                    <!-- Country options will be populated by JavaScript -->
+                  </div>
+                </div>
               </div>
+              <input type="tel" id="phone-input" placeholder="" />
+              <!-- Custom placeholder with mixed styling -->
+              <div class="custom-placeholder" id="custom-placeholder">
+                <span class="number-format" id="number-format">5xxxxxxxx</span>
+              </div>
+              <!-- Validation error message -->
+              <div class="phone-validation-error" id="phone-validation-error" style="display: none;"></div>
             </div>
           </div>
           

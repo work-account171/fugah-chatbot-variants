@@ -78,6 +78,13 @@
           const sendMessageBtn = shadow.querySelector(".fugah-send-button");
           const phoneInput = shadow.querySelector("#phone-input");
       const customPlaceholder = shadow.querySelector("#custom-placeholder");
+      const countryCodeBtn = shadow.querySelector("#country-code-btn");
+      const countryCodeDropdown = shadow.querySelector("#country-code-dropdown");
+      const countryList = shadow.querySelector("#country-list");
+      const countryFlag = shadow.querySelector("#country-flag");
+      const countryCodeText = shadow.querySelector("#country-code-text");
+      const numberFormat = shadow.querySelector("#number-format");
+      const phoneValidationError = shadow.querySelector("#phone-validation-error");
           const mainHomeContainer = shadow.querySelector(".main-home-container");
           const mainMessageContainer = shadow.querySelector(".main-message-container");
           const mainMessageDetailContainer = shadow.querySelector(".main-message-detail-container");
@@ -158,6 +165,9 @@
           const currentTheme = chatWindow.classList.toString().match(/theme-(\w+)/);
           const themeName = currentTheme ? currentTheme[1] : 'black';
           
+          // COMMENTED OUT: X icon logic when chat opens - bubble will be hidden instead
+          // Uncomment below if you need to show X icon when chat is open in the future
+          /*
           let xIconPath;
           switch(themeName) {
             case 'green':
@@ -185,6 +195,8 @@
           }
           
           chatIcon.src = xIconPath;
+          */
+          // Hide chat bubble - screens will appear in its place
           bubble.classList.add("chat-open");
         } else {
           // Get current theme to set correct message icon
@@ -273,199 +285,288 @@
 
 
       // ========================================
-      // FIXED COUNTRY CODE DISPLAY FUNCTIONALITY
+      // COUNTRY CODE DROPDOWN AND PHONE VALIDATION FUNCTIONALITY
       // ========================================
-      // Handle fixed country code that always stays visible
-      if (phoneInput) {
-        // Function to show/hide placeholder based on input content
-        const updatePlaceholderVisibility = () => {
-          if (customPlaceholder) {
-            const value = phoneInput.value;
-            // Show placeholder if only country code exists (e.g., "+966 "), hide if there are digits after it
-            const phoneNumber = value.match(/^\+\d{1,4}\s(.+)/);
-            if (phoneNumber && phoneNumber[1].trim().length > 0) {
+      // Country codes data with flags, phone formats, and validation patterns
+      const countryCodes = [
+        { code: "966", flag: "🇸🇦", name: "Saudi Arabia", iso: "SA", format: "5xxxxxxxx", pattern: /^5\d{8}$/, minLength: 9, maxLength: 9 },
+        { code: "1", flag: "🇺🇸", name: "United States", iso: "US", format: "(xxx) xxx-xxxx", pattern: /^\d{10}$/, minLength: 10, maxLength: 10 },
+        { code: "44", flag: "🇬🇧", name: "United Kingdom", iso: "GB", format: "xxxx xxxxxx", pattern: /^\d{10,11}$/, minLength: 10, maxLength: 11 },
+        { code: "971", flag: "🇦🇪", name: "United Arab Emirates", iso: "AE", format: "5x xxx xxxx", pattern: /^5\d{8}$/, minLength: 9, maxLength: 9 },
+        { code: "965", flag: "🇰🇼", name: "Kuwait", iso: "KW", format: "xxxx xxxx", pattern: /^\d{8}$/, minLength: 8, maxLength: 8 },
+        { code: "974", flag: "🇶🇦", name: "Qatar", iso: "QA", format: "xxxx xxxx", pattern: /^\d{8}$/, minLength: 8, maxLength: 8 },
+        { code: "973", flag: "🇧🇭", name: "Bahrain", iso: "BH", format: "xxxx xxxx", pattern: /^\d{8}$/, minLength: 8, maxLength: 8 },
+        { code: "968", flag: "🇴🇲", name: "Oman", iso: "OM", format: "xxxx xxxx", pattern: /^\d{8}$/, minLength: 8, maxLength: 8 },
+        { code: "961", flag: "🇱🇧", name: "Lebanon", iso: "LB", format: "xx xxx xxx", pattern: /^\d{7,8}$/, minLength: 7, maxLength: 8 },
+        { code: "962", flag: "🇯🇴", name: "Jordan", iso: "JO", format: "x xxxx xxxx", pattern: /^\d{9}$/, minLength: 9, maxLength: 9 },
+        { code: "20", flag: "🇪🇬", name: "Egypt", iso: "EG", format: "xxx xxx xxxx", pattern: /^\d{10}$/, minLength: 10, maxLength: 10 },
+        { code: "212", flag: "🇲🇦", name: "Morocco", iso: "MA", format: "xxxx-xxxxxx", pattern: /^\d{9}$/, minLength: 9, maxLength: 9 },
+        { code: "213", flag: "🇩🇿", name: "Algeria", iso: "DZ", format: "xxx xx xx xx", pattern: /^\d{9}$/, minLength: 9, maxLength: 9 },
+        { code: "216", flag: "🇹🇳", name: "Tunisia", iso: "TN", format: "xx xxx xxx", pattern: /^\d{8}$/, minLength: 8, maxLength: 8 },
+        { code: "33", flag: "🇫🇷", name: "France", iso: "FR", format: "x xx xx xx xx", pattern: /^\d{9}$/, minLength: 9, maxLength: 9 },
+        { code: "49", flag: "🇩🇪", name: "Germany", iso: "DE", format: "xxxx xxxxxxx", pattern: /^\d{10,11}$/, minLength: 10, maxLength: 11 },
+        { code: "39", flag: "🇮🇹", name: "Italy", iso: "IT", format: "xxx xxx xxxx", pattern: /^\d{9,10}$/, minLength: 9, maxLength: 10 },
+        { code: "34", flag: "🇪🇸", name: "Spain", iso: "ES", format: "xxx xxx xxx", pattern: /^\d{9}$/, minLength: 9, maxLength: 9 },
+        { code: "31", flag: "🇳🇱", name: "Netherlands", iso: "NL", format: "x xxxx xxxx", pattern: /^\d{9}$/, minLength: 9, maxLength: 9 },
+        { code: "32", flag: "🇧🇪", name: "Belgium", iso: "BE", format: "xxxx xx xx", pattern: /^\d{9}$/, minLength: 9, maxLength: 9 },
+        { code: "41", flag: "🇨🇭", name: "Switzerland", iso: "CH", format: "xx xxx xx xx", pattern: /^\d{9}$/, minLength: 9, maxLength: 9 },
+        { code: "43", flag: "🇦🇹", name: "Austria", iso: "AT", format: "xxxx xxxxxx", pattern: /^\d{10,13}$/, minLength: 10, maxLength: 13 },
+        { code: "46", flag: "🇸🇪", name: "Sweden", iso: "SE", format: "xx-xxx xx xx", pattern: /^\d{9}$/, minLength: 9, maxLength: 9 },
+        { code: "47", flag: "🇳🇴", name: "Norway", iso: "NO", format: "xxx xx xxx", pattern: /^\d{8}$/, minLength: 8, maxLength: 8 },
+        { code: "45", flag: "🇩🇰", name: "Denmark", iso: "DK", format: "xx xx xx xx", pattern: /^\d{8}$/, minLength: 8, maxLength: 8 },
+        { code: "358", flag: "🇫🇮", name: "Finland", iso: "FI", format: "xx xxx xxxx", pattern: /^\d{9,10}$/, minLength: 9, maxLength: 10 },
+        { code: "7", flag: "🇷🇺", name: "Russia", iso: "RU", format: "xxx xxx-xx-xx", pattern: /^\d{10}$/, minLength: 10, maxLength: 10 },
+        { code: "86", flag: "🇨🇳", name: "China", iso: "CN", format: "xxx xxxx xxxx", pattern: /^\d{11}$/, minLength: 11, maxLength: 11 },
+        { code: "81", flag: "🇯🇵", name: "Japan", iso: "JP", format: "xx-xxxx-xxxx", pattern: /^\d{10,11}$/, minLength: 10, maxLength: 11 },
+        { code: "82", flag: "🇰🇷", name: "South Korea", iso: "KR", format: "xxx-xxxx-xxxx", pattern: /^\d{10,11}$/, minLength: 10, maxLength: 11 },
+        { code: "91", flag: "🇮🇳", name: "India", iso: "IN", format: "xxxxx xxxxx", pattern: /^\d{10}$/, minLength: 10, maxLength: 10 },
+        { code: "61", flag: "🇦🇺", name: "Australia", iso: "AU", format: "xxxx xxxx", pattern: /^\d{9,10}$/, minLength: 9, maxLength: 10 },
+        { code: "64", flag: "🇳🇿", name: "New Zealand", iso: "NZ", format: "xxxx xxxx", pattern: /^\d{8,9}$/, minLength: 8, maxLength: 9 },
+        { code: "27", flag: "🇿🇦", name: "South Africa", iso: "ZA", format: "xx xxx xxxx", pattern: /^\d{9}$/, minLength: 9, maxLength: 9 },
+        { code: "52", flag: "🇲🇽", name: "Mexico", iso: "MX", format: "xx xxxx xxxx", pattern: /^\d{10}$/, minLength: 10, maxLength: 10 },
+        { code: "55", flag: "🇧🇷", name: "Brazil", iso: "BR", format: "(xx) xxxxx-xxxx", pattern: /^\d{10,11}$/, minLength: 10, maxLength: 11 },
+        { code: "54", flag: "🇦🇷", name: "Argentina", iso: "AR", format: "xx xxxx-xxxx", pattern: /^\d{10}$/, minLength: 10, maxLength: 10 },
+        { code: "90", flag: "🇹🇷", name: "Turkey", iso: "TR", format: "xxx xxx xx xx", pattern: /^\d{10}$/, minLength: 10, maxLength: 10 },
+        { code: "60", flag: "🇲🇾", name: "Malaysia", iso: "MY", format: "xx-xxx xxxx", pattern: /^\d{9,10}$/, minLength: 9, maxLength: 10 },
+        { code: "65", flag: "🇸🇬", name: "Singapore", iso: "SG", format: "xxxx xxxx", pattern: /^\d{8}$/, minLength: 8, maxLength: 8 },
+        { code: "66", flag: "🇹🇭", name: "Thailand", iso: "TH", format: "xx-xxx-xxxx", pattern: /^\d{9}$/, minLength: 9, maxLength: 9 },
+        { code: "62", flag: "🇮🇩", name: "Indonesia", iso: "ID", format: "xxx-xxxx-xxxx", pattern: /^\d{9,11}$/, minLength: 9, maxLength: 11 },
+        { code: "63", flag: "🇵🇭", name: "Philippines", iso: "PH", format: "xxx xxx xxxx", pattern: /^\d{10}$/, minLength: 10, maxLength: 10 },
+        { code: "84", flag: "🇻🇳", name: "Vietnam", iso: "VN", format: "xxx xxxx xxx", pattern: /^\d{9,10}$/, minLength: 9, maxLength: 10 },
+        { code: "92", flag: "🇵🇰", name: "Pakistan", iso: "PK", format: "xxx xxxxxxx", pattern: /^\d{10}$/, minLength: 10, maxLength: 10 },
+        { code: "880", flag: "🇧🇩", name: "Bangladesh", iso: "BD", format: "xxxx-xxxxxx", pattern: /^\d{10}$/, minLength: 10, maxLength: 10 },
+        { code: "94", flag: "🇱🇰", name: "Sri Lanka", iso: "LK", format: "xx xxx xxxx", pattern: /^\d{9}$/, minLength: 9, maxLength: 9 }
+      ];
+
+      // Current selected country (default: Saudi Arabia)
+      let selectedCountry = countryCodes.find(c => c.code === "966") || countryCodes[0];
+
+      // Validate phone number based on selected country (accessible globally)
+      function validatePhoneNumber() {
+        if (!phoneInput || !phoneValidationError) return;
+        
+        const phoneNumber = phoneInput.value.trim().replace(/\D/g, "");
+        
+        if (!phoneNumber) {
+          phoneInput.classList.remove("valid", "invalid");
+          if (customPlaceholder) customPlaceholder.classList.remove("invalid");
+          phoneValidationError.style.display = "none";
+          return;
+        }
+        
+        // Check length
+        if (phoneNumber.length < selectedCountry.minLength || phoneNumber.length > selectedCountry.maxLength) {
+          phoneInput.classList.remove("valid");
+          phoneInput.classList.add("invalid");
+          if (customPlaceholder) customPlaceholder.classList.add("invalid");
+          phoneValidationError.textContent = "الرجاء إدخال رقم صحيح";
+          phoneValidationError.style.display = "block";
+          return;
+        }
+        
+        // Check pattern
+        if (selectedCountry.pattern && !selectedCountry.pattern.test(phoneNumber)) {
+          phoneInput.classList.remove("valid");
+          phoneInput.classList.add("invalid");
+          if (customPlaceholder) customPlaceholder.classList.add("invalid");
+          phoneValidationError.textContent = "الرجاء إدخال رقم صحيح";
+          phoneValidationError.style.display = "block";
+          return;
+        }
+        
+        // Valid
+        phoneInput.classList.remove("invalid");
+        phoneInput.classList.add("valid");
+        if (customPlaceholder) customPlaceholder.classList.remove("invalid");
+        phoneValidationError.style.display = "none";
+      }
+
+      // Initialize country code dropdown and phone validation
+      if (phoneInput && countryCodeBtn && countryCodeDropdown && countryList) {
+        // Populate country list
+        function populateCountryList(filter = "") {
+          if (!countryList) return;
+          
+          countryList.innerHTML = "";
+          const filtered = countryCodes.filter(country => 
+            country.name.toLowerCase().includes(filter.toLowerCase()) ||
+            country.code.includes(filter) ||
+            `+${country.code}`.includes(filter)
+          );
+          
+          filtered.forEach(country => {
+            const option = document.createElement("div");
+            option.className = `country-option ${country.code === selectedCountry.code ? "selected" : ""}`;
+            option.innerHTML = `
+              <span class="country-option-code">+${country.code}</span>
+            `;
+            option.addEventListener("click", () => {
+              selectCountry(country);
+            });
+            countryList.appendChild(option);
+          });
+        }
+
+        // Select country
+        function selectCountry(country) {
+          selectedCountry = country;
+          
+          // Update dropdown button
+          if (countryCodeText) countryCodeText.textContent = `+${country.code}`;
+          
+          // Update placeholder format
+          if (numberFormat) numberFormat.textContent = country.format;
+          
+          // Clear input value when country changes
+            phoneInput.value = "";
+            
+          // Close dropdown
+          if (countryCodeDropdown) countryCodeDropdown.style.display = "none";
+          if (countryCodeBtn) countryCodeBtn.classList.remove("open");
+          
+          // Re-populate list to update selected state
+          populateCountryList("");
+          
+          // Clear validation
+          phoneInput.classList.remove("valid", "invalid");
+          if (customPlaceholder) customPlaceholder.classList.remove("invalid");
+          if (phoneValidationError) phoneValidationError.style.display = "none";
+          
+          // Update placeholder visibility
+          updatePlaceholderVisibility();
+        }
+
+        // validatePhoneNumber function is defined globally above
+
+        // Update placeholder visibility
+        function updatePlaceholderVisibility() {
+          if (customPlaceholder && phoneInput) {
+            const value = phoneInput.value.trim();
+            if (value.length > 0) {
               customPlaceholder.style.display = "none";
             } else {
               customPlaceholder.style.display = "block";
+              // Remove invalid class when placeholder is shown (empty input)
+              customPlaceholder.classList.remove("invalid");
             }
           }
-        };
-        
-        // Always start with +966 and position cursor after it
-        phoneInput.value = "+966 ";
-        
-        // Show placeholder initially since no digits are entered yet
-        updatePlaceholderVisibility();
-        
+        }
+
+        // Initialize with default country (Saudi Arabia)
+        selectCountry(selectedCountry);
+        populateCountryList();
+
+        // Country code dropdown toggle
+        if (countryCodeBtn) {
+          countryCodeBtn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            const isOpen = countryCodeDropdown.style.display === "block";
+            countryCodeDropdown.style.display = isOpen ? "none" : "block";
+            countryCodeBtn.classList.toggle("open", !isOpen);
+          });
+        }
+
+        // Country search - disabled since search input is hidden
+        // if (countrySearch) {
+        //   countrySearch.addEventListener("input", (e) => {
+        //     populateCountryList(e.target.value);
+        //   });
+        // }
+
+        // Close dropdown when clicking outside
+        document.addEventListener("click", (e) => {
+          if (countryCodeDropdown && countryCodeBtn && 
+              !countryCodeDropdown.contains(e.target) && 
+              !countryCodeBtn.contains(e.target)) {
+            countryCodeDropdown.style.display = "none";
+            if (countryCodeBtn) countryCodeBtn.classList.remove("open");
+          }
+        });
+
+        // Phone input validation
+        phoneInput.value = "";
         phoneInput.addEventListener("input", (e) => {
-          let value = e.target.value;
+          // Only allow digits
+          const value = e.target.value.replace(/\D/g, "");
+          phoneInput.value = value;
           
-          // Ensure it always starts with + and has proper format
-          if (!value.startsWith("+")) {
-            phoneInput.value = "+966 ";
-            setTimeout(() => {
-              phoneInput.setSelectionRange(5, 5);
-            }, 0);
-            updatePlaceholderVisibility();
-            return;
-          }
-          
-          // Parse the country code and phone number
-          const match = value.match(/^\+(\d{0,4})\s*(.*)/);
-          if (match) {
-            let countryCode = match[1];
-            let phoneNumber = match[2];
-            
-            // Ensure country code is not empty, default to 966
-            if (countryCode === "") {
-              countryCode = "966";
-            }
-            
-            // Clean phone number (only digits)
-            phoneNumber = phoneNumber.replace(/[^\d]/g, '');
-            
-            // Reconstruct the value
-            const newValue = `+${countryCode} ${phoneNumber}`;
-            
-            if (value !== newValue) {
-              const cursorPos = phoneInput.selectionStart;
-              phoneInput.value = newValue;
-              
-              // Maintain cursor position appropriately
-              if (cursorPos <= 4) {
-                setTimeout(() => {
-                  phoneInput.setSelectionRange(cursorPos, cursorPos);
-                }, 0);
-              } else {
-                setTimeout(() => {
-                  phoneInput.setSelectionRange(phoneInput.value.length, phoneInput.value.length);
-                }, 0);
-              }
-            }
-            
-            // Update placeholder visibility after value changes
-            updatePlaceholderVisibility();
-          } else {
-            // Fallback to default format
-            phoneInput.value = "+966 ";
-            setTimeout(() => {
-              phoneInput.setSelectionRange(5, 5);
-            }, 0);
-            updatePlaceholderVisibility();
-          }
-        });
-
-        phoneInput.addEventListener("keydown", (e) => {
-          const cursorPos = phoneInput.selectionStart;
-          const value = phoneInput.value;
-          
-          // Allow editing country code (positions 1-3) but protect + and space
-          if (cursorPos === 0) {
-            // Prevent editing the + sign
-            if (e.key === "Backspace" || e.key === "Delete" || (e.key.length === 1 && e.key !== "+")) {
-              e.preventDefault();
-              phoneInput.setSelectionRange(1, 1);
-              return;
-            }
-          } else if (cursorPos >= 1 && cursorPos <= 3) {
-            // Allow editing country code digits
-            if (e.key.length === 1 && /\d/.test(e.key)) {
-              // Allow digit input in country code area
-              return;
-            } else if (e.key === "Backspace") {
-              // Allow backspace in country code area
-              return;
-            } else if (e.key !== "ArrowLeft" && e.key !== "ArrowRight" && e.key !== "Tab") {
-              e.preventDefault();
-              return;
-            }
-          } else if (cursorPos === 4) {
-            // Protect the space after country code
-            if (e.key === "Backspace" || e.key === "Delete" || (e.key.length === 1 && e.key !== " ")) {
-              e.preventDefault();
-              return;
-            }
-          }
-          
-          // Handle Enter key
-          if (e.key === "Enter" && sendMessageBtn) {
-            sendMessageBtn.click();
-          }
-        });
-
-        phoneInput.addEventListener("focus", () => {
-          // Ensure proper format exists
-          if (!phoneInput.value.match(/^\+\d{1,4}\s/)) {
-            phoneInput.value = "+966 ";
-            setTimeout(() => {
-              phoneInput.setSelectionRange(5, 5);
-            }, 0);
-          }
           updatePlaceholderVisibility();
+          validatePhoneNumber();
         });
 
         phoneInput.addEventListener("blur", () => {
-          // Ensure proper format on blur
-          if (!phoneInput.value.match(/^\+\d{1,4}\s/)) {
-            phoneInput.value = "+966 ";
-          }
+          validatePhoneNumber();
+        });
+
+        phoneInput.addEventListener("focus", () => {
           updatePlaceholderVisibility();
         });
 
-        phoneInput.addEventListener("click", (e) => {
-          // Allow clicking anywhere, but ensure proper format
-          if (!phoneInput.value.match(/^\+\d{1,4}\s/)) {
-            phoneInput.value = "+966 ";
-            setTimeout(() => {
-              phoneInput.setSelectionRange(5, 5);
-            }, 0);
+        // Handle Enter key
+        phoneInput.addEventListener("keydown", (e) => {
+          if (e.key === "Enter" && sendMessageBtn) {
+            e.preventDefault();
+            if (!phoneInput.classList.contains("invalid") && phoneInput.value.trim()) {
+              sendMessageBtn.click();
+            }
           }
-          updatePlaceholderVisibility();
-        });
-
-        // Handle paste events
-        phoneInput.addEventListener("paste", (e) => {
-          e.preventDefault();
-          const pastedText = (e.clipboardData || window.clipboardData).getData('text');
-          const numbers = pastedText.replace(/[^\d]/g, '');
-          
-          // Always append numbers after "+966 "
-          const currentNumbers = phoneInput.value.substring(5);
-          phoneInput.value = "+966 " + currentNumbers + numbers;
-          
-          // Position cursor at the end
-          setTimeout(() => {
-            phoneInput.setSelectionRange(phoneInput.value.length, phoneInput.value.length);
-          }, 0);
-          updatePlaceholderVisibility();
         });
       }
 
 
       // ========================================
-      // END CUSTOM PLACEHOLDER FUNCTIONALITY
+      // END COUNTRY CODE DROPDOWN AND PHONE VALIDATION FUNCTIONALITY
       // ========================================
 
 
       // ========================================
       // MAIN SEND BUTTON FUNCTIONALITY
       // ========================================
-      // Handle main send button click - switches to message tab
+      // Handle main send button click - switches to message tab only if phone number is valid
       if (sendMessageBtn) {
         sendMessageBtn.addEventListener("click", () => {
-          // Switch to message tab (same as footer message icon)
-          switchTab("message");
-        });
-      }
-
-      // Handle phone input enter key
-      if (phoneInput) {
-        phoneInput.addEventListener("keydown", e => {
-          if (e.key === "Enter" && sendMessageBtn) {
-            sendMessageBtn.click();
+          // Validate phone number before switching
+          if (phoneInput) {
+            const phoneNumber = phoneInput.value.trim().replace(/\D/g, "");
+            
+            // Check if phone number exists and is valid
+            if (!phoneNumber) {
+              // No phone number entered, don't navigate
+              return;
+            }
+            
+            // Check if phone number is valid according to selected country
+            const isValidLength = phoneNumber.length >= selectedCountry.minLength && 
+                                 phoneNumber.length <= selectedCountry.maxLength;
+            const isValidPattern = !selectedCountry.pattern || selectedCountry.pattern.test(phoneNumber);
+            const isNotInvalid = !phoneInput.classList.contains("invalid");
+            
+            if (isValidLength && isValidPattern && isNotInvalid) {
+              // Phone number is valid, switch to message tab
+              switchTab("message");
+            } else {
+              // Phone number is invalid, trigger validation to show error
+              if (typeof validatePhoneNumber === 'function') {
+                validatePhoneNumber();
+              } else {
+                // If validatePhoneNumber is not accessible, manually validate
+                phoneInput.classList.remove("valid");
+                phoneInput.classList.add("invalid");
+                if (customPlaceholder) customPlaceholder.classList.add("invalid");
+                if (phoneValidationError) {
+                  phoneValidationError.textContent = "الرجاء إدخال رقم صحيح";
+                  phoneValidationError.style.display = "block";
+                }
+              }
+            }
+          } else {
+            // No phone input, allow navigation (fallback)
+            switchTab("message");
           }
         });
       }
+
+      // Handle phone input enter key - already handled in country code section above
 
 
       // ========================================
@@ -614,10 +715,16 @@
           existingTimestamp.remove();
         }
         
-        // Disable input while bot is responding
+        // Disable input field while bot is responding
         if (messageDetailInput) {
           messageDetailInput.disabled = true;
           messageDetailInput.setAttribute('readonly', 'readonly');
+        }
+        
+        // Disable send button while bot is responding
+        if (messageDetailSendBtn) {
+          messageDetailSendBtn.classList.add("inactive");
+          messageDetailSendBtn.disabled = true;
         }
         
         const messageDiv = document.createElement("div");
@@ -735,12 +842,6 @@
         messageDiv.appendChild(contentDiv);
         messageDetailMessages.appendChild(messageDiv);
         
-        // Re-enable input when bot finishes responding (when bot message is added)
-        if (!isUser && messageDetailInput) {
-          messageDetailInput.disabled = false;
-          messageDetailInput.removeAttribute('readonly');
-        }
-        
         // Handle timestamp based on message type
         if (updateTimestamp) {
           // Bot message: Remove existing timestamp first, then add new one
@@ -749,6 +850,18 @@
             existingTimestamp.remove();
           }
           updateLastMessageTimestamp();
+          
+          // Re-enable input field when bot responds
+          if (messageDetailInput) {
+            messageDetailInput.disabled = false;
+            messageDetailInput.removeAttribute('readonly');
+          }
+          
+          // Re-enable send button when bot responds
+          if (messageDetailSendBtn) {
+            messageDetailSendBtn.disabled = false;
+            toggleMessageDetailSendButtonState();
+          }
         } else if (isUser) {
           // User message: Remove timestamp immediately (timestamp only shows for bot messages)
           const existingTimestamp = messageDetailMessages.querySelector(".last-message-timestamp");
@@ -1369,9 +1482,11 @@
           if (chatIcon) {
             let iconPath;
             
-            // Check if chat is currently open (showing X icon)
+            // COMMENTED OUT: X icon logic when chat is open - bubble will be hidden instead
+            // Uncomment below if you need to show X icon when chat is open in the future
             if (isOpen) {
-              // Use theme-specific X icon
+              // Use theme-specific X icon - COMMENTED OUT
+              /*
               switch(themeName) {
                 case 'green':
                   iconPath = getAssetPath("X-green.png");
@@ -1396,6 +1511,10 @@
                   iconPath = getAssetPath("X.png");
                   break;
               }
+              chatIcon.src = iconPath;
+              */
+              // Don't change icon when chat is open - bubble will be hidden
+              // Skip icon change, continue with rest of theme changes
             } else {
               // Use theme-specific message icon
               switch(themeName) {
@@ -1423,7 +1542,10 @@
                   break;
               }
             }
-            chatIcon.src = iconPath;
+            // Only set icon if chat is closed (when chat is open, bubble is hidden)
+            if (!isOpen && iconPath) {
+              chatIcon.src = iconPath;
+            }
           }
           
           // Change message detail send button icon based on theme

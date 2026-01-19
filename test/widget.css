@@ -112,7 +112,13 @@
   object-fit: contain;
 }
 
-/* Chat bubble when chatbot is open (showing X icon) */
+/* Chat bubble when chatbot is open - hide it so screens can take its place */
+#chat-bubble.chat-open {
+  display: none !important;
+}
+
+/* COMMENTED OUT: Original X icon styles when chat is open - uncomment if needed in future */
+/*
 #chat-bubble.chat-open {
   background-color: white;
   border-radius: 100%;
@@ -120,12 +126,12 @@
   box-sizing: border-box;
 }
 
-/* Chat icon when bubble is open */
 #chat-bubble.chat-open #chat-icon {
   width: 32px;
   height: 32px;
   object-fit: cover;
 }
+*/
 
 
 /* ========================================
@@ -134,7 +140,7 @@
 
 #chat-window {
   position: fixed;
-  bottom: 100px;
+  /* bottom: 100px; */
   right: 20px;
   width: 90%;
   max-width: 390px;
@@ -303,6 +309,7 @@ border-radius: 16px;
   color: #222;
   /* margin-top: 72px; */
   transition: margin-top 0.3s ease;
+  flex-shrink: 0;
 }
 
 /* When message detail container is active, remove margin and hide tabs */
@@ -357,9 +364,13 @@ border-radius: 16px;
   .main-home-container,
   .fugah-main-content,
   #fugah-main-content {
+    min-height: 0;
+    flex: 1; /* Changed from fixed height to flex: 1 to allow footer space */
+    /* OLD CODE (commented for future use):
     min-height: 450px;
     height: 75vh;
     max-height: 75vh;
+    */
   }
   
   #fugah-main-content {
@@ -377,9 +388,13 @@ border-radius: 16px;
   
   /* Message List Screen Responsive Sizing */
   .main-message-container {
+    min-height: 0;
+    flex: 1; /* Changed from fixed height to flex: 1 to allow footer space */
+    /* OLD CODE (commented for future use):
     min-height: 450px;
     height: 75vh;
     max-height: 75vh;
+    */
   }
   
   .message-item {
@@ -403,9 +418,13 @@ border-radius: 16px;
   
   /* Individual Chat Screen Responsive Sizing */
   .main-message-detail-container {
+    min-height: 0;
+    flex: 1; /* Changed from fixed height to flex: 1 to allow footer space */
+    /* OLD CODE (commented for future use):
     min-height: 450px;
     height: 75vh;
     max-height: 75vh;
+    */
   }
   
   .message-detail-messages {
@@ -509,24 +528,55 @@ border-radius: 16px;
   width: 100%;
   box-sizing: border-box;
   flex-shrink: 0;
+  overflow: visible; /* Allow dropdown to show */
+  position: relative; /* Create stacking context */
 }
 .fugah-number-div label {
   font-size: 16px;
   font-weight: 500;
   color: #222;
 }
-.fugah-number-div input {
-  width: 100%;
-  padding: 12px 14px;
+.fugah-number-div input[type="tel"] {
+  flex: 1;
+  min-width: 0; /* Allow flex item to shrink below content size */
+  padding: 14px 16px; /* Increased padding */
   box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.04);
   border-radius: 8px;
   background-color: rgba(34, 34, 34, 0.02);
   border: 0.5px solid rgba(34, 34, 34, 0.1);
-  font-size: 16px;
+  font-size: 18px; /* Increased font size */
   box-sizing: border-box;
   text-align: left;
   direction: ltr !important;
   font-family: monospace, sans-serif;
+  position: relative; /* For absolute positioning of placeholder */
+  overflow: hidden; /* Prevent content overflow */
+}
+
+.fugah-number-div input[type="tel"].invalid {
+  border-color: #dc3545;
+  background-color: rgba(220, 53, 69, 0.05);
+}
+
+.fugah-number-div input[type="tel"].valid {
+  border-color: #28a745;
+  background-color: rgba(40, 167, 69, 0.05);
+}
+
+/* Validation error message */
+.phone-validation-error {
+  position: absolute;
+  bottom: calc(100% + 4px); /* Above the placeholder */
+  left: calc(70px + 8px + 16px); /* Align with placeholder (dropdown width + gap + input padding) */
+  font-size: 12px;
+  color: #dc3545;
+  background-color: rgba(220, 53, 69, 0.1);
+  padding: 4px 8px;
+  border-radius: 4px;
+  white-space: nowrap;
+  z-index: 10;
+  direction: rtl; /* Right-to-left for Arabic text */
+  text-align: right;
 }
 
 .fugah-number-div input::placeholder {
@@ -556,20 +606,156 @@ border-radius: 16px;
 .phone-input-wrapper {
   position: relative;
   width: 100%;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  overflow: visible; /* Allow dropdown to show */
+}
+
+/* Country code dropdown wrapper */
+.country-code-dropdown-wrapper {
+  position: relative;
+  flex-shrink: 0;
+  z-index: 10001; /* Higher z-index to appear above footer */
+}
+
+.country-code-dropdown-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 10px 8px;
+  background-color: rgba(34, 34, 34, 0.02);
+  border: 0.5px solid rgba(34, 34, 34, 0.1);
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  box-sizing: border-box;
+  min-width: 70px;
+  justify-content: space-between;
+  transition: all 0.2s ease;
+}
+
+.country-code-dropdown-btn:hover {
+  background-color: rgba(34, 34, 34, 0.05);
+  border-color: rgba(34, 34, 34, 0.2);
+}
+
+.country-flag {
+  display: none;
+}
+
+.country-code-text {
+  font-weight: 500;
+  color: #222;
+  direction: ltr;
+  font-size: 14px;
+}
+
+.dropdown-arrow {
+  font-size: 10px;
+  color: #666;
+  transition: transform 0.2s ease;
+}
+
+.country-code-dropdown-btn.open .dropdown-arrow {
+  transform: rotate(180deg);
+}
+
+/* Country code dropdown menu */
+.country-code-dropdown {
+  position: absolute;
+  bottom: calc(100% + 4px); /* Show above the button */
+  left: 0;
+  background-color: white;
+  border: 1px solid rgba(34, 34, 34, 0.1);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 10001; /* Higher z-index to appear above footer */
+  width: 120px; /* Smaller width */
+  max-height: 150px; /* Smaller height */
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Ensure no format text appears in dropdown */
+.country-code-dropdown .number-format,
+.country-code-dropdown .custom-placeholder,
+.country-list .number-format,
+.country-option .number-format {
+  display: none !important;
+}
+
+.country-search {
+  padding: 10px 12px;
+  border: none;
+  border-bottom: 1px solid rgba(34, 34, 34, 0.1);
+  font-size: 14px;
+  outline: none;
+  width: 100%;
+  box-sizing: border-box;
+  display: none; /* Hide search input to remove foreign language text */
+}
+
+.country-list {
+  overflow-y: auto;
+  max-height: 150px; /* Smaller height */
+}
+
+.country-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  border-bottom: 1px solid rgba(34, 34, 34, 0.05);
+}
+
+.country-option:hover {
+  background-color: rgba(34, 34, 34, 0.05);
+}
+
+.country-option.selected {
+  background-color: rgba(34, 34, 34, 0.1);
+}
+
+.country-option-code {
+  font-size: 13px; /* Smaller font */
+  color: #222;
+  font-weight: 500;
+  direction: ltr;
+  text-align: center;
+  width: 100%;
 }
 
 .custom-placeholder {
   position: absolute;
-  left: calc(14px + 50px); /* 14px padding + width of "+966 " (approximately 50px) */
+  left: calc(70px + 8px + 16px); /* country dropdown width + gap + input padding */
   top: 50%;
   transform: translateY(-50%);
   pointer-events: none;
   color: #000000;
-  font-size: 16px; /* Match input font-size */
+  font-size: 18px; /* Increased to match input font-size */
   direction: ltr;
   display: flex;
   gap: 4px;
   font-family: monospace, sans-serif; /* Match input font-family */
+  max-width: calc(100% - 70px - 8px - 32px); /* Prevent overflow: full width minus dropdown, gap, and input padding */
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  z-index: 1;
+  transition: all 0.2s ease; /* Smooth transition */
+  padding: 2px 4px;
+  border-radius: 4px;
+}
+
+.custom-placeholder.invalid {
+  color: #dc3545; /* Red color when invalid */
+  border: 1px solid #dc3545; /* Red border when invalid */
+  background-color: rgba(220, 53, 69, 0.05);
 }
 
 .custom-placeholder .country-code {
@@ -579,7 +765,11 @@ border-radius: 16px;
 
 .custom-placeholder .number-format {
   font-weight: 400; /* Same font-weight as country code base */
-  color: rgba(0, 0, 0, 0.4);
+  color: rgba(0, 0, 0, 0.6); /* More visible */
+}
+
+.custom-placeholder.invalid .number-format {
+  color: #dc3545; /* Red color when invalid */
 }
 
 .fugah-number-div input:focus + .custom-placeholder,
@@ -705,7 +895,10 @@ border-radius: 16px;
 #fugah-main-container{
   display: flex;
   justify-content: space-between;
+  align-items: stretch; /* Changed from 'center' to 'stretch' to allow content to fill space and show footer */
+  /* OLD CODE (commented for future use):
   align-items: center;
+  */
   flex-direction: column;
   min-height: 450px;
   height: 75vh;
@@ -719,9 +912,13 @@ border-radius: 16px;
   justify-content: center;
   align-items: center;
   gap: clamp(35px, 4vh, 70px);
+  min-height: 0;
+  flex: 1; /* Changed from fixed height to flex: 1 to allow footer space */
+  /* OLD CODE (commented for future use):
   min-height: 450px;
   height: 75vh;
   max-height: 75vh;
+  */
   box-sizing: border-box;
   width: 100%;
   padding-left:20px;
@@ -747,9 +944,13 @@ border-radius: 16px;
   justify-content: center;
   align-items: center;
   width: 100%;
+  min-height: 0;
+  flex: 1; /* Changed from fixed height to flex: 1 to allow footer space */
+  /* OLD CODE (commented for future use):
   min-height: 450px;
   height: 75vh;
   max-height: 75vh;
+  */
   box-sizing: border-box;
   overflow: hidden;
 }
@@ -758,9 +959,13 @@ border-radius: 16px;
   display: none;
   flex-direction: column;
   width: 100%;
+  min-height: 0;
+  flex: 1; /* Changed from fixed height to flex: 1 to allow footer space */
+  /* OLD CODE (commented for future use):
   min-height: 450px;
   height: 75vh;
   max-height: 75vh;
+  */
   box-sizing: border-box;
   overflow-y: auto;
   background-color: white;
@@ -937,9 +1142,13 @@ border-radius: 16px;
   display: none;
   flex-direction: column;
   width: 100%;
+  min-height: 0;
+  flex: 1; /* Changed from fixed height to flex: 1 to allow footer space */
+  /* OLD CODE (commented for future use):
   min-height: 450px;
   height: 75vh;
   max-height: 75vh;
+  */
   box-sizing: border-box;
   background-color: #f0f0f0;
   overflow: hidden;

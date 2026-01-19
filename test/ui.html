@@ -39,14 +39,17 @@
      ======================================== -->
 <!-- Script for fetching response from n8n server (for future integration) -->
 <script>
-  fetch("https://n8n.srv1196634.hstgr.cloud/webhook/body")
-  .then(response => response.json())
-  .then(data => {
-    console.log(data);
-  })
-  .catch(error => {
-    console.error("Error fetching response from n8n server:", error);
-  });
+fetch("https://n8n.srv1196634.hstgr.cloud/webhook-test/user", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ message: "hello" })
+})
+.then(async res => {
+  const text = await res.text();
+  console.log("Status:", res.status);
+  console.log("Body:", text);
+})
+.catch(console.error);
 </script>
 
 

@@ -614,6 +614,12 @@
           existingTimestamp.remove();
         }
         
+        // Disable input while bot is responding
+        if (messageDetailInput) {
+          messageDetailInput.disabled = true;
+          messageDetailInput.setAttribute('readonly', 'readonly');
+        }
+        
         const messageDiv = document.createElement("div");
         messageDiv.className = "chat-message chat-message-bot";
         
@@ -728,6 +734,12 @@
         
         messageDiv.appendChild(contentDiv);
         messageDetailMessages.appendChild(messageDiv);
+        
+        // Re-enable input when bot finishes responding (when bot message is added)
+        if (!isUser && messageDetailInput) {
+          messageDetailInput.disabled = false;
+          messageDetailInput.removeAttribute('readonly');
+        }
         
         // Handle timestamp based on message type
         if (updateTimestamp) {

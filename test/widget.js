@@ -159,6 +159,20 @@
         isOpen = !isOpen;
         chatWindow.style.display = isOpen ? "flex" : "none";
         
+        // Clear phone input when closing chat (returning to home screen)
+        if (!isOpen && phoneInput) {
+          phoneInput.value = "";
+          if (customPlaceholder) {
+            customPlaceholder.classList.remove("invalid");
+            customPlaceholder.style.display = "block";
+            customPlaceholder.style.opacity = "1";
+          }
+          if (phoneValidationError) {
+            phoneValidationError.style.display = "none";
+          }
+          phoneInput.classList.remove("valid", "invalid");
+        }
+        
         // Toggle icon between message and cross based on current theme
         if (isOpen) {
           // Get current theme to set correct X icon
@@ -579,6 +593,20 @@
       // ========================================
       // Handle switching between home and message tabs with proper image updates
       function switchTab(tabName) {
+        // Clear phone input when leaving home screen
+        if (tabName !== "home" && phoneInput) {
+          phoneInput.value = "";
+          if (customPlaceholder) {
+            customPlaceholder.classList.remove("invalid");
+            customPlaceholder.style.display = "block";
+            customPlaceholder.style.opacity = "1";
+          }
+          if (phoneValidationError) {
+            phoneValidationError.style.display = "none";
+          }
+          phoneInput.classList.remove("valid", "invalid");
+        }
+        
         // Remove active class from all tabs
         footerTabItems.forEach(item => {
           item.classList.remove("active");
@@ -666,6 +694,20 @@
       // ========================================
       // Handle opening and closing of message detail view
       function openMessageDetail(messageId) {
+        // Clear phone input when opening message detail
+        if (phoneInput) {
+          phoneInput.value = "";
+          if (customPlaceholder) {
+            customPlaceholder.classList.remove("invalid");
+            customPlaceholder.style.display = "block";
+            customPlaceholder.style.opacity = "1";
+          }
+          if (phoneValidationError) {
+            phoneValidationError.style.display = "none";
+          }
+          phoneInput.classList.remove("valid", "invalid");
+        }
+        
         // Hide message list container
         if (mainMessageContainer) mainMessageContainer.style.display = "none";
         // Show message detail container

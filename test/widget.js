@@ -1513,6 +1513,40 @@
         const fileUploadIcon = shadow.querySelector("#file-upload-icon");
         const dropdownIcon = shadow.querySelector("#fugah-message-detail-dropdown-icon");
         
+        // Change main page background image based on theme
+        const fugahBody = document.querySelector('.fugah-body');
+        if (fugahBody) {
+          let backgroundImagePath;
+          switch(themeName) {
+            case 'green':
+              // Use main-bg.png for green theme as specified
+              backgroundImagePath = "url('assets/main-bg.png')";
+              break;
+            case 'red':
+              backgroundImagePath = "url('assets/main-red-bg.png')";
+              break;
+            case 'blue':
+              backgroundImagePath = "url('assets/main-blue-bg.png')";
+              break;
+            case 'yellow':
+              backgroundImagePath = "url('assets/main-yellow-bg.png')";
+              break;
+            case 'cyan':
+              backgroundImagePath = "url('assets/main-cyan-bg.png')";
+              break;
+            case 'black':
+              backgroundImagePath = "url('assets/main-black-bg.png')";
+              break;
+            case 'white':
+              backgroundImagePath = "url('assets/main-white-bg.png')";
+              break;
+            default:
+              backgroundImagePath = "url('assets/main-bg.png')";
+              break;
+          }
+          fugahBody.style.backgroundImage = backgroundImagePath;
+        }
+        
         if (chatWindow) {
           // Remove all existing theme classes
           chatWindow.classList.remove('theme-green', 'theme-red', 'theme-blue', 'theme-yellow', 'theme-cyan', 'theme-black', 'theme-white');

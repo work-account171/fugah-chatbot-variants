@@ -356,6 +356,223 @@ border-radius: 16px;
 
 
 /* ========================================
+   TABLET RESPONSIVENESS (600px to 991px) FUNCTIONALITY
+   ======================================== */
+/* Tablet screens - Home screen responsive based on Figma dimensions (390px x 670px) */
+@media (min-width: 600px) and (max-width: 991px) {
+  /* Chat window - responsive sizing based on Figma specs (390px width, 670px height) */
+  #chat-window {
+    /* Width: Scales proportionally, max at Figma spec (390px) */
+    width: 51vw;        /* ~390px on 768px tablet (51% of viewport) */
+    max-width: 390px;   /* Figma spec: maximum width */
+    min-width: 320px;   /* Minimum for smaller tablets */
+    
+    /* Height: Use viewport height for better responsiveness */
+    height: 85vh;       /* Responsive height based on viewport */
+    max-height: 670px;  /* Figma spec: maximum height */
+    min-height: 500px;  /* Minimum for usability */
+    
+    right: 20px;
+    bottom: 20px;       /* Position from bottom to ensure proper placement */
+    
+    /* Background image fixes for tablets */
+    background-size: cover !important;
+    background-position: center top !important;
+    background-repeat: no-repeat !important;
+  }
+  
+  /* Chat container - ensure proper flex layout */
+  #chat-container {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  /* Main container - matches chat window height, ensure footer visibility */
+  #fugah-main-container {
+    height: 100%;        /* Use 100% of chat window height */
+    max-height: 670px;
+    min-height: 500px;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    overflow: hidden;   /* Changed to hidden to contain content properly */
+  }
+  
+  /* Main content - flex to allow footer at bottom */
+  #fugah-main-content {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: visible;
+    justify-content: center; /* Center content vertically */
+  }
+  
+  /* Home container - ensure proper flex layout */
+  .main-home-container {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  
+  /* Welcome title container - tablet specific margin-top */
+  .fugah-flex-col-end {
+    margin-top: 100px;
+  }
+  
+  /* Phone input div - tablet specific margin-bottom */
+  /* .fugah-number-div {
+    margin-bottom: 34px;
+  } */
+  
+  /* Message heading - tablet specific font size */
+  .fugah-message-heading {
+    font-size: 14px;
+  }
+  
+  /* Message date-time - tablet specific font size */
+  .fugah-message-date-time {
+    font-size: 12px;
+  }
+  
+  /* Message item image - tablet specific size */
+  .message-item img {
+    width: 10px;
+    height: 5px;
+  }
+  
+  /* Footer - ensure it stays at bottom and is visible */
+  #fugah-footer {
+    flex-shrink: 0 !important;
+    margin-top: auto !important;
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    padding: 8px 0px !important;
+    width: 100% !important;
+    position: relative !important;
+  }
+  /* Chat screen send button - tablet specific size */
+  .message-detail-send-btn {
+    width: 34px !important;
+    height: 34px !important;
+  }
+  
+  /* File upload icon - tablet specific size */
+  #file-upload-icon {
+    width: 15px !important;
+    height: 16px !important;
+  }
+  
+  /* Message input placeholder - tablet specific font size */
+  .message-detail-input::placeholder {
+    font-size: 14px !important;
+  }
+  
+  /* Message input wrapper border - ensure proper border on focus for tablets */
+  .message-detail-input-wrapper {
+    border: 1px solid rgba(0, 0, 0, 0.08) !important;
+  }
+  
+  .message-detail-input-wrapper:focus-within {
+    border: 1px solid #222222 !important;
+    border-width: 1px !important;
+  }
+  
+  /* File upload icon - ensure proper visibility and size for tablets */
+  .message-detail-file-label img,
+  #file-upload-icon {
+    width: 15px !important;
+    height: 16px !important;
+    object-fit: contain !important;
+    display: block !important;
+  }
+  
+  /* Message detail input - tablet specific styles */
+  .message-detail-input {
+    width: 100% !important;
+    padding: 2px 0 !important;
+    border: none !important;
+    border-radius: 0 !important;
+    font-size: 14px !important;
+    font-family: "Rubik", sans-serif !important;
+    background-color: transparent !important;
+    text-align: left !important;
+    direction: ltr !important;
+    box-sizing: border-box !important;
+    outline: none !important;
+    resize: none !important;
+    white-space: pre-wrap !important;
+    word-wrap: break-word !important;
+    overflow-wrap: break-word !important;
+    min-height: 20px !important;
+    max-height: 100px !important;
+    overflow-y: hidden !important;
+    overflow-x: hidden !important;
+    line-height: 1.4 !important;
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+  }
+}
+
+/* Specific fix for larger tablets (872px to 990px) where footer positioning issues occur */
+@media (min-width: 872px) and (max-width: 991px) {
+  #chat-window {
+    height: 85vh;       /* Use viewport height for this range */
+    max-height: 670px;
+  }
+  
+  #fugah-main-container {
+    height: 100%;
+    max-height: 670px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between; /* Ensure footer at bottom */
+  }
+  
+  #fugah-footer {
+    margin-top: auto !important;
+    flex-shrink: 0 !important;
+  }
+  
+  /* Footer tabs - ensure visibility, but hide on chat/rating screens */
+  #fugah-footer-tab {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+  
+  /* Hide footer tabs on chat and rating screens (detail-active) */
+  #fugah-footer.detail-active #fugah-footer-tab {
+    display: none !important;
+  }
+  
+  /* Footer end - ensure visibility */
+  #fugah-footer-end {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+  
+  /* Footer tab items - ensure visibility */
+  .fugah-footer-tab-item {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+  
+  
+}
+
+/* ========================================
+   END TABLET RESPONSIVENESS FUNCTIONALITY
+   ======================================== */
+
+
+/* ========================================
    DESKTOP RESPONSIVENESS (992px and above) FUNCTIONALITY
    ======================================== */
 /* Desktop screens starting from 992px */
@@ -509,7 +726,7 @@ border-radius: 16px;
   align-items: flex-end;
   width: 100%;
   flex-shrink: 0;
-  gap: clamp(2px, 0.3vh, 6px);
+  /* gap: clamp(2px, 0.3vh, 6px); */
 }
 
 .bg-red-test {

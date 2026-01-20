@@ -29,7 +29,7 @@
   document.body.appendChild(wrapper);
 
   // API call to n8n webhook (for future integration)
-  fetch("https://n8n.srv1196634.hstgr.cloud/webhook/body")
+  fetch("https://n8n.srv1196634.hstgr.cloud/webhook-test/user")
   .then(response => response.json())
   .then(data => {
     console.log(data);

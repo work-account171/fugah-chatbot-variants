@@ -112,6 +112,14 @@
   object-fit: contain;
 }
 
+/* Mobile: Smaller chat icon size */
+@media screen and (max-width: 767px) {
+  #chat-bubble #chat-icon {
+    width: 54px;
+    height: 54px;
+  }
+}
+
 /* Chat bubble when chatbot is open - hide it so screens can take its place */
 #chat-bubble.chat-open {
   display: none !important;

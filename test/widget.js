@@ -29,14 +29,17 @@
   document.body.appendChild(wrapper);
 
   // API call to n8n webhook (for future integration)
-  fetch("https://n8n.srv1196634.hstgr.cloud/webhook-test/user")
-  .then(response => response.json())
-  .then(data => {
-    console.log(data);
+  fetch("https://n8n.srv1196634.hstgr.cloud/webhook-test/user", {
+    method: "GET",
+    headers: { "Content-Type": "application/json" },
+    // body: JSON.stringify({ message: "hello" })
   })
-  .catch(error => {
-    console.error("Error fetching response from n8n server:", error);
-  });
+  .then(async res => {
+    const text = await res.text();
+    console.log("Status:", res.status);
+  //  console.log("Body:", text);
+  })
+  .catch(console.error);
   
   const shadow = wrapper.attachShadow({ mode: "open" }); // Create shadow DOM
 
@@ -159,6 +162,20 @@
         isOpen = !isOpen;
         chatWindow.style.display = isOpen ? "flex" : "none";
         
+        // Get the body element with fugah-body class (from main document, not shadow DOM)
+        const fugahBody = document.querySelector('.fugah-body');
+        
+        // Helper function to check if device is mobile
+        const checkIsMobile = () => {
+          // Check both window width and matchMedia for better mobile detection
+          const width = window.innerWidth;
+          const isMobileWidth = width <= 767;
+          const isMobileMedia = window.matchMedia && window.matchMedia('(max-width: 767px)').matches;
+          const isMobile = isMobileWidth || isMobileMedia;
+          console.log('Mobile check - width:', width, 'isMobileWidth:', isMobileWidth, 'isMobileMedia:', isMobileMedia, 'isMobile:', isMobile);
+          return isMobile;
+        };
+        
         // Clear phone input when closing chat (returning to home screen)
         if (!isOpen && phoneInput) {
           phoneInput.value = "";
@@ -175,6 +192,110 @@
         
         // Toggle icon between message and cross based on current theme
         if (isOpen) {
+          // Check if device is mobile (max-width: 767px)
+          const isMobile = checkIsMobile();
+          
+          // Get chat-container and chat-content elements
+          const chatContainer = shadow.querySelector("#chat-container");
+          const chatContent = shadow.querySelector("#chat-content");
+          
+          // Add class to indicate chat window is open
+          chatWindow.classList.add("chat-window-open");
+          
+          // Only apply fullscreen changes on mobile devices
+          if (isMobile) {
+            console.log('Applying mobile fullscreen styles');
+            
+            // Get current theme
+            const currentTheme = chatWindow.classList.toString().match(/theme-(\w+)/);
+            const themeName = currentTheme ? currentTheme[1] : 'black';
+            console.log('Current theme:', themeName);
+            
+            // Remove background-image from body when chat opens (mobile only)
+            // This removes main-yellow-bg.png or any other theme background
+            if (fugahBody) {
+              console.log('Removing background from fugah-body');
+              fugahBody.style.setProperty("background-image", "none", "important");
+            } else {
+              console.error('fugahBody not found!');
+            }
+            
+            // Change background image to mobile version for all themes (mobile only)
+            // Replace regular bg with mobile bg for all themes
+            const mobileBackgroundMap = {
+              'green': 'chatbot-green-mobile-bg.png',
+              'red': 'chatbot-red-mobile-bg.png',
+              'blue': 'chatbot-cyan-mobile-bg.png', // theme-blue uses cyan-bg
+              'yellow': 'chatbot-yellow-mobile-bg.png',
+              'cyan': 'chatbot-blue-mobile-bg.png', // theme-cyan uses blue-bg
+              'black': 'chatbot-black-mobile-bg.png',
+              'white': 'chatbot-black-mobile-bg.png'
+            };
+            
+            if (mobileBackgroundMap[themeName]) {
+              console.log(`Setting mobile background for ${themeName} theme`);
+              chatWindow.style.setProperty("background-image", `url(/assets/${mobileBackgroundMap[themeName]})`, "important");
+              chatWindow.style.setProperty("background-size", "cover", "important");
+              chatWindow.style.setProperty("background-position", "center top", "important");
+              chatWindow.style.setProperty("background-repeat", "no-repeat", "important");
+            }
+            
+            // Make chat-window fullscreen with no border-radius and full height (mobile only)
+            console.log('Setting fullscreen styles');
+            chatWindow.style.setProperty("position", "fixed", "important");
+            chatWindow.style.setProperty("top", "0", "important");
+            chatWindow.style.setProperty("left", "0", "important");
+            chatWindow.style.setProperty("right", "0", "important");
+            chatWindow.style.setProperty("bottom", "0", "important");
+            chatWindow.style.setProperty("width", "100vw", "important");
+            chatWindow.style.setProperty("height", "100vh", "important");
+            chatWindow.style.setProperty("max-width", "none", "important");
+            chatWindow.style.setProperty("max-height", "none", "important");
+            chatWindow.style.setProperty("border-radius", "0", "important");
+            chatWindow.style.setProperty("padding", "0", "important");
+            chatWindow.style.setProperty("margin", "0", "important");
+            
+            // Make chat-container full height (mobile only)
+            if (chatContainer) {
+              chatContainer.style.setProperty("height", "100%", "important");
+              chatContainer.style.setProperty("min-height", "100%", "important");
+              chatContainer.style.setProperty("border-radius", "0", "important");
+              chatContainer.style.setProperty("padding", "0", "important");
+              chatContainer.style.setProperty("margin", "0", "important");
+              chatContainer.style.setProperty("display", "flex", "important");
+              chatContainer.style.setProperty("flex-direction", "column", "important");
+            }
+            
+            // Make fugah-main-container full height and ensure footer at bottom (mobile only)
+            const fugahMainContainer = shadow.querySelector("#fugah-main-container");
+            if (fugahMainContainer) {
+              fugahMainContainer.style.setProperty("height", "100%", "important");
+              fugahMainContainer.style.setProperty("min-height", "100%", "important");
+              fugahMainContainer.style.setProperty("max-height", "none", "important");
+              fugahMainContainer.style.setProperty("display", "flex", "important");
+              fugahMainContainer.style.setProperty("flex-direction", "column", "important");
+              fugahMainContainer.style.setProperty("justify-content", "space-between", "important");
+            }
+            
+            // Ensure footer is at bottom (mobile only)
+            const fugahFooter = shadow.querySelector("#fugah-footer");
+            if (fugahFooter) {
+              fugahFooter.style.setProperty("margin-top", "auto", "important");
+              fugahFooter.style.setProperty("flex-shrink", "0", "important");
+            }
+            
+            // Remove border-radius, padding, and margin from chat-content (mobile only)
+            if (chatContent) {
+              chatContent.style.setProperty("border-radius", "0", "important");
+              chatContent.style.setProperty("padding", "0", "important");
+              chatContent.style.setProperty("margin", "0", "important");
+              chatContent.style.setProperty("margin-top", "0", "important");
+            }
+          } else {
+            // Tablet/Desktop: Keep normal chat window behavior (no fullscreen changes)
+            // Don't remove background image, don't change chat window size
+          }
+          
           // Get current theme to set correct X icon
           const currentTheme = chatWindow.classList.toString().match(/theme-(\w+)/);
           const themeName = currentTheme ? currentTheme[1] : 'black';
@@ -213,9 +334,114 @@
           // Hide chat bubble - screens will appear in its place
           bubble.classList.add("chat-open");
         } else {
-          // Get current theme to set correct message icon
+          // Check if device is mobile (max-width: 767px)
+          const isMobile = checkIsMobile();
+          
+          // Get current theme to restore correct background and message icon
           const currentTheme = chatWindow.classList.toString().match(/theme-(\w+)/);
           const themeName = currentTheme ? currentTheme[1] : 'black';
+          
+          // Get chat-container and chat-content elements
+          const chatContainer = shadow.querySelector("#chat-container");
+          const chatContent = shadow.querySelector("#chat-content");
+          
+          // Remove class to indicate chat window is closed
+          chatWindow.classList.remove("chat-window-open");
+          
+          // Only restore styles if they were applied (mobile only)
+          if (isMobile) {
+            // Restore background-image when chat closes based on current theme (mobile only)
+            if (fugahBody) {
+              let backgroundImagePath;
+              switch(themeName) {
+                case 'green':
+                  backgroundImagePath = "url('assets/main-bg.png')";
+                  break;
+                case 'red':
+                  backgroundImagePath = "url('assets/main-red-bg.png')";
+                  break;
+                case 'blue':
+                  backgroundImagePath = "url('assets/main-blue-bg.png')";
+                  break;
+                case 'yellow':
+                  backgroundImagePath = "url('assets/main-yellow-bg.png')";
+                  break;
+                case 'cyan':
+                  backgroundImagePath = "url('assets/main-cyan-bg.png')";
+                  break;
+                case 'black':
+                  backgroundImagePath = "url('assets/main-black-bg.png')";
+                  break;
+                case 'white':
+                  backgroundImagePath = "url('assets/main-white-bg.png')";
+                  break;
+                default:
+                  backgroundImagePath = "url('assets/main-bg.png')";
+                  break;
+              }
+              fugahBody.style.removeProperty("background-image");
+              fugahBody.style.backgroundImage = backgroundImagePath;
+            }
+            
+            // Restore chat-window background image for all themes (mobile only)
+            // Remove inline styles to let CSS take over for all themes
+            chatWindow.style.removeProperty("background-image");
+            chatWindow.style.removeProperty("background-size");
+            chatWindow.style.removeProperty("background-position");
+            chatWindow.style.removeProperty("background-repeat");
+            
+            // Restore chat-window to normal size (mobile only)
+            chatWindow.style.removeProperty("position");
+            chatWindow.style.removeProperty("top");
+            chatWindow.style.removeProperty("left");
+            chatWindow.style.removeProperty("right");
+            chatWindow.style.removeProperty("bottom");
+            chatWindow.style.removeProperty("width");
+            chatWindow.style.removeProperty("height");
+            chatWindow.style.removeProperty("max-width");
+            chatWindow.style.removeProperty("max-height");
+            chatWindow.style.removeProperty("border-radius");
+            chatWindow.style.removeProperty("padding");
+            chatWindow.style.removeProperty("margin");
+            
+            // Restore chat-container styles (mobile only)
+            if (chatContainer) {
+              chatContainer.style.removeProperty("height");
+              chatContainer.style.removeProperty("min-height");
+              chatContainer.style.removeProperty("border-radius");
+              chatContainer.style.removeProperty("padding");
+              chatContainer.style.removeProperty("margin");
+              chatContainer.style.removeProperty("display");
+              chatContainer.style.removeProperty("flex-direction");
+            }
+            
+            // Restore fugah-main-container styles (mobile only)
+            const fugahMainContainer = shadow.querySelector("#fugah-main-container");
+            if (fugahMainContainer) {
+              fugahMainContainer.style.removeProperty("height");
+              fugahMainContainer.style.removeProperty("min-height");
+              fugahMainContainer.style.removeProperty("max-height");
+              fugahMainContainer.style.removeProperty("display");
+              fugahMainContainer.style.removeProperty("flex-direction");
+              fugahMainContainer.style.removeProperty("justify-content");
+            }
+            
+            // Restore footer styles (mobile only)
+            const fugahFooter = shadow.querySelector("#fugah-footer");
+            if (fugahFooter) {
+              fugahFooter.style.removeProperty("margin-top");
+              fugahFooter.style.removeProperty("flex-shrink");
+            }
+            
+            // Restore chat-content styles (mobile only)
+            if (chatContent) {
+              chatContent.style.removeProperty("border-radius");
+              chatContent.style.removeProperty("padding");
+              chatContent.style.removeProperty("margin");
+              chatContent.style.removeProperty("margin-top");
+            }
+          }
+          // Tablet/Desktop: No changes needed, chat window stays in normal state
           
           let iconPath;
           switch(themeName) {
@@ -262,7 +488,10 @@
       // Add event listeners for opening and closing chat window
       
       // Open chat from bubble click
-      bubble.addEventListener("click", toggleChat);
+      bubble.addEventListener("click", (e) => {
+        console.log('Chat bubble clicked, window width:', window.innerWidth);
+        toggleChat();
+      });
 
       // Close chat from header close button
       if (closeBtn) {
@@ -1394,6 +1623,34 @@
             // Clone all messages from message detail
             ratingMessages.innerHTML = messageDetailMessages.innerHTML;
             
+            // Always append mobile rating container after copying messages
+            // (since innerHTML overwrites everything, we need to add it back)
+            const mobileRatingContainer = document.createElement("div");
+            mobileRatingContainer.className = "chat-message chat-message-rating";
+            
+            // Get asset paths
+            const emoji1Path = getAssetPath('emoji-1.png');
+            const emoji2Path = getAssetPath('emoji-2.png');
+            const emoji3Path = getAssetPath('emoji-3.png');
+            const emoji4Path = getAssetPath('emoji-4.png');
+            const emoji5Path = getAssetPath('emoji-5.png');
+            
+            mobileRatingContainer.innerHTML = `
+              <div class="chat-message-content rating-message-content">
+                <div class="rating-title">
+                  <p>قيم محادثتك</p>
+                </div>
+                <div class="rating-emoji-container">
+                  <img src="${emoji1Path}" alt="Rating 1" class="rating-emoji" data-rating="1" />
+                  <img src="${emoji2Path}" alt="Rating 2" class="rating-emoji" data-rating="2" />
+                  <img src="${emoji3Path}" alt="Rating 3" class="rating-emoji" data-rating="3" />
+                  <img src="${emoji4Path}" alt="Rating 4" class="rating-emoji" data-rating="4" />
+                  <img src="${emoji5Path}" alt="Rating 5" class="rating-emoji" data-rating="5" />
+                </div>
+              </div>
+            `;
+            ratingMessages.appendChild(mobileRatingContainer);
+            
             // Scroll to bottom of rating messages
             setTimeout(() => {
               ratingMessages.scrollTop = ratingMessages.scrollHeight;
@@ -1544,7 +1801,11 @@
               backgroundImagePath = "url('assets/main-bg.png')";
               break;
           }
-          fugahBody.style.backgroundImage = backgroundImagePath;
+          // Only set background image if chat is not open OR if not mobile (on tablet/desktop, keep background even when chat is open)
+          const isMobile = window.innerWidth <= 767;
+          if (!isOpen || !isMobile) {
+            fugahBody.style.backgroundImage = backgroundImagePath;
+          }
         }
         
         if (chatWindow) {

@@ -343,70 +343,16 @@ border-radius: 16px;
   }
 } */
 
-/* ========================================
-   MOBILE RESPONSIVENESS (up to 599px) FUNCTIONALITY
-   ======================================== */
-/* Mobile screens - full screen chat window */
-@media (max-width: 599px) {
-  /* Chat window - full screen on mobile */
+/* Mobile adjustments */
+/* @media (max-width: 767px) {
   #chat-window {
-    width: 100vw !important;
-    max-width: 100vw !important;
-    height: 100vh !important;
-    max-height: 100vh !important;
-    right: 0 !important;
-    left: 0 !important;
-    bottom: 0 !important;
-    top: 0 !important;
-    border-radius: 0 !important;
+    bottom: 90px;
+    right: 10px;
+    left: 10px;
+    width: auto;
+    height: calc(100vh - 100px);
   }
-  
-  /* Chat container - full height */
-  #chat-container {
-    height: 100vh;
-    display: flex;
-    flex-direction: column;
-  }
-  
-  /* Main container - full screen on mobile */
-  #fugah-main-container {
-    height: 100vh !important;
-    max-height: 100vh !important;
-    min-height: 100vh !important;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-  }
-  
-  /* Main content - full height with proper spacing */
-  #fugah-main-content {
-    flex: 1;
-    min-height: 0;
-    height: 100%;
-    padding: 20px 16px;
-    gap: 20px;
-    box-sizing: border-box;
-  }
-  
-  /* Home container - full height */
-  .main-home-container {
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-  }
-  
-  /* Footer - ensure it stays at bottom */
-  #fugah-footer {
-    flex-shrink: 0 !important;
-    margin-top: auto !important;
-    padding: 12px 0px !important;
-  }
-}
-
-/* ========================================
-   END MOBILE RESPONSIVENESS FUNCTIONALITY
-   ======================================== */
+} */
 
 
 /* ========================================
@@ -1597,8 +1543,9 @@ border-radius: 16px;
   border-radius: 24px;
   border: 1px solid rgba(0, 0, 0, 0.08);
   background-color: white;
-  padding: clamp(10px, 1.5vh, 12px) clamp(12px, 2vh, 16px);
-  box-sizing: border-box;
+  padding: clamp(10px, 1.5vh, 12px);
+    /* clamp(12px, 2vh, 16px);  */
+    box-sizing: border-box;
 }
 
 .message-detail-input-wrapper:focus-within {
@@ -1665,6 +1612,78 @@ border-radius: 16px;
   /* Inherits all styles from .message-detail-input-container */
 }
 
+/* Mobile rating container inside messages - hidden by default (desktop) */
+.chat-message-rating {
+  display: none;
+  margin-top: 8px;
+  width: 100%;
+  justify-content: center;
+}
+
+.rating-message-content {
+  max-width: 100% !important;
+  width: 100%;
+  padding: 14px 20px;
+  border-radius: 24px;
+  background-color: #f0f0f0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+  box-sizing: border-box;
+}
+
+.rating-message-content .rating-title {
+  margin: 0;
+  padding: 0;
+}
+
+.rating-message-content .rating-title p {
+  font-size: 16px;
+  font-weight: 500;
+  color: #222;
+  margin: 0;
+  padding: 0;
+}
+
+.rating-message-content .rating-emoji-container {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  gap: 15px;
+  width: 100%;
+  flex-wrap: wrap;
+}
+
+/* Desktop rating container - show by default */
+.rating-input-container-desktop {
+  display: block;
+}
+
+/* Mobile only: Show rating inside messages, hide desktop container */
+@media screen and (max-width: 767px) {
+  .chat-message-rating {
+    display: flex;
+  }
+  
+  .rating-input-container-desktop {
+    display: none !important;
+  }
+}
+
+/* Desktop: Hide mobile rating, show desktop container */
+@media screen and (min-width: 768px) {
+  .chat-message-rating {
+    display: none !important;
+  }
+  
+  .rating-input-container-desktop {
+    display: block;
+  }
+}
+
 /* Rating emoji wrapper (uses same styles as message-detail-input-wrapper) */
 .rating-emoji-wrapper {
   /* Inherits all styles from .message-detail-input-wrapper */
@@ -1673,7 +1692,8 @@ border-radius: 16px;
   align-items: center;
   justify-content: center;
   gap: clamp(15px, 2vh, 20px);
-  padding: clamp(15px, 2vh, 20px) clamp(12px, 2vh, 16px);
+  padding: clamp(15px, 2vh, 20px) ;
+  /* clamp(12px, 2vh, 16px) */
 }
 
 /* Rating title */
@@ -2000,6 +2020,62 @@ border-radius: 16px;
   box-shadow: 0 8px 32px rgba(0,0,0,0.15) !important;
 }
 
+/* Yellow Theme - Use mobile background when chat window is open (mobile only) */
+@media screen and (max-width: 767px) {
+  .theme-yellow#chat-window.chat-window-open {
+    background-image: url(/assets/chatbot-yellow-mobile-bg.png) !important;
+    background-size: cover !important;
+    background-position: center top !important;
+    background-repeat: no-repeat !important;
+    border-radius: 0 !important;
+  }
+  
+  /* Mobile-specific styles for flex column end */
+  .fugah-flex-col-end {
+    margin-bottom: auto;
+    margin-top: 95px;
+  }
+  
+  /* Mobile-specific font sizes for message elements */
+  .fugah-message-heading {
+    font-size: 14px !important;
+  }
+  
+  .fugah-message-date-time {
+    font-size: 12px !important;
+  }
+  
+  /* Mobile-specific image size for message items */
+  .message-item img {
+    width: 10px !important;
+    height: 10px !important;
+  }
+  
+  /* Mobile-specific size for message detail back button image */
+  #message-detail-back-btn {
+    width: 9px !important;
+    height: 17px !important;
+  }
+  
+  /* Mobile-specific size for rating screen back button image */
+  #rating-back-btn {
+    width: 9px !important;
+    height: 17px !important;
+  }
+  
+  /* Mobile-specific size for message detail send button image */
+  .message-detail-send-btn img {
+    width: 34px !important;
+    height: 34px !important;
+  }
+  
+  /* Mobile-specific size for message detail file label image */
+  .message-detail-file-label img {
+    width: 15px !important;
+    height: 16px !important;
+  }
+}
+
 .theme-yellow #chat-bubble {
   background-color: #FFD700 !important;
   border: 2px solid #FFC107 !important;
@@ -2292,8 +2368,12 @@ border-radius: 16px;
   border-color: #555555 !important;
 }
 
+.theme-black .rating-message-content {
+  background-color: #333333 !important;
+}
+
 .theme-black .rating-title p {
-  color: white !important;
+  color: white 
 }
 
 .theme-black .message-detail-input {

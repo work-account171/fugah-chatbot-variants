@@ -38,9 +38,9 @@
      N8N WEBHOOK INTEGRATION FUNCTIONALITY
      ======================================== -->
 <!-- Script for fetching response from n8n server (for future integration) -->
-<script>
+<!-- <script>
 fetch("https://n8n.srv1196634.hstgr.cloud/webhook-test/user", {
-  method: "POST",
+  method: "GET",
   headers: { "Content-Type": "application/json" },
   body: JSON.stringify({ message: "hello" })
 })
@@ -50,7 +50,7 @@ fetch("https://n8n.srv1196634.hstgr.cloud/webhook-test/user", {
   console.log("Body:", text);
 })
 .catch(console.error);
-</script>
+</script> -->
 
 
 <!-- ========================================
@@ -286,10 +286,29 @@ fetch("https://n8n.srv1196634.hstgr.cloud/webhook-test/user", {
           <!-- Messages container (same as message detail) -->
           <div class="message-detail-messages" id="rating-messages">
             <!-- Messages will be copied here from message-detail-messages -->
+            
+            <!-- Rating container inside messages (mobile only) -->
+            <div class="chat-message chat-message-rating">
+              <div class="chat-message-content rating-message-content">
+                <!-- Rating title -->
+                <div class="rating-title">
+                  <p>قيم محادثتك</p>
+                </div>
+                
+                <!-- Emoji container with 5 emojis -->
+                <div class="rating-emoji-container">
+                  <img src="../assets/emoji-1.png" alt="Rating 1" class="rating-emoji" data-rating="1" />
+                  <img src="../assets/emoji-2.png" alt="Rating 2" class="rating-emoji" data-rating="2" />
+                  <img src="../assets/emoji-3.png" alt="Rating 3" class="rating-emoji" data-rating="3" />
+                  <img src="../assets/emoji-4.png" alt="Rating 4" class="rating-emoji" data-rating="4" />
+                  <img src="../assets/emoji-5.png" alt="Rating 5" class="rating-emoji" data-rating="5" />
+                </div>
+              </div>
+            </div>
           </div>
           
-          <!-- Rating container (styled like message-detail-input-container) -->
-          <div class="message-detail-input-container rating-input-container">
+          <!-- Rating container (desktop - styled like message-detail-input-container) -->
+          <div class="message-detail-input-container rating-input-container rating-input-container-desktop">
             <div class="message-detail-input-wrapper rating-emoji-wrapper">
               <!-- Rating title -->
               <div class="rating-title">

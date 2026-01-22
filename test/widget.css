@@ -148,10 +148,14 @@
 
 #chat-window {
   position: fixed;
-  /* bottom: 100px; */
+  bottom: 20px;
   right: 20px;
-  width: 90%;
+  width: 390px;
+  height: 670px;
   max-width: 390px;
+  max-height: 90vh;
+  min-width: 320px;
+  min-height: 500px;
   display: none;
   flex-direction: column;
   z-index: 9999;
@@ -161,8 +165,8 @@
   background-position: center top;
   background-repeat: no-repeat;
   box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.06);
-border-radius: 16px;
-
+  border-radius: 16px;
+  box-sizing: border-box;
 }
 
 
@@ -170,7 +174,9 @@ border-radius: 16px;
   position: relative;
   display: flex;
   flex-direction: column;
-  /* min-height: 670px; */
+  height: 100%;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 
@@ -261,7 +267,7 @@ border-radius: 16px;
   box-sizing: border-box;
   text-align: right;
   color: #000000 !important;
-  margin-bottom: clamp(40px, 5vh, 60px);
+  margin-bottom: 50px;
   transition: all 0.2s ease;
   flex-shrink: 0;
 }
@@ -285,16 +291,15 @@ border-radius: 16px;
 }
 .fugah-main-container {
   display: flex;
-  padding-left:20px;
+  padding-left: 20px;
   padding-right: 20px;
   flex-direction: column;
-  gap: clamp(20px, 2.5vh, 30px);
+  gap: 20px;
   box-sizing: border-box;
   justify-content: center;
   align-items: center;
   width: 100%;
   padding-top: 15px;
-
 }
 
 
@@ -368,22 +373,16 @@ border-radius: 16px;
    ======================================== */
 /* Tablet screens - Home screen responsive based on Figma dimensions (390px x 670px) */
 @media (min-width: 600px) and (max-width: 991px) {
-  /* Chat window - responsive sizing based on Figma specs (390px width, 670px height) */
+  /* Chat window - consistent sizing for tablets */
   #chat-window {
-    /* Width: Scales proportionally, max at Figma spec (390px) */
-    width: 51vw;        /* ~390px on 768px tablet (51% of viewport) */
-    max-width: 390px;   /* Figma spec: maximum width */
-    min-width: 320px;   /* Minimum for smaller tablets */
-    
-    /* Height: Use viewport height for better responsiveness */
-    height: 85vh;       /* Responsive height based on viewport */
-    max-height: 670px;  /* Figma spec: maximum height */
-    min-height: 500px;  /* Minimum for usability */
-    
+    width: 390px;
+    height: 670px;
+    max-width: 390px;
+    max-height: 90vh;
+    min-width: 320px;
+    min-height: 500px;
     right: 20px;
-    bottom: 20px;       /* Position from bottom to ensure proper placement */
-    
-    /* Background image fixes for tablets */
+    bottom: 20px;
     background-size: cover !important;
     background-position: center top !important;
     background-repeat: no-repeat !important;
@@ -396,15 +395,14 @@ border-radius: 16px;
     flex-direction: column;
   }
   
-  /* Main container - matches chat window height, ensure footer visibility */
+  /* Main container - consistent flex layout */
   #fugah-main-container {
-    height: 100%;        /* Use 100% of chat window height */
-    max-height: 670px;
-    min-height: 500px;
+    flex: 1;
+    min-height: 0;
     display: flex;
     flex-direction: column;
     align-items: stretch;
-    overflow: hidden;   /* Changed to hidden to contain content properly */
+    overflow: hidden;
   }
   
   /* Main content - flex to allow footer at bottom */
@@ -414,7 +412,9 @@ border-radius: 16px;
     display: flex;
     flex-direction: column;
     overflow: visible;
-    justify-content: center; /* Center content vertically */
+    justify-content: center;
+    padding-top: 30px;
+    gap: 40px;
   }
   
   /* Home container - ensure proper flex layout */
@@ -450,6 +450,16 @@ border-radius: 16px;
   .message-item img {
     width: 10px;
     height: 5px;
+  }
+  
+  /* Standardize spacing for tablet */
+  #fugah-body {
+    gap: 20px;
+  }
+  
+  .fugah-number-div {
+    gap: 10px;
+    padding: 12px;
   }
   
   /* Footer - ensure it stays at bottom and is visible */
@@ -529,16 +539,18 @@ border-radius: 16px;
 /* Specific fix for larger tablets (872px to 990px) where footer positioning issues occur */
 @media (min-width: 872px) and (max-width: 991px) {
   #chat-window {
-    height: 85vh;       /* Use viewport height for this range */
-    max-height: 670px;
+    width: 390px;
+    height: 670px;
+    max-width: 390px;
+    max-height: 90vh;
   }
   
   #fugah-main-container {
-    height: 100%;
-    max-height: 670px;
+    flex: 1;
+    min-height: 0;
     display: flex;
     flex-direction: column;
-    justify-content: space-between; /* Ensure footer at bottom */
+    justify-content: space-between;
   }
   
   #fugah-footer {
@@ -585,51 +597,53 @@ border-radius: 16px;
    ======================================== */
 /* Desktop screens starting from 992px */
 @media (min-width: 992px) {
+  /* Chat window - responsive sizing for desktop using viewport units */
+  #chat-window {
+    width: min(390px, 20vw);
+    height: min(670px, 85vh);
+    max-width: 450px;
+    max-height: 90vh;
+    min-width: 320px;
+    min-height: 500px;
+    bottom: 20px;
+    right: 20px;
+  }
+  
   /* Home Screen Responsive Sizing */
   .main-home-container,
   .fugah-main-content,
   #fugah-main-content {
     min-height: 0;
-    flex: 1; /* Changed from fixed height to flex: 1 to allow footer space */
-    /* OLD CODE (commented for future use):
-    min-height: 450px;
-    height: 75vh;
-    max-height: 75vh;
-    */
+    flex: 1;
   }
   
   #fugah-main-content {
-    gap: clamp(35px, 4vh, 70px);
-    padding-top: clamp(20px, 2.5vh, 40px);
+    gap: 40px;
+    padding-top: 30px;
   }
   
   .fugah-main-content {
-    gap: clamp(20px, 2.5vh, 40px);
+    gap: 30px;
   }
   
   #fugah-body {
-    gap: clamp(18px, 2vh, 28px);
+    gap: 20px;
   }
   
   /* Message List Screen Responsive Sizing */
   .main-message-container {
     min-height: 0;
-    flex: 1; /* Changed from fixed height to flex: 1 to allow footer space */
-    /* OLD CODE (commented for future use):
-    min-height: 450px;
-    height: 75vh;
-    max-height: 75vh;
-    */
+    flex: 1;
   }
   
   .message-item {
-    padding-top: clamp(12px, 1.5vh, 16px);
-    padding-bottom: clamp(12px, 1.5vh, 16px);
+    padding-top: 14px;
+    padding-bottom: 14px;
   }
   
   .flex-1 {
-    padding-top: clamp(12px, 1.5vh, 16px);
-    padding-bottom: clamp(12px, 1.5vh, 16px);
+    padding-top: 14px;
+    padding-bottom: 14px;
   }
   
   .chat-rating-header {
@@ -638,49 +652,43 @@ border-radius: 16px;
   }
   
   .fugah-message-content {
-    gap: clamp(6px, 0.8vh, 8px);
+    gap: 7px;
   }
   
   /* Individual Chat Screen Responsive Sizing */
   .main-message-detail-container {
     min-height: 0;
-    flex: 1; /* Changed from fixed height to flex: 1 to allow footer space */
-    /* OLD CODE (commented for future use):
-    min-height: 450px;
-    height: 75vh;
-    max-height: 75vh;
-    */
+    flex: 1;
   }
   
   .message-detail-messages {
-    padding: clamp(15px, 4vh, 20px);
-    gap: clamp(12px, 1.5vh, 16px);
+    padding: 18px;
+    gap: 14px;
   }
   
   .message-detail-input-container {
-    padding: clamp(10px, 1.5vh, 12px) clamp(12px, 2vh, 16px);
+    padding: 11px 14px;
   }
   
   .message-detail-input-wrapper {
-    gap: clamp(8px, 1vh, 10px);
-    padding: clamp(10px, 1.5vh, 12px) clamp(12px, 2vh, 16px);
+    gap: 9px;
+    padding: 11px 14px;
   }
   
   .fugah-message-detail-header {
-    gap: clamp(12px, 1.5vh, 15px);
-    padding: clamp(12px, 1.5vh, 16px) ;
+    gap: 13px;
+    padding: 14px;
   }
   
   .rating-emoji-wrapper {
-    gap: clamp(15px, 2vh, 20px);
-    padding: clamp(15px, 2vh, 20px) clamp(12px, 2vh, 16px);
+    gap: 18px;
+    padding: 18px 14px;
   }
   
   /* Parent Container */
   #fugah-main-container {
-    min-height: 450px;
-    height: auto;
-    max-height: 75vh;
+    flex: 1;
+    min-height: 0;
   }
 }
 
@@ -744,17 +752,16 @@ border-radius: 16px;
   display: flex;
   flex-direction: column;
   justify-items: center;
-  gap: clamp(8px, 1vh, 12px);
+  gap: 10px;
   align-items: end;
   background-color: white;
-  padding: clamp(10px, 1.5vh, 14px);
+  padding: 12px;
   border-radius: 16px;
-  
   width: 100%;
   box-sizing: border-box;
   flex-shrink: 0;
-  overflow: visible; /* Allow dropdown to show */
-  position: relative; /* Create stacking context */
+  overflow: visible;
+  position: relative;
 }
 .fugah-number-div label {
   font-size: 16px;
@@ -1007,11 +1014,10 @@ border-radius: 16px;
   justify-content: center;
   align-items: center;
   width: 100%;
-  min-height: 450px;
-  height: auto;
-  max-height: 80vh;
+  min-height: 0;
+  flex: 1;
   box-sizing: border-box;
-  gap: clamp(20px, 2.5vh, 40px);
+  gap: 30px;
   overflow: hidden;
 }
 
@@ -1120,34 +1126,27 @@ border-radius: 16px;
 #fugah-main-container{
   display: flex;
   justify-content: space-between;
-  align-items: stretch; /* Changed from 'center' to 'stretch' to allow content to fill space and show footer */
-  /* OLD CODE (commented for future use):
-  align-items: center;
-  */
+  align-items: stretch;
   flex-direction: column;
-  min-height: 450px;
-  height: 75vh;
-  max-height: 75vh;
+  flex: 1;
+  min-height: 0;
+  width: 100%;
   overflow: hidden;
+  box-sizing: border-box;
 }
 #fugah-main-content{
   display: flex;
-  padding-top: clamp(20px, 2.5vh, 40px);
+  padding-top: 30px;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  gap: clamp(35px, 4vh, 70px);
+  gap: 40px;
   min-height: 0;
-  flex: 1; /* Changed from fixed height to flex: 1 to allow footer space */
-  /* OLD CODE (commented for future use):
-  min-height: 450px;
-  height: 75vh;
-  max-height: 75vh;
-  */
+  flex: 1;
   box-sizing: border-box;
   width: 100%;
-  padding-left:20px;
-  padding-right:20px;
+  padding-left: 20px;
+  padding-right: 20px;
   overflow: hidden;
 }
 #fugah-body{
@@ -1155,7 +1154,7 @@ border-radius: 16px;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  gap: clamp(18px, 2vh, 28px);
+  gap: 20px;
   height: fit-content;
   box-sizing: border-box;
   width: 100%;
@@ -1204,8 +1203,8 @@ border-radius: 16px;
   align-items: center;
   padding-left: 20px;
   padding-right: 20px;
-  padding-top: clamp(20px, 1.5vh, 16px);
-  padding-bottom: clamp(24px, 1.5vh, 16px);
+  padding-top: 14px;
+  padding-bottom: 14px;
   border: 1px solid rgba(34, 34, 34, 0.1);
   background-color: white;
   width: 100%;
@@ -1289,20 +1288,16 @@ border-radius: 16px;
 }
 .message-item{
   display: flex;
-  padding-top: clamp(12px, 1.5vh, 16px);  
-    
-
+  padding-top: 14px;
   flex-direction: row-reverse;
   justify-content: space-between;
   align-items: center;
   width: 90%;
   height: fit-content;
-  
-  height: fit-content;
   border-bottom: 1px solid rgba(0, 0, 0, 0.06);
   margin-left: 20px;
   margin-right: 20px;
-  padding-bottom: clamp(12px, 1.5vh, 16px);
+  padding-bottom: 14px;
   flex-shrink: 0;
 }
 .fugah-message-content{
@@ -1311,7 +1306,7 @@ border-radius: 16px;
   justify-content: center;
   align-items: end;
   height: auto;
-  gap: clamp(6px, 0.8vh, 8px);
+  gap: 7px;
   padding: 0px;
   flex-shrink: 0;
 }
@@ -1401,10 +1396,10 @@ border-radius: 16px;
   max-height: 100%;
   overflow-y: auto;
   overflow-x: hidden;
-  padding: clamp(15px, 3.5vh, 35px);
+  padding: 18px;
   display: flex;
   flex-direction: column;
-  gap: clamp(12px, 1.5vh, 16px);
+  gap: 14px;
   box-sizing: border-box;
 }
 
@@ -1536,7 +1531,7 @@ border-radius: 16px;
 .message-detail-input-container {
   background-color: white;
   box-sizing: border-box;
-  padding: clamp(10px, 1.5vh, 12px) clamp(12px, 2vh, 16px);
+  padding: 11px 14px;
   flex-shrink: 0;
   position: sticky;
   bottom: 0;
@@ -1546,14 +1541,13 @@ border-radius: 16px;
 .message-detail-input-wrapper {
   display: flex;
   flex-direction: column;
-  gap: clamp(8px, 1vh, 10px);
+  gap: 9px;
   width: 100%;
   border-radius: 24px;
   border: 1px solid rgba(0, 0, 0, 0.08);
   background-color: white;
-  padding: clamp(10px, 1.5vh, 12px);
-    /* clamp(12px, 2vh, 16px);  */
-    box-sizing: border-box;
+  padding: 11px 14px;
+  box-sizing: border-box;
 }
 
 .message-detail-input-wrapper:focus-within {
@@ -1616,9 +1610,7 @@ border-radius: 16px;
 }
 
 /* Rating container uses same styles as message-detail-input-container */
-.rating-input-container {
-  /* Inherits all styles from .message-detail-input-container */
-}
+/* .rating-input-container inherits from .message-detail-input-container */
 
 /* Mobile rating container inside messages - hidden by default (desktop) */
 .chat-message-rating {
@@ -1694,14 +1686,12 @@ border-radius: 16px;
 
 /* Rating emoji wrapper (uses same styles as message-detail-input-wrapper) */
 .rating-emoji-wrapper {
-  /* Inherits all styles from .message-detail-input-wrapper */
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: clamp(15px, 2vh, 20px);
-  padding: clamp(15px, 2vh, 20px) ;
-  /* clamp(12px, 2vh, 16px) */
+  gap: 18px;
+  padding: 18px 14px;
 }
 
 /* Rating title */
@@ -1826,11 +1816,11 @@ border-radius: 16px;
   flex-direction: row;
   justify-content: end;
   align-items: center;
-  gap: clamp(12px, 1.5vh, 15px);
+  gap: 13px;
   width: 100%;
   height: fit-content;
   box-sizing: border-box;
-  padding: clamp(12px, 1.5vh, 16px);
+  padding: 14px;
   flex-shrink: 0;
 }
 #fugah-message-detail-icon {
@@ -2137,17 +2127,13 @@ border-radius: 16px;
   margin-top: auto !important;
 }
 
-.theme-yellow #fugah-footer-end {
- 
-}
+/* .theme-yellow #fugah-footer-end - no specific styling needed */
 
 .theme-yellow #fugah-footer-end p {
   color: #333 !important;
 }
 
-.theme-yellow .fugah-footer-tab-item p {
-  /* color: #666 !important; */
-}
+/* .theme-yellow .fugah-footer-tab-item p - uses default styling */
 
 .theme-yellow .fugah-footer-tab-item.active p {
   color: #333 !important;
@@ -2158,9 +2144,7 @@ border-radius: 16px;
   background-color: rgba(255,255,255,0.95) !important;
 }
 
-.theme-yellow .message-detail-input-container {
-  
-}
+/* .theme-yellow .message-detail-input-container - uses default styling */
 
 .theme-yellow .message-detail-input-wrapper {
   background-color: rgba(255,255,255,0.9) !important;

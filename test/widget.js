@@ -584,7 +584,7 @@
       // Current selected country (default: Saudi Arabia)
       let selectedCountry = countryCodes.find(c => c.code === "966") || countryCodes[0];
 
-      // Validate phone number based on selected country (accessible globally)
+      // Validate phone number - auto-detects country code from input (accessible globally)
       function validatePhoneNumber() {
         if (!phoneInput || !phoneValidationError) return;
         
@@ -597,8 +597,33 @@
           return;
         }
         
+        // Auto-detect country code from input
+        let detectedCountry = null;
+        
+        // Try to match country code from the beginning of the phone number
+        // Sort by code length (longest first) to match longer codes first (e.g., 966 before 96)
+        const sortedCodes = [...countryCodes].sort((a, b) => b.code.length - a.code.length);
+        
+        for (const country of sortedCodes) {
+          if (phoneNumber.startsWith(country.code)) {
+            detectedCountry = country;
+            break;
+          }
+        }
+        
+        // If no country code detected, default to Saudi Arabia (966)
+        if (!detectedCountry) {
+          detectedCountry = countryCodes.find(c => c.code === "966") || countryCodes[0];
+        }
+        
+        // Extract phone number without country code for validation
+        let phoneWithoutCode = phoneNumber;
+        if (phoneNumber.startsWith(detectedCountry.code)) {
+          phoneWithoutCode = phoneNumber.substring(detectedCountry.code.length);
+        }
+        
         // Check length
-        if (phoneNumber.length < selectedCountry.minLength || phoneNumber.length > selectedCountry.maxLength) {
+        if (phoneWithoutCode.length < detectedCountry.minLength || phoneWithoutCode.length > detectedCountry.maxLength) {
           phoneInput.classList.remove("valid");
           phoneInput.classList.add("invalid");
           if (customPlaceholder) customPlaceholder.classList.add("invalid");
@@ -608,7 +633,7 @@
         }
         
         // Check pattern
-        if (selectedCountry.pattern && !selectedCountry.pattern.test(phoneNumber)) {
+        if (detectedCountry.pattern && !detectedCountry.pattern.test(phoneWithoutCode)) {
           phoneInput.classList.remove("valid");
           phoneInput.classList.add("invalid");
           if (customPlaceholder) customPlaceholder.classList.add("invalid");
@@ -625,61 +650,90 @@
       }
 
       // Initialize country code dropdown and phone validation
-      if (phoneInput && countryCodeBtn && countryCodeDropdown && countryList) {
-        // Populate country list
-        function populateCountryList(filter = "") {
-          if (!countryList) return;
-          
-          countryList.innerHTML = "";
-          const filtered = countryCodes.filter(country => 
-            country.name.toLowerCase().includes(filter.toLowerCase()) ||
-            country.code.includes(filter) ||
-            `+${country.code}`.includes(filter)
-          );
-          
-          filtered.forEach(country => {
-            const option = document.createElement("div");
-            option.className = `country-option ${country.code === selectedCountry.code ? "selected" : ""}`;
-            option.innerHTML = `
-              <span class="country-option-code">+${country.code}</span>
-            `;
-            option.addEventListener("click", () => {
-              selectCountry(country);
+      // COUNTRY CODE DROPDOWN LOGIC COMMENTED OUT - keeping for safety
+      // Validation still works with all countries - detects country code from input
+      if (phoneInput) {
+        // Dropdown initialization commented out
+        /*
+        if (phoneInput && countryCodeBtn && countryCodeDropdown && countryList) {
+          // Populate country list
+          function populateCountryList(filter = "") {
+            if (!countryList) return;
+            
+            countryList.innerHTML = "";
+            const filtered = countryCodes.filter(country => 
+              country.name.toLowerCase().includes(filter.toLowerCase()) ||
+              country.code.includes(filter) ||
+              `+${country.code}`.includes(filter)
+            );
+            
+            filtered.forEach(country => {
+              const option = document.createElement("div");
+              option.className = `country-option ${country.code === selectedCountry.code ? "selected" : ""}`;
+              option.innerHTML = `
+                <span class="country-option-code">+${country.code}</span>
+              `;
+              option.addEventListener("click", () => {
+                selectCountry(country);
+              });
+              countryList.appendChild(option);
             });
-            countryList.appendChild(option);
+          }
+
+          // Select country
+          function selectCountry(country) {
+            selectedCountry = country;
+            
+            // Update dropdown button
+            if (countryCodeText) countryCodeText.textContent = `+${country.code}`;
+            
+            // Update placeholder format
+            if (numberFormat) numberFormat.textContent = country.format;
+            
+            // Clear input value when country changes
+              phoneInput.value = "";
+              
+            // Close dropdown
+            if (countryCodeDropdown) countryCodeDropdown.style.display = "none";
+            if (countryCodeBtn) countryCodeBtn.classList.remove("open");
+            
+            // Re-populate list to update selected state
+            populateCountryList("");
+            
+            // Clear validation
+            phoneInput.classList.remove("valid", "invalid");
+            if (customPlaceholder) customPlaceholder.classList.remove("invalid");
+            if (phoneValidationError) phoneValidationError.style.display = "none";
+            
+            // Update placeholder visibility
+            updatePlaceholderVisibility();
+          }
+
+          // Initialize with default country (Saudi Arabia)
+          selectCountry(selectedCountry);
+          populateCountryList();
+
+          // Country code dropdown toggle
+          if (countryCodeBtn) {
+            countryCodeBtn.addEventListener("click", (e) => {
+              e.stopPropagation();
+              const isOpen = countryCodeDropdown.style.display === "block";
+              countryCodeDropdown.style.display = isOpen ? "none" : "block";
+              countryCodeBtn.classList.toggle("open", !isOpen);
+            });
+          }
+
+          // Close dropdown when clicking outside
+          document.addEventListener("click", (e) => {
+            if (countryCodeDropdown && countryCodeBtn && 
+                !countryCodeDropdown.contains(e.target) && 
+                !countryCodeBtn.contains(e.target)) {
+              countryCodeDropdown.style.display = "none";
+              if (countryCodeBtn) countryCodeBtn.classList.remove("open");
+            }
           });
         }
-
-        // Select country
-        function selectCountry(country) {
-          selectedCountry = country;
-          
-          // Update dropdown button
-          if (countryCodeText) countryCodeText.textContent = `+${country.code}`;
-          
-          // Update placeholder format
-          if (numberFormat) numberFormat.textContent = country.format;
-          
-          // Clear input value when country changes
-            phoneInput.value = "";
-            
-          // Close dropdown
-          if (countryCodeDropdown) countryCodeDropdown.style.display = "none";
-          if (countryCodeBtn) countryCodeBtn.classList.remove("open");
-          
-          // Re-populate list to update selected state
-          populateCountryList("");
-          
-          // Clear validation
-          phoneInput.classList.remove("valid", "invalid");
-          if (customPlaceholder) customPlaceholder.classList.remove("invalid");
-          if (phoneValidationError) phoneValidationError.style.display = "none";
-          
-          // Update placeholder visibility
-          updatePlaceholderVisibility();
-        }
-
-        // validatePhoneNumber function is defined globally above
+        */
 
         // Update placeholder visibility
         function updatePlaceholderVisibility() {
@@ -688,61 +742,36 @@
             if (value.length > 0) {
               customPlaceholder.style.display = "none";
             } else {
-              customPlaceholder.style.display = "block";
+              customPlaceholder.style.display = "flex";
               // Remove invalid class when placeholder is shown (empty input)
               customPlaceholder.classList.remove("invalid");
             }
           }
         }
 
-        // Initialize with default country (Saudi Arabia)
-        selectCountry(selectedCountry);
-        populateCountryList();
-
-        // Country code dropdown toggle
-        if (countryCodeBtn) {
-          countryCodeBtn.addEventListener("click", (e) => {
-            e.stopPropagation();
-            const isOpen = countryCodeDropdown.style.display === "block";
-            countryCodeDropdown.style.display = isOpen ? "none" : "block";
-            countryCodeBtn.classList.toggle("open", !isOpen);
-          });
-        }
-
-        // Country search - disabled since search input is hidden
-        // if (countrySearch) {
-        //   countrySearch.addEventListener("input", (e) => {
-        //     populateCountryList(e.target.value);
-        //   });
-        // }
-
-        // Close dropdown when clicking outside
-        document.addEventListener("click", (e) => {
-          if (countryCodeDropdown && countryCodeBtn && 
-              !countryCodeDropdown.contains(e.target) && 
-              !countryCodeBtn.contains(e.target)) {
-            countryCodeDropdown.style.display = "none";
-            if (countryCodeBtn) countryCodeBtn.classList.remove("open");
-          }
-        });
-
-        // Phone input validation
+        // Phone input validation (works with all countries - auto-detects country code)
         phoneInput.value = "";
         phoneInput.addEventListener("input", (e) => {
           // Only allow digits
           const value = e.target.value.replace(/\D/g, "");
           phoneInput.value = value;
           
+          // Hide placeholder when user types
           updatePlaceholderVisibility();
           validatePhoneNumber();
         });
 
         phoneInput.addEventListener("blur", () => {
           validatePhoneNumber();
+          // Show placeholder if input is empty
+          updatePlaceholderVisibility();
         });
 
         phoneInput.addEventListener("focus", () => {
-          updatePlaceholderVisibility();
+          // Hide placeholder when focused
+          if (customPlaceholder) {
+            customPlaceholder.style.display = "none";
+          }
         });
 
         // Handle Enter key
@@ -774,21 +803,51 @@
             
             // Check if phone number exists and is valid
             if (!phoneNumber) {
-              // No phone number entered, don't navigate
+              // No phone number entered, show specific error message
+              phoneInput.classList.remove("valid");
+              phoneInput.classList.add("invalid");
+              if (customPlaceholder) customPlaceholder.classList.add("invalid");
+              if (phoneValidationError) {
+                phoneValidationError.textContent = "الرجاء إدخال رقم الهاتف";
+                phoneValidationError.style.display = "block";
+              }
               return;
             }
             
-            // Check if phone number is valid according to selected country
-            const isValidLength = phoneNumber.length >= selectedCountry.minLength && 
-                                 phoneNumber.length <= selectedCountry.maxLength;
-            const isValidPattern = !selectedCountry.pattern || selectedCountry.pattern.test(phoneNumber);
+            // Validate phone number using the same auto-detection logic
+            // Auto-detect country code from input
+            let detectedCountry = null;
+            const sortedCodes = [...countryCodes].sort((a, b) => b.code.length - a.code.length);
+            
+            for (const country of sortedCodes) {
+              if (phoneNumber.startsWith(country.code)) {
+                detectedCountry = country;
+                break;
+              }
+            }
+            
+            // If no country code detected, default to Saudi Arabia (966)
+            if (!detectedCountry) {
+              detectedCountry = countryCodes.find(c => c.code === "966") || countryCodes[0];
+            }
+            
+            // Extract phone number without country code for validation
+            let phoneWithoutCode = phoneNumber;
+            if (phoneNumber.startsWith(detectedCountry.code)) {
+              phoneWithoutCode = phoneNumber.substring(detectedCountry.code.length);
+            }
+            
+            // Check if phone number is valid according to detected country
+            const isValidLength = phoneWithoutCode.length >= detectedCountry.minLength && 
+                                 phoneWithoutCode.length <= detectedCountry.maxLength;
+            const isValidPattern = !detectedCountry.pattern || detectedCountry.pattern.test(phoneWithoutCode);
             const isNotInvalid = !phoneInput.classList.contains("invalid");
             
             if (isValidLength && isValidPattern && isNotInvalid) {
               // Phone number is valid, switch to message tab
               switchTab("message");
             } else {
-              // Phone number is invalid, trigger validation to show error
+              // Phone number is invalid format, trigger validation to show error
               if (typeof validatePhoneNumber === 'function') {
                 validatePhoneNumber();
               } else {
@@ -1161,11 +1220,12 @@
           existingTimestamp.remove();
         }
         
+        // Timestamp div creation disabled - keeping logic for safety
         // Add new timestamp for the last message
-        const timestampDiv = document.createElement("div");
-        timestampDiv.className = "last-message-timestamp chat-message-datetime";
-        timestampDiv.textContent = formatDateTime();
-        messageDetailMessages.appendChild(timestampDiv);
+        // const timestampDiv = document.createElement("div");
+        // timestampDiv.className = "last-message-timestamp chat-message-datetime";
+        // timestampDiv.textContent = formatDateTime();
+        // messageDetailMessages.appendChild(timestampDiv);
         
         // Store current minute and hour (no seconds) for 5-minute comparison
         const now = new Date();

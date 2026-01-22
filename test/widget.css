@@ -799,7 +799,7 @@
 .phone-validation-error {
   position: absolute;
   bottom: calc(100% + 4px); /* Above the placeholder */
-  left: calc(70px + 8px + 16px); /* Align with placeholder (dropdown width + gap + input padding) */
+  left: 16px; /* Align with placeholder (input padding - dropdown is hidden) */
   font-size: 12px;
   color: #dc3545;
   background-color: rgba(220, 53, 69, 0.1);
@@ -850,6 +850,7 @@
   position: relative;
   flex-shrink: 0;
   z-index: 10001; /* Higher z-index to appear above footer */
+  display: none; /* Hidden - dropdown logic commented out */
 }
 
 .country-code-dropdown-btn {
@@ -964,7 +965,7 @@
 
 .custom-placeholder {
   position: absolute;
-  left: calc(70px + 8px + 16px); /* country dropdown width + gap + input padding */
+  left: 16px; /* Input padding - dropdown is hidden */
   top: 50%;
   transform: translateY(-50%);
   pointer-events: none;
@@ -974,7 +975,7 @@
   display: flex;
   gap: 4px;
   font-family: monospace, sans-serif; /* Match input font-family */
-  max-width: calc(100% - 70px - 8px - 32px); /* Prevent overflow: full width minus dropdown, gap, and input padding */
+  max-width: calc(100% - 32px); /* Prevent overflow: full width minus input padding */
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;

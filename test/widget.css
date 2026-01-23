@@ -500,6 +500,31 @@
     border-width: 1px !important;
   }
   
+  /* Expand message area for tablets - reduce padding on other elements */
+  .chat-rating-header {
+    padding-top: 6px !important;
+    padding-bottom: 6px !important;
+  }
+  
+  .message-detail-messages {
+    padding: 14px !important;
+    gap: 24px !important;
+  }
+  
+  .message-detail-input-container {
+    padding: 8px 12px !important;
+  }
+  
+  .message-detail-input-wrapper {
+    gap: 7px !important;
+    padding: 8px 12px !important;
+  }
+  
+  .fugah-message-detail-header {
+    padding: 14px !important;
+    gap: 13px !important;
+  }
+  
   /* File upload icon - ensure proper visibility and size for tablets */
   .message-detail-file-label img,
   #file-upload-icon {
@@ -647,8 +672,8 @@
   }
   
   .chat-rating-header {
-    padding-top: 8px;
-    padding-bottom: 8px;
+    padding-top: 6px;
+    padding-bottom: 6px;
   }
   
   .fugah-message-content {
@@ -662,17 +687,17 @@
   }
   
   .message-detail-messages {
-    padding: 18px;
-    gap: 14px;
+    padding: 14px;
+    gap: 24px;
   }
   
   .message-detail-input-container {
-    padding: 11px 14px;
+    padding: 8px 12px;
   }
   
   .message-detail-input-wrapper {
-    gap: 9px;
-    padding: 11px 14px;
+    gap: 7px;
+    padding: 8px 12px;
   }
   
   .fugah-message-detail-header {
@@ -1229,8 +1254,8 @@
   align-items: center;
   padding-left: 20px;
   padding-right: 20px;
-  padding-top: 8px;
-  padding-bottom: 8px;
+  padding-top: 6px;
+  padding-bottom: 6px;
   border: 1px solid rgba(34, 34, 34, 0.1);
   background-color: white;
   width: 100%;
@@ -1402,10 +1427,10 @@
   max-height: 100%;
   overflow-y: auto;
   overflow-x: hidden;
-  padding: 18px;
+  padding: 14px;
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 24px;
   box-sizing: border-box;
 }
 
@@ -1439,7 +1464,7 @@
 
 .chat-message-content {
   max-width: 75%;
-  padding: 12px 16px;
+  padding: 14px 20px;
   border-radius: 18px;
   word-wrap: break-word;
   box-sizing: border-box;
@@ -1483,7 +1508,6 @@
   background-color: #f0f0f0;
   color: #222;
   padding: 14px 20px;
-
   border-radius: 24px;
   text-align: right;
 }
@@ -1537,7 +1561,7 @@
 .message-detail-input-container {
   background-color: white;
   box-sizing: border-box;
-  padding: 11px 14px;
+  padding: 8px 12px;
   flex-shrink: 0;
   position: sticky;
   bottom: 0;
@@ -1547,12 +1571,12 @@
 .message-detail-input-wrapper {
   display: flex;
   flex-direction: column;
-  gap: 9px;
+  gap: 7px;
   width: 100%;
   border-radius: 24px;
   border: 1px solid rgba(0, 0, 0, 0.08);
   background-color: white;
-  padding: 11px 14px;
+  padding: 8px 12px;
   box-sizing: border-box;
 }
 
@@ -2533,3 +2557,126 @@
   transform: scale(1.1) !important;
   box-shadow: 0 6px 25px rgba(108, 117, 125, 0.5) !important;
 }
+
+/* ========================================
+   CUSTOM CONFIRMATION DIALOG STYLING
+   ======================================== */
+.custom-confirmation-dialog {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 100000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: "RubikForce", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+.confirmation-dialog-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(2px);
+}
+
+.confirmation-dialog-content {
+  position: relative;
+  background-color: white;
+  border-radius: 16px;
+  padding: 24px;
+  max-width: 320px;
+  width: 90%;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  z-index: 100001;
+  text-align: right;
+  direction: rtl;
+}
+
+.confirmation-dialog-message {
+  font-size: 16px;
+  font-weight: 500;
+  color: #222;
+  margin: 0 0 20px 0;
+  line-height: 1.5;
+  text-align: right;
+}
+
+.confirmation-dialog-buttons {
+  display: flex;
+  flex-direction: row-reverse;
+  gap: 12px;
+  justify-content: flex-start;
+}
+
+.confirmation-btn {
+  flex: 1;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: "RubikForce", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+.confirmation-btn-cancel {
+  background-color: #f0f0f0;
+  color: #222;
+}
+
+.confirmation-btn-cancel:hover {
+  background-color: #e0e0e0;
+  transform: translateY(-1px);
+}
+
+.confirmation-btn-confirm {
+  background-color: #222222;
+  color: white;
+}
+
+.confirmation-btn-confirm:hover {
+  background-color: #333333;
+  transform: translateY(-1px);
+}
+
+.confirmation-btn:active {
+  transform: translateY(0);
+}
+
+/* Dark theme support for confirmation dialog */
+.theme-black .confirmation-dialog-content {
+  background-color: #1a1a1a;
+  color: white;
+}
+
+.theme-black .confirmation-dialog-message {
+  color: white;
+}
+
+.theme-black .confirmation-btn-cancel {
+  background-color: #333333;
+  color: white;
+}
+
+.theme-black .confirmation-btn-cancel:hover {
+  background-color: #444444;
+}
+
+.theme-black .confirmation-btn-confirm {
+  background-color: #ffffff;
+  color: #222222;
+}
+
+.theme-black .confirmation-btn-confirm:hover {
+  background-color: #f0f0f0;
+}
+
+/* ========================================
+   END CUSTOM CONFIRMATION DIALOG STYLING
+   ======================================== */

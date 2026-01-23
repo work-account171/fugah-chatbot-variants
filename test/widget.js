@@ -99,6 +99,11 @@
           const fugahMessageDetailDropdown = shadow.querySelector("#fugah-message-detail-dropdown");
           const closeChatDetailMenuItem = shadow.querySelector("#close-chat-detail-menu-item");
           const createTicketDetailMenuItem = shadow.querySelector("#create-ticket-detail-menu-item");
+          // Custom confirmation dialog elements
+          const customConfirmationDialog = shadow.querySelector("#custom-confirmation-dialog");
+          const confirmationDialogMessage = shadow.querySelector("#confirmation-dialog-message");
+          const confirmationBtnCancel = shadow.querySelector("#confirmation-btn-cancel");
+          const confirmationBtnConfirm = shadow.querySelector("#confirmation-btn-confirm");
       const fugahRatingDropdownIcon = shadow.querySelector("#fugah-rating-dropdown-icon");
       const fugahRatingDropdown = shadow.querySelector("#fugah-rating-dropdown");
       const closeRatingMenuItem = shadow.querySelector("#close-rating-menu-item");
@@ -188,6 +193,19 @@
             phoneValidationError.style.display = "none";
           }
           phoneInput.classList.remove("valid", "invalid");
+        }
+        
+        // Reset to home screen when opening chat
+        if (isOpen) {
+          // Show home screen when opening chat
+          if (mainHomeContainer) mainHomeContainer.style.display = "flex";
+          if (mainMessageContainer) mainMessageContainer.style.display = "none";
+          if (mainMessageDetailContainer) mainMessageDetailContainer.style.display = "none";
+          if (mainRatingContainer) mainRatingContainer.style.display = "none";
+          if (fugahFooter) fugahFooter.classList.remove("detail-active");
+          
+          // Reset footer tabs to home
+          switchTab("home");
         }
         
         // Toggle icon between message and cross based on current theme
@@ -844,8 +862,63 @@
             const isNotInvalid = !phoneInput.classList.contains("invalid");
             
             if (isValidLength && isValidPattern && isNotInvalid) {
-              // Phone number is valid, switch to message tab
-              switchTab("message");
+              // Phone number is valid, open chat detail directly (individual chat screen)
+              // Clear phone input when leaving home screen
+              if (phoneInput) {
+                phoneInput.value = "";
+                if (customPlaceholder) {
+                  customPlaceholder.classList.remove("invalid");
+                  customPlaceholder.style.display = "flex";
+                }
+                if (phoneValidationError) {
+                  phoneValidationError.style.display = "none";
+                }
+                phoneInput.classList.remove("valid", "invalid");
+              }
+              
+              // Hide home container
+              if (mainHomeContainer) mainHomeContainer.style.display = "none";
+              // Hide message list container
+              if (mainMessageContainer) mainMessageContainer.style.display = "none";
+              // Show message detail container (chat screen)
+              if (mainMessageDetailContainer) mainMessageDetailContainer.style.display = "flex";
+              // Hide rating container
+              if (mainRatingContainer) mainRatingContainer.style.display = "none";
+              // Add detail-active class on footer (tabs should be hidden in detail view)
+              if (fugahFooter) fugahFooter.classList.add("detail-active");
+              
+              // Update footer tab images without switching to message list
+              footerTabItems.forEach(item => {
+                const tabType = item.getAttribute("data-tab");
+                const img = item.querySelector("img");
+                const currentTheme = chatWindow.classList.toString().match(/theme-(\w+)/);
+                const themeName = currentTheme ? currentTheme[1] : 'default';
+                
+                if (tabType === "message") {
+                  item.classList.add("active");
+                  if (themeName === 'black') {
+                    img.src = getAssetPath("active-message-footer-black.png");
+                  } else {
+                    img.src = getAssetPath("active-message-footer.png");
+                  }
+                  img.alt = "message active";
+                } else if (tabType === "home") {
+                  item.classList.remove("active");
+                  if (themeName === 'black') {
+                    img.src = getAssetPath("new-img.png");
+                  } else {
+                    img.src = getAssetPath("inactive-home-footer.png.png");
+                  }
+                  img.alt = "home inactive";
+                }
+              });
+              
+              // Scroll to bottom of messages
+              if (messageDetailMessages) {
+                setTimeout(() => {
+                  messageDetailMessages.scrollTop = messageDetailMessages.scrollHeight;
+                }, 100);
+              }
             } else {
               // Phone number is invalid format, trigger validation to show error
               if (typeof validatePhoneNumber === 'function') {
@@ -862,8 +935,50 @@
               }
             }
           } else {
-            // No phone input, allow navigation (fallback)
-            switchTab("message");
+            // No phone input, open chat detail directly (fallback)
+            // Hide home container
+            if (mainHomeContainer) mainHomeContainer.style.display = "none";
+            // Hide message list container
+            if (mainMessageContainer) mainMessageContainer.style.display = "none";
+            // Show message detail container (chat screen)
+            if (mainMessageDetailContainer) mainMessageDetailContainer.style.display = "flex";
+            // Hide rating container
+            if (mainRatingContainer) mainRatingContainer.style.display = "none";
+            // Add detail-active class on footer (tabs should be hidden in detail view)
+            if (fugahFooter) fugahFooter.classList.add("detail-active");
+            
+            // Update footer tab images without switching to message list
+            footerTabItems.forEach(item => {
+              const tabType = item.getAttribute("data-tab");
+              const img = item.querySelector("img");
+              const currentTheme = chatWindow.classList.toString().match(/theme-(\w+)/);
+              const themeName = currentTheme ? currentTheme[1] : 'default';
+              
+              if (tabType === "message") {
+                item.classList.add("active");
+                if (themeName === 'black') {
+                  img.src = getAssetPath("active-message-footer-black.png");
+                } else {
+                  img.src = getAssetPath("active-message-footer.png");
+                }
+                img.alt = "message active";
+              } else if (tabType === "home") {
+                item.classList.remove("active");
+                if (themeName === 'black') {
+                  img.src = getAssetPath("new-img.png");
+                } else {
+                  img.src = getAssetPath("inactive-home-footer.png.png");
+                }
+                img.alt = "home inactive";
+              }
+            });
+            
+            // Scroll to bottom of messages
+            if (messageDetailMessages) {
+              setTimeout(() => {
+                messageDetailMessages.scrollTop = messageDetailMessages.scrollHeight;
+              }, 100);
+            }
           }
         });
       }
@@ -953,6 +1068,19 @@
 
         // Show/hide containers based on active tab
         if (tabName === "home") {
+          // Clear phone input when returning to home screen
+          if (phoneInput) {
+            phoneInput.value = "";
+            if (customPlaceholder) {
+              customPlaceholder.classList.remove("invalid");
+              customPlaceholder.style.display = "flex";
+            }
+            if (phoneValidationError) {
+              phoneValidationError.style.display = "none";
+            }
+            phoneInput.classList.remove("valid", "invalid");
+          }
+          
           if (mainHomeContainer) mainHomeContainer.style.display = "flex";
           if (mainMessageContainer) mainMessageContainer.style.display = "none";
           if (mainMessageDetailContainer) mainMessageDetailContainer.style.display = "none";
@@ -1663,12 +1791,75 @@
       // ========================================
       // DROPDOWN MENU ACTIONS FUNCTIONALITY
       // ========================================
+      // Custom confirmation dialog function
+      let currentConfirmCallback = null;
+      function showCustomConfirmation(message, onConfirm) {
+        if (customConfirmationDialog && confirmationDialogMessage && confirmationBtnCancel && confirmationBtnConfirm) {
+          confirmationDialogMessage.textContent = message;
+          customConfirmationDialog.style.display = "flex";
+          currentConfirmCallback = onConfirm;
+        } else {
+          // Fallback to browser confirm
+          if (confirm(message)) {
+            if (onConfirm) onConfirm();
+          }
+        }
+      }
+      
+      // Handle confirmation dialog buttons
+      if (confirmationBtnCancel) {
+        confirmationBtnCancel.addEventListener("click", () => {
+          if (customConfirmationDialog) {
+            customConfirmationDialog.style.display = "none";
+          }
+          currentConfirmCallback = null;
+        });
+      }
+      
+      if (confirmationBtnConfirm) {
+        confirmationBtnConfirm.addEventListener("click", () => {
+          if (customConfirmationDialog) {
+            customConfirmationDialog.style.display = "none";
+          }
+          if (currentConfirmCallback) {
+            currentConfirmCallback();
+            currentConfirmCallback = null;
+          }
+        });
+      }
+      
+      // Close on overlay click
+      if (customConfirmationDialog) {
+        const overlay = customConfirmationDialog.querySelector(".confirmation-dialog-overlay");
+        if (overlay) {
+          overlay.addEventListener("click", () => {
+            customConfirmationDialog.style.display = "none";
+            currentConfirmCallback = null;
+          });
+        }
+      }
+
       // Handle dropdown menu item actions (close chat, create ticket)
       if (closeChatDetailMenuItem) {
         closeChatDetailMenuItem.addEventListener("click", (e) => {
           e.stopPropagation();
           fugahMessageDetailDropdown.style.display = "none";
-          toggleChat();
+          
+          // Show custom confirmation message before closing
+          showCustomConfirmation("هل أنت متأكد من إغلاق الدردشة؟", () => {
+            // Reset to home screen before closing
+            if (mainHomeContainer) mainHomeContainer.style.display = "flex";
+            if (mainMessageContainer) mainMessageContainer.style.display = "none";
+            if (mainMessageDetailContainer) mainMessageDetailContainer.style.display = "none";
+            if (mainRatingContainer) mainRatingContainer.style.display = "none";
+            if (fugahFooter) fugahFooter.classList.remove("detail-active");
+            
+            // Reset footer tabs to home
+            switchTab("home");
+            
+            // Close chat
+            toggleChat();
+          });
         });
       }
 
@@ -1676,6 +1867,9 @@
         createTicketDetailMenuItem.addEventListener("click", (e) => {
           e.stopPropagation();
           fugahMessageDetailDropdown.style.display = "none";
+          
+          // Show custom confirmation message before creating ticket
+          showCustomConfirmation("هل أنت متأكد من رفع تذكرة؟", () => {
           
           // Copy messages from message detail to rating screen
           const ratingMessages = shadow.querySelector("#rating-messages");
@@ -1734,6 +1928,7 @@
           
           // Setup emoji hover and click functionality
           setupRatingEmojis();
+          });
         });
       }
 
@@ -1742,7 +1937,22 @@
         closeRatingMenuItem.addEventListener("click", (e) => {
           e.stopPropagation();
           fugahRatingDropdown.style.display = "none";
-          toggleChat();
+          
+          // Show custom confirmation message before closing
+          showCustomConfirmation("هل أنت متأكد من إغلاق الدردشة؟", () => {
+            // Reset to home screen before closing
+            if (mainHomeContainer) mainHomeContainer.style.display = "flex";
+            if (mainMessageContainer) mainMessageContainer.style.display = "none";
+            if (mainMessageDetailContainer) mainMessageDetailContainer.style.display = "none";
+            if (mainRatingContainer) mainRatingContainer.style.display = "none";
+            if (fugahFooter) fugahFooter.classList.remove("detail-active");
+            
+            // Reset footer tabs to home
+            switchTab("home");
+            
+            // Close chat
+            toggleChat();
+          });
         });
       }
 

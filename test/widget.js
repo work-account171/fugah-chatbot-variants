@@ -29,8 +29,8 @@
   document.body.appendChild(wrapper);
 
   // API call to n8n webhook (for future integration)
-  fetch("https://n8n.srv1196634.hstgr.cloud/webhook-test/user", {
-    method: "GET",
+  fetch("https://n8n.srv1196634.hstgr.cloud/webhook/user", {
+    method: "POST",
     headers: { "Content-Type": "application/json" },
     // body: JSON.stringify({ message: "hello" })
   })

@@ -162,6 +162,13 @@
       // ========================================
       // Handle opening and closing of chat window with icon switching
       let isOpen = false;
+      
+      // Store scroll prevention handlers for cleanup
+      let scrollPreventionHandlers = {
+        homeContainer: null,
+        chatContainer: null,
+        chatWindow: null
+      };
 
       const toggleChat = () => {
         isOpen = !isOpen;
@@ -386,6 +393,34 @@
               chatContent.style.setProperty("margin", "0", "important");
               chatContent.style.setProperty("margin-top", "0", "important");
             }
+
+            // Prevent scrolling on home screen for mobile (iOS Safari fix)
+            const preventHomeScreenScroll = (e) => {
+              // Only prevent if we're on the home screen
+              if (mainHomeContainer && mainHomeContainer.style.display !== "none") {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+              }
+            };
+
+            // Store handler reference for cleanup
+            scrollPreventionHandlers.homeContainer = preventHomeScreenScroll;
+            scrollPreventionHandlers.chatContainer = preventHomeScreenScroll;
+            scrollPreventionHandlers.chatWindow = preventHomeScreenScroll;
+
+            // Add touch event listeners to prevent scrolling on home screen
+            if (mainHomeContainer) {
+              mainHomeContainer.addEventListener('touchmove', preventHomeScreenScroll, { passive: false });
+              mainHomeContainer.addEventListener('touchstart', preventHomeScreenScroll, { passive: false });
+              mainHomeContainer.addEventListener('touchend', preventHomeScreenScroll, { passive: false });
+            }
+            if (chatContainer) {
+              chatContainer.addEventListener('touchmove', preventHomeScreenScroll, { passive: false });
+            }
+            if (chatWindow) {
+              chatWindow.addEventListener('touchmove', preventHomeScreenScroll, { passive: false });
+            }
           } else {
             // Tablet/Desktop: Keep normal chat window behavior (no fullscreen changes)
             // Don't remove background image, don't change chat window size
@@ -447,6 +482,24 @@
           if (isMobile) {
             // Remove mobile height update listeners when chat closes
             removeMobileHeightUpdates();
+            
+            // Remove scroll prevention listeners when chat closes
+            if (scrollPreventionHandlers.homeContainer && mainHomeContainer) {
+              mainHomeContainer.removeEventListener('touchmove', scrollPreventionHandlers.homeContainer);
+              mainHomeContainer.removeEventListener('touchstart', scrollPreventionHandlers.homeContainer);
+              mainHomeContainer.removeEventListener('touchend', scrollPreventionHandlers.homeContainer);
+            }
+            if (scrollPreventionHandlers.chatContainer && chatContainer) {
+              chatContainer.removeEventListener('touchmove', scrollPreventionHandlers.chatContainer);
+            }
+            if (scrollPreventionHandlers.chatWindow && chatWindow) {
+              chatWindow.removeEventListener('touchmove', scrollPreventionHandlers.chatWindow);
+            }
+            
+            // Clear handler references
+            scrollPreventionHandlers.homeContainer = null;
+            scrollPreventionHandlers.chatContainer = null;
+            scrollPreventionHandlers.chatWindow = null;
             
             // Restore background-image when chat closes based on current theme (mobile only)
             if (fugahBody) {

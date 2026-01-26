@@ -118,11 +118,93 @@
     width: 54px;
     height: 54px;
   }
+
+  /* Additional iOS Safari scrollbar fixes */
+  #chat-window {
+    -webkit-overflow-scrolling: auto !important;
+    overscroll-behavior: none !important;
+    overscroll-behavior-y: none !important;
+    overscroll-behavior-x: none !important;
+  }
+
+  #chat-container {
+    -webkit-overflow-scrolling: auto !important;
+    overscroll-behavior: none !important;
+  }
+
+  #fugah-main-container {
+    -webkit-overflow-scrolling: auto !important;
+    overscroll-behavior: none !important;
+  }
+
+  #fugah-main-content {
+    -webkit-overflow-scrolling: auto !important;
+    overscroll-behavior: none !important;
+  }
+
+  .main-home-container {
+    -webkit-overflow-scrolling: auto !important;
+    overscroll-behavior: none !important;
+    position: relative !important;
+  }
+
+  #fugah-body {
+    -webkit-overflow-scrolling: auto !important;
+    overscroll-behavior: none !important;
+  }
 }
 
 /* Chat bubble when chatbot is open - hide it so screens can take its place */
 #chat-bubble.chat-open {
   display: none !important;
+}
+
+/* ========================================
+   MOBILE SCROLLBAR HIDING (iOS Safari Fix)
+   ======================================== */
+/* Comprehensive scrollbar hiding for mobile, especially iOS Safari */
+@media screen and (max-width: 767px) {
+  /* Hide scrollbars on all containers for mobile */
+  #chat-window,
+  #chat-container,
+  #chat-content,
+  #fugah-main-container,
+  #fugah-main-content,
+  .fugah-main-content,
+  .main-home-container,
+  #fugah-body {
+    overflow: hidden !important;
+    overflow-y: hidden !important;
+    overflow-x: hidden !important;
+    -webkit-overflow-scrolling: auto !important;
+    scrollbar-width: none !important; /* Firefox */
+    -ms-overflow-style: none !important; /* IE and Edge */
+    touch-action: none !important; /* Prevent touch scrolling */
+    overscroll-behavior: none !important;
+    overscroll-behavior-y: none !important;
+    overscroll-behavior-x: none !important;
+  }
+
+  /* Hide webkit scrollbars on mobile */
+  #chat-window::-webkit-scrollbar,
+  #chat-container::-webkit-scrollbar,
+  #chat-content::-webkit-scrollbar,
+  #fugah-main-container::-webkit-scrollbar,
+  #fugah-main-content::-webkit-scrollbar,
+  .fugah-main-content::-webkit-scrollbar,
+  .main-home-container::-webkit-scrollbar,
+  #fugah-body::-webkit-scrollbar {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+    background: transparent !important;
+    -webkit-appearance: none !important;
+  }
+
+  /* Prevent scrolling on home screen specifically */
+  .main-home-container {
+    position: relative !important;
+  }
 }
 
 /* COMMENTED OUT: Original X icon styles when chat is open - uncomment if needed in future */
@@ -268,6 +350,16 @@ border-radius: 16px;
   flex-direction: column;
   box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
   margin-top: auto;
+  overflow: hidden;
+  overflow-y: hidden;
+  overflow-x: hidden;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+}
+
+/* Hide scrollbar for Chrome, Safari and Opera on chat content */
+#chat-content::-webkit-scrollbar {
+  display: none;
 }
 
 /* Send message button */

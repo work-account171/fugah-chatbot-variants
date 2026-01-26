@@ -77,7 +77,6 @@
           const bubble = shadow.querySelector("#chat-bubble");
           const chatIcon = shadow.querySelector("#chat-icon");
           const chatWindow = shadow.querySelector("#chat-window");
-          const closeBtn = shadow.querySelector("#close-btn");
           const sendMessageBtn = shadow.querySelector(".fugah-send-button");
           const phoneInput = shadow.querySelector("#phone-input");
       const customPlaceholder = shadow.querySelector("#custom-placeholder");
@@ -694,21 +693,19 @@
         toggleChat();
       });
 
-      // Close chat from header close button
-      if (closeBtn) {
-        closeBtn.addEventListener("click", (e) => {
-          console.log("Close button clicked");
+      // Close chat from header close button (and message-list close – same class .close-button)
+      const closeButtons = shadow.querySelectorAll(".close-button");
+      closeButtons.forEach((btn) => {
+        btn.addEventListener("click", (e) => {
           e.stopPropagation();
           toggleChat();
         });
-        // Add touch event listeners for mobile devices
-        closeBtn.addEventListener("touchstart", (e) => {
-          console.log("Close button touched (mobile)");
+        btn.addEventListener("touchstart", (e) => {
           e.stopPropagation();
           toggleChat();
         });
-        console.log("Close button event listener added");
-      } else {
+      });
+      if (closeButtons.length === 0) {
         console.error("Close button not found in shadow DOM");
       }
 
@@ -2004,36 +2001,128 @@
         }
       }
 
-      // Add click handler to message detail back button
+      // Helper function to show rating screen (used by message detail close button and submit ticket)
+      function showRatingScreen() {
+        // Copy messages from message detail to rating screen
+        const ratingMessages = shadow.querySelector("#rating-messages");
+        if (messageDetailMessages && ratingMessages) {
+          // Clone all messages from message detail
+          ratingMessages.innerHTML = messageDetailMessages.innerHTML;
+          
+          // Always append mobile rating container after copying messages
+          // (since innerHTML overwrites everything, we need to add it back)
+          const mobileRatingContainer = document.createElement("div");
+          mobileRatingContainer.className = "chat-message chat-message-rating";
+          
+          // Get asset paths
+          const emoji1Path = getAssetPath('emoji-1.png');
+          const emoji2Path = getAssetPath('emoji-2.png');
+          const emoji3Path = getAssetPath('emoji-3.png');
+          const emoji4Path = getAssetPath('emoji-4.png');
+          const emoji5Path = getAssetPath('emoji-5.png');
+          
+          mobileRatingContainer.innerHTML = `
+            <div class="chat-message-content rating-message-content">
+              <div class="rating-title">
+                <p>قيم محادثتك</p>
+              </div>
+              <div class="rating-emoji-container">
+                <img src="${emoji1Path}" alt="Rating 1" class="rating-emoji" data-rating="1" />
+                <img src="${emoji2Path}" alt="Rating 2" class="rating-emoji" data-rating="2" />
+                <img src="${emoji3Path}" alt="Rating 3" class="rating-emoji" data-rating="3" />
+                <img src="${emoji4Path}" alt="Rating 4" class="rating-emoji" data-rating="4" />
+                <img src="${emoji5Path}" alt="Rating 5" class="rating-emoji" data-rating="5" />
+              </div>
+            </div>
+          `;
+          ratingMessages.appendChild(mobileRatingContainer);
+          
+          // Scroll to bottom of rating messages
+          setTimeout(() => {
+            ratingMessages.scrollTop = ratingMessages.scrollHeight;
+          }, 100);
+        }
+        
+        // Hide message detail container
+        if (mainMessageDetailContainer) {
+          mainMessageDetailContainer.style.display = "none";
+        }
+        
+        // Show rating container
+        if (mainRatingContainer) {
+          mainRatingContainer.style.display = "flex";
+        }
+        
+        // Add detail-active class on footer (tabs should be hidden in rating view)
+        if (fugahFooter) {
+          fugahFooter.classList.add("detail-active");
+        }
+        
+        // Setup emoji hover and click functionality
+        setupRatingEmojis();
+      }
+
+      // Add click handler to message detail back button (X button)
+      // Flow: Chat page → Confirm → Rating screen
       if (messageDetailBackBtn) {
         messageDetailBackBtn.addEventListener("click", (e) => {
           e.stopPropagation();
-          goBackToMessageList();
+          
+          // Show custom confirmation message
+          showCustomConfirmation("هل أنت متأكد من إغلاق الدردشة؟", () => {
+            // Show rating screen after confirmation
+            showRatingScreen();
+          });
+        });
+        
+        // Add touch event listener for mobile devices
+        messageDetailBackBtn.addEventListener("touchstart", (e) => {
+          e.stopPropagation();
+          
+          // Show custom confirmation message
+          showCustomConfirmation("هل أنت متأكد من إغلاق الدردشة؟", () => {
+            // Show rating screen after confirmation
+            showRatingScreen();
+          });
         });
       }
 
-      // Add click handler to rating screen back button
+      // Add click handler to rating screen back button (X button)
+      // Flow: X again → Close page (no confirmation)
       if (ratingBackBtn) {
         ratingBackBtn.addEventListener("click", (e) => {
           e.stopPropagation();
           
-          // Reset emoji selection when leaving rating screen
-          resetRatingEmojis();
+          // Reset to home screen before closing
+          if (mainHomeContainer) mainHomeContainer.style.display = "flex";
+          if (mainMessageContainer) mainMessageContainer.style.display = "none";
+          if (mainMessageDetailContainer) mainMessageDetailContainer.style.display = "none";
+          if (mainRatingContainer) mainRatingContainer.style.display = "none";
+          if (fugahFooter) fugahFooter.classList.remove("detail-active");
           
-          // Hide rating container
-          if (mainRatingContainer) {
-            mainRatingContainer.style.display = "none";
-          }
+          // Reset footer tabs to home
+          switchTab("home");
           
-          // Show message detail container
-          if (mainMessageDetailContainer) {
-            mainMessageDetailContainer.style.display = "flex";
-          }
+          // Close chat
+          toggleChat();
+        });
+        
+        // Add touch event listener for mobile devices
+        ratingBackBtn.addEventListener("touchstart", (e) => {
+          e.stopPropagation();
           
-          // Keep detail-active class on footer (tabs should be hidden)
-          if (fugahFooter) {
-            fugahFooter.classList.add("detail-active");
-          }
+          // Reset to home screen before closing
+          if (mainHomeContainer) mainHomeContainer.style.display = "flex";
+          if (mainMessageContainer) mainMessageContainer.style.display = "none";
+          if (mainMessageDetailContainer) mainMessageDetailContainer.style.display = "none";
+          if (mainRatingContainer) mainRatingContainer.style.display = "none";
+          if (fugahFooter) fugahFooter.classList.remove("detail-active");
+          
+          // Reset footer tabs to home
+          switchTab("home");
+          
+          // Close chat
+          toggleChat();
         });
       }
 
@@ -2219,6 +2308,7 @@
       }
 
       // Handle dropdown menu item actions (close chat, create ticket)
+      // Flow: Three dots → Close chat → Confirm → Rating screen (same as X button)
       if (closeChatDetailMenuItem) {
         closeChatDetailMenuItem.addEventListener("click", (e) => {
           e.stopPropagation();
@@ -2226,18 +2316,20 @@
           
           // Show custom confirmation message before closing
           showCustomConfirmation("هل أنت متأكد من إغلاق الدردشة؟", () => {
-            // Reset to home screen before closing
-            if (mainHomeContainer) mainHomeContainer.style.display = "flex";
-            if (mainMessageContainer) mainMessageContainer.style.display = "none";
-            if (mainMessageDetailContainer) mainMessageDetailContainer.style.display = "none";
-            if (mainRatingContainer) mainRatingContainer.style.display = "none";
-            if (fugahFooter) fugahFooter.classList.remove("detail-active");
-            
-            // Reset footer tabs to home
-            switchTab("home");
-            
-            // Close chat
-            toggleChat();
+            // Show rating screen after confirmation (same as X button)
+            showRatingScreen();
+          });
+        });
+        
+        // Add touch event listener for mobile devices
+        closeChatDetailMenuItem.addEventListener("touchstart", (e) => {
+          e.stopPropagation();
+          fugahMessageDetailDropdown.style.display = "none";
+          
+          // Show custom confirmation message before closing
+          showCustomConfirmation("هل أنت متأكد من إغلاق الدردشة؟", () => {
+            // Show rating screen after confirmation (same as X button)
+            showRatingScreen();
           });
         });
       }
@@ -2249,64 +2341,20 @@
           
           // Show custom confirmation message before creating ticket
           showCustomConfirmation("هل أنت متأكد من رفع تذكرة؟", () => {
+            // Show rating screen after confirmation
+            showRatingScreen();
+          });
+        });
+        
+        // Add touch event listener for mobile devices
+        createTicketDetailMenuItem.addEventListener("touchstart", (e) => {
+          e.stopPropagation();
+          fugahMessageDetailDropdown.style.display = "none";
           
-          // Copy messages from message detail to rating screen
-          const ratingMessages = shadow.querySelector("#rating-messages");
-          if (messageDetailMessages && ratingMessages) {
-            // Clone all messages from message detail
-            ratingMessages.innerHTML = messageDetailMessages.innerHTML;
-            
-            // Always append mobile rating container after copying messages
-            // (since innerHTML overwrites everything, we need to add it back)
-            const mobileRatingContainer = document.createElement("div");
-            mobileRatingContainer.className = "chat-message chat-message-rating";
-            
-            // Get asset paths
-            const emoji1Path = getAssetPath('emoji-1.png');
-            const emoji2Path = getAssetPath('emoji-2.png');
-            const emoji3Path = getAssetPath('emoji-3.png');
-            const emoji4Path = getAssetPath('emoji-4.png');
-            const emoji5Path = getAssetPath('emoji-5.png');
-            
-            mobileRatingContainer.innerHTML = `
-              <div class="chat-message-content rating-message-content">
-                <div class="rating-title">
-                  <p>قيم محادثتك</p>
-                </div>
-                <div class="rating-emoji-container">
-                  <img src="${emoji1Path}" alt="Rating 1" class="rating-emoji" data-rating="1" />
-                  <img src="${emoji2Path}" alt="Rating 2" class="rating-emoji" data-rating="2" />
-                  <img src="${emoji3Path}" alt="Rating 3" class="rating-emoji" data-rating="3" />
-                  <img src="${emoji4Path}" alt="Rating 4" class="rating-emoji" data-rating="4" />
-                  <img src="${emoji5Path}" alt="Rating 5" class="rating-emoji" data-rating="5" />
-                </div>
-              </div>
-            `;
-            ratingMessages.appendChild(mobileRatingContainer);
-            
-            // Scroll to bottom of rating messages
-            setTimeout(() => {
-              ratingMessages.scrollTop = ratingMessages.scrollHeight;
-            }, 100);
-          }
-          
-          // Hide message detail container
-          if (mainMessageDetailContainer) {
-            mainMessageDetailContainer.style.display = "none";
-          }
-          
-          // Show rating container
-          if (mainRatingContainer) {
-            mainRatingContainer.style.display = "flex";
-          }
-          
-          // Add detail-active class on footer (tabs should be hidden in rating view)
-          if (fugahFooter) {
-            fugahFooter.classList.add("detail-active");
-          }
-          
-          // Setup emoji hover and click functionality
-          setupRatingEmojis();
+          // Show custom confirmation message before creating ticket
+          showCustomConfirmation("هل أنت متأكد من رفع تذكرة؟", () => {
+            // Show rating screen after confirmation
+            showRatingScreen();
           });
         });
       }

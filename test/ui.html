@@ -132,8 +132,11 @@ fetch("https://n8n.srv1196634.hstgr.cloud/webhook-test/user", {
            ======================================== -->
       <!-- Message list showing conversation history -->
       <div class="main-message-container" style="display: none;">
-        <!-- Header with title -->
+        <!-- Header with close button and title (same id and class as home – reuses existing CSS) -->
         <div class="flex-1">
+          <button id="close-btn" class="close-button">
+            <img src="../assets/white-exit-button.png" alt="Close" />
+          </button>
           <p>تاريخ الدردشة</p>
         </div>
         

@@ -236,6 +236,71 @@
               // When keyboard opens, offsetTop becomes negative, positioning chat window correctly
               chatWindow.style.setProperty("top", `${offsetTop}px`, "important");
               
+              // Fix message detail container to prevent overlap and ensure input stays above keyboard
+              // ONLY when message detail screen is actually visible
+              const mainMessageDetailContainer = shadow.querySelector(".main-message-detail-container");
+              const mainHomeContainer = shadow.querySelector(".main-home-container");
+              const mainMessageContainer = shadow.querySelector(".main-message-container");
+              
+              // Check if message detail screen is visible (not home or message list)
+              const isMessageDetailVisible = mainMessageDetailContainer && 
+                mainMessageDetailContainer.style.display !== "none" &&
+                (!mainHomeContainer || mainHomeContainer.style.display === "none") &&
+                (!mainMessageContainer || mainMessageContainer.style.display === "none");
+              
+              if (isMessageDetailVisible) {
+                const messageDetailChat = shadow.querySelector(".message-detail-chat");
+                const messageDetailMessages = shadow.querySelector("#message-detail-messages");
+                const messageDetailInputContainer = shadow.querySelector(".message-detail-input-container");
+                
+                // Ensure container uses full available height
+                mainMessageDetailContainer.style.setProperty("height", "100%", "important");
+                mainMessageDetailContainer.style.setProperty("max-height", "100%", "important");
+                mainMessageDetailContainer.style.setProperty("overflow", "hidden", "important");
+                
+                // Ensure chat wrapper uses flex properly
+                if (messageDetailChat) {
+                  messageDetailChat.style.setProperty("height", "100%", "important");
+                  messageDetailChat.style.setProperty("max-height", "100%", "important");
+                  messageDetailChat.style.setProperty("overflow", "hidden", "important");
+                  messageDetailChat.style.setProperty("display", "flex", "important");
+                  messageDetailChat.style.setProperty("flex-direction", "column", "important");
+                }
+                
+                // Ensure messages container doesn't overlap input
+                if (messageDetailMessages) {
+                  messageDetailMessages.style.setProperty("flex", "1", "important");
+                  messageDetailMessages.style.setProperty("min-height", "0", "important");
+                  messageDetailMessages.style.setProperty("overflow-y", "auto", "important");
+                  messageDetailMessages.style.setProperty("overflow-x", "hidden", "important");
+                }
+                
+                // Ensure input container stays visible above keyboard
+                if (messageDetailInputContainer) {
+                  messageDetailInputContainer.style.setProperty("position", "relative", "important");
+                  messageDetailInputContainer.style.setProperty("flex-shrink", "0", "important");
+                  messageDetailInputContainer.style.setProperty("z-index", "10", "important");
+                  messageDetailInputContainer.style.setProperty("background-color", "white", "important");
+                }
+                
+                // Scroll messages to bottom when keyboard opens to show input
+                setTimeout(() => {
+                  if (messageDetailMessages) {
+                    const messageDetailInput = shadow.querySelector("#message-detail-input");
+                    if (messageDetailInput && (document.activeElement === messageDetailInput || messageDetailInput.matches(':focus'))) {
+                      messageDetailMessages.scrollTop = messageDetailMessages.scrollHeight;
+                    }
+                  }
+                }, 200);
+              } else {
+                // Reset styles for other screens to prevent overlap issues
+                if (mainMessageDetailContainer) {
+                  mainMessageDetailContainer.style.removeProperty("height");
+                  mainMessageDetailContainer.style.removeProperty("max-height");
+                  mainMessageDetailContainer.style.removeProperty("overflow");
+                }
+              }
+              
               console.log('Updated mobile height to:', dynamicHeight, 'offsetTop:', offsetTop);
             }
           };
@@ -1714,6 +1779,64 @@
           toggleMessageDetailSendButtonState();
           autoResizeTextarea();
         });
+
+        // Handle keyboard opening on mobile - ensure input stays visible
+        if (messageDetailInput) {
+          const messageDetailMessages = shadow.querySelector("#message-detail-messages");
+          const messageDetailInputContainer = shadow.querySelector(".message-detail-input-container");
+          
+          // Function to scroll input into view
+          const ensureInputVisible = () => {
+            if (!checkIsMobile()) return;
+            
+            // Multiple attempts to handle keyboard animation
+            const scrollAttempts = [100, 300, 500];
+            scrollAttempts.forEach((delay, index) => {
+              setTimeout(() => {
+                if (messageDetailMessages) {
+                  // Scroll messages to bottom
+                  messageDetailMessages.scrollTop = messageDetailMessages.scrollHeight;
+                }
+                
+                // Try to scroll input container into view
+                if (messageDetailInputContainer && index === scrollAttempts.length - 1) {
+                  try {
+                    messageDetailInputContainer.scrollIntoView({ 
+                      behavior: 'smooth', 
+                      block: 'end',
+                      inline: 'nearest'
+                    });
+                  } catch (e) {
+                    // Fallback: just ensure messages are scrolled
+                    if (messageDetailMessages) {
+                      messageDetailMessages.scrollTop = messageDetailMessages.scrollHeight;
+                    }
+                  }
+                }
+              }, delay);
+            });
+          };
+          
+          // When input is focused (keyboard opens) - only on mobile
+          messageDetailInput.addEventListener("focus", () => {
+            if (checkIsMobile()) {
+              ensureInputVisible();
+            }
+          });
+          
+          // Also handle click/touch events - only on mobile
+          messageDetailInput.addEventListener("click", () => {
+            if (checkIsMobile()) {
+              setTimeout(ensureInputVisible, 50);
+            }
+          });
+          
+          messageDetailInput.addEventListener("touchend", () => {
+            if (checkIsMobile()) {
+              setTimeout(ensureInputVisible, 50);
+            }
+          });
+        }
 
         // Initialize textarea size
         if (messageDetailInput) {

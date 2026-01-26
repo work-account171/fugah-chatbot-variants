@@ -701,6 +701,12 @@
           e.stopPropagation();
           toggleChat();
         });
+        // Add touch event listeners for mobile devices
+        closeBtn.addEventListener("touchstart", (e) => {
+          console.log("Close button touched (mobile)");
+          e.stopPropagation();
+          toggleChat();
+        });
         console.log("Close button event listener added");
       } else {
         console.error("Close button not found in shadow DOM");
@@ -984,6 +990,25 @@
             }
           }
         });
+
+        // Add touch event listeners for mobile devices
+        // Touch start - hide placeholder when user touches input field
+        phoneInput.addEventListener("touchstart", (e) => {
+          // Hide placeholder when touched (mobile)
+          if (customPlaceholder) {
+            customPlaceholder.style.display = "none";
+          }
+          // Focus the input to show keyboard
+          phoneInput.focus();
+        });
+
+        // Touch end - validate when user finishes touching (mobile)
+        phoneInput.addEventListener("touchend", (e) => {
+          // Validate phone number after touch interaction
+          validatePhoneNumber();
+          // Show placeholder if input is empty
+          updatePlaceholderVisibility();
+        });
       }
 
 
@@ -998,6 +1023,176 @@
       // Handle main send button click - switches to message tab only if phone number is valid
       if (sendMessageBtn) {
         sendMessageBtn.addEventListener("click", () => {
+          // Validate phone number before switching
+          if (phoneInput) {
+            const phoneNumber = phoneInput.value.trim().replace(/\D/g, "");
+            
+            // Check if phone number exists and is valid
+            if (!phoneNumber) {
+              // No phone number entered, show specific error message
+              phoneInput.classList.remove("valid");
+              phoneInput.classList.add("invalid");
+              if (customPlaceholder) customPlaceholder.classList.add("invalid");
+              if (phoneValidationError) {
+                phoneValidationError.textContent = "الرجاء إدخال رقم الهاتف";
+                phoneValidationError.style.display = "block";
+              }
+              return;
+            }
+            
+            // Validate phone number using the same auto-detection logic
+            // Auto-detect country code from input
+            let detectedCountry = null;
+            const sortedCodes = [...countryCodes].sort((a, b) => b.code.length - a.code.length);
+            
+            for (const country of sortedCodes) {
+              if (phoneNumber.startsWith(country.code)) {
+                detectedCountry = country;
+                break;
+              }
+            }
+            
+            // If no country code detected, default to Saudi Arabia (966)
+            if (!detectedCountry) {
+              detectedCountry = countryCodes.find(c => c.code === "966") || countryCodes[0];
+            }
+            
+            // Extract phone number without country code for validation
+            let phoneWithoutCode = phoneNumber;
+            if (phoneNumber.startsWith(detectedCountry.code)) {
+              phoneWithoutCode = phoneNumber.substring(detectedCountry.code.length);
+            }
+            
+            // Check if phone number is valid according to detected country
+            const isValidLength = phoneWithoutCode.length >= detectedCountry.minLength && 
+                                 phoneWithoutCode.length <= detectedCountry.maxLength;
+            const isValidPattern = !detectedCountry.pattern || detectedCountry.pattern.test(phoneWithoutCode);
+            const isNotInvalid = !phoneInput.classList.contains("invalid");
+            
+            if (isValidLength && isValidPattern && isNotInvalid) {
+              // Phone number is valid, open chat detail directly (individual chat screen)
+              // Clear phone input when leaving home screen
+              if (phoneInput) {
+                phoneInput.value = "";
+                if (customPlaceholder) {
+                  customPlaceholder.classList.remove("invalid");
+                  customPlaceholder.style.display = "flex";
+                }
+                if (phoneValidationError) {
+                  phoneValidationError.style.display = "none";
+                }
+                phoneInput.classList.remove("valid", "invalid");
+              }
+              
+              // Hide home container
+              if (mainHomeContainer) mainHomeContainer.style.display = "none";
+              // Hide message list container
+              if (mainMessageContainer) mainMessageContainer.style.display = "none";
+              // Show message detail container (chat screen)
+              if (mainMessageDetailContainer) mainMessageDetailContainer.style.display = "flex";
+              // Hide rating container
+              if (mainRatingContainer) mainRatingContainer.style.display = "none";
+              // Add detail-active class on footer (tabs should be hidden in detail view)
+              if (fugahFooter) fugahFooter.classList.add("detail-active");
+              
+              // Update footer tab images without switching to message list
+              footerTabItems.forEach(item => {
+                const tabType = item.getAttribute("data-tab");
+                const img = item.querySelector("img");
+                const currentTheme = chatWindow.classList.toString().match(/theme-(\w+)/);
+                const themeName = currentTheme ? currentTheme[1] : 'default';
+                
+                if (tabType === "message") {
+                  item.classList.add("active");
+                  if (themeName === 'black') {
+                    img.src = getAssetPath("active-message-footer-black.png");
+                  } else {
+                    img.src = getAssetPath("active-message-footer.png");
+                  }
+                  img.alt = "message active";
+                } else if (tabType === "home") {
+                  item.classList.remove("active");
+                  if (themeName === 'black') {
+                    img.src = getAssetPath("new-img.png");
+                  } else {
+                    img.src = getAssetPath("inactive-home-footer.png.png");
+                  }
+                  img.alt = "home inactive";
+                }
+              });
+              
+              // Scroll to bottom of messages
+              if (messageDetailMessages) {
+                setTimeout(() => {
+                  messageDetailMessages.scrollTop = messageDetailMessages.scrollHeight;
+                }, 100);
+              }
+            } else {
+              // Phone number is invalid format, trigger validation to show error
+              if (typeof validatePhoneNumber === 'function') {
+                validatePhoneNumber();
+              } else {
+                // If validatePhoneNumber is not accessible, manually validate
+                phoneInput.classList.remove("valid");
+                phoneInput.classList.add("invalid");
+                if (customPlaceholder) customPlaceholder.classList.add("invalid");
+                if (phoneValidationError) {
+                  phoneValidationError.textContent = "الرجاء إدخال رقم صحيح";
+                  phoneValidationError.style.display = "block";
+                }
+              }
+            }
+          } else {
+            // No phone input, open chat detail directly (fallback)
+            // Hide home container
+            if (mainHomeContainer) mainHomeContainer.style.display = "none";
+            // Hide message list container
+            if (mainMessageContainer) mainMessageContainer.style.display = "none";
+            // Show message detail container (chat screen)
+            if (mainMessageDetailContainer) mainMessageDetailContainer.style.display = "flex";
+            // Hide rating container
+            if (mainRatingContainer) mainRatingContainer.style.display = "none";
+            // Add detail-active class on footer (tabs should be hidden in detail view)
+            if (fugahFooter) fugahFooter.classList.add("detail-active");
+            
+            // Update footer tab images without switching to message list
+            footerTabItems.forEach(item => {
+              const tabType = item.getAttribute("data-tab");
+              const img = item.querySelector("img");
+              const currentTheme = chatWindow.classList.toString().match(/theme-(\w+)/);
+              const themeName = currentTheme ? currentTheme[1] : 'default';
+              
+              if (tabType === "message") {
+                item.classList.add("active");
+                if (themeName === 'black') {
+                  img.src = getAssetPath("active-message-footer-black.png");
+                } else {
+                  img.src = getAssetPath("active-message-footer.png");
+                }
+                img.alt = "message active";
+              } else if (tabType === "home") {
+                item.classList.remove("active");
+                if (themeName === 'black') {
+                  img.src = getAssetPath("new-img.png");
+                } else {
+                  img.src = getAssetPath("inactive-home-footer.png.png");
+                }
+                img.alt = "home inactive";
+              }
+            });
+            
+            // Scroll to bottom of messages
+            if (messageDetailMessages) {
+              setTimeout(() => {
+                messageDetailMessages.scrollTop = messageDetailMessages.scrollHeight;
+              }, 100);
+            }
+          }
+        });
+        
+        // Add touch event listener for mobile devices
+        sendMessageBtn.addEventListener("touchstart", (e) => {
+          e.preventDefault(); // Prevent double-firing with click event
           // Validate phone number before switching
           if (phoneInput) {
             const phoneNumber = phoneInput.value.trim().replace(/\D/g, "");

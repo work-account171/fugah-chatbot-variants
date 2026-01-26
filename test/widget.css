@@ -1572,6 +1572,19 @@ border-radius: 16px;
   width: 100%;
 }
 
+/* Mobile: Prevent white space above input container when keyboard appears */
+@media screen and (max-width: 767px) {
+  .message-detail-chat {
+    overflow: hidden !important;
+    position: relative !important;
+  }
+  
+  .message-detail-messages {
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+  }
+}
+
 .message-detail-messages {
   flex: 1;
   min-height: 0;
@@ -1717,6 +1730,14 @@ border-radius: 16px;
   position: sticky;
   bottom: 0;
   z-index: 5;
+}
+
+/* Mobile: Remove sticky positioning to prevent white space above input when keyboard appears */
+@media screen and (max-width: 767px) {
+  .message-detail-input-container {
+    position: relative !important;
+    bottom: auto !important;
+  }
 }
 
 .message-detail-input-wrapper {

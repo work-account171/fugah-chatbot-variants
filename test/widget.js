@@ -149,7 +149,7 @@
       if (backArrow) {
         backArrow.src = getAssetPath("right-arrow.png");
       }
-      // messageListArrows will be set correctly by changeTheme() function
+      // messageListArrows will be set correctly by changeTheme() 
 
 
       // ========================================

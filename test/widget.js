@@ -2219,34 +2219,58 @@
       // ========================================
       // DROPDOWN MENU FUNCTIONALITY
       // ========================================
-      // Handle message detail dropdown menu toggle and outside click closing
+      // Guard so "close when clicking outside" doesn't run in same tap on mobile
+      let lastDropdownOpenAt = 0;
+      const DROPDOWN_OPEN_GUARD_MS = 400;
+
+      function toggleMessageDetailDropdown() {
+        if (!fugahMessageDetailDropdown) return;
+        const isVisible = fugahMessageDetailDropdown.style.display === "block";
+        fugahMessageDetailDropdown.style.display = isVisible ? "none" : "block";
+        if (!isVisible) lastDropdownOpenAt = Date.now();
+      }
+      function toggleRatingDropdown() {
+        if (!fugahRatingDropdown) return;
+        const isVisible = fugahRatingDropdown.style.display === "block";
+        fugahRatingDropdown.style.display = isVisible ? "none" : "block";
+        if (!isVisible) lastDropdownOpenAt = Date.now();
+      }
+
+      // Handle message detail dropdown menu toggle (click + touch for mobile)
       if (fugahMessageDetailDropdownIcon) {
         fugahMessageDetailDropdownIcon.addEventListener("click", (e) => {
           e.stopPropagation();
-          const isVisible = fugahMessageDetailDropdown.style.display === "block";
-          fugahMessageDetailDropdown.style.display = isVisible ? "none" : "block";
+          toggleMessageDetailDropdown();
         });
+        fugahMessageDetailDropdownIcon.addEventListener("touchstart", (e) => {
+          e.stopPropagation();
+          e.preventDefault(); // prevent synthetic click that can trigger outside-close on same tap
+          toggleMessageDetailDropdown();
+        }, { passive: false });
       }
 
-      // Handle rating dropdown menu toggle
+      // Handle rating dropdown menu toggle (click + touch for mobile)
       if (fugahRatingDropdownIcon) {
         fugahRatingDropdownIcon.addEventListener("click", (e) => {
           e.stopPropagation();
-          const isVisible = fugahRatingDropdown.style.display === "block";
-          fugahRatingDropdown.style.display = isVisible ? "none" : "block";
+          toggleRatingDropdown();
         });
+        fugahRatingDropdownIcon.addEventListener("touchstart", (e) => {
+          e.stopPropagation();
+          e.preventDefault(); // prevent synthetic click that can trigger outside-close on same tap
+          toggleRatingDropdown();
+        }, { passive: false });
       }
 
-      // Close dropdown when clicking outside
+      // Close dropdown when clicking outside (ignore within guard window to fix mobile “open then disappear”)
       shadow.addEventListener("click", (e) => {
-        // Close message detail dropdown
+        if (Date.now() - lastDropdownOpenAt < DROPDOWN_OPEN_GUARD_MS) return;
+
         if (fugahMessageDetailDropdown && fugahMessageDetailDropdownIcon) {
           if (!fugahMessageDetailDropdown.contains(e.target) && !fugahMessageDetailDropdownIcon.contains(e.target)) {
             fugahMessageDetailDropdown.style.display = "none";
           }
         }
-        
-        // Close rating dropdown
         if (fugahRatingDropdown && fugahRatingDropdownIcon) {
           if (!fugahRatingDropdown.contains(e.target) && !fugahRatingDropdownIcon.contains(e.target)) {
             fugahRatingDropdown.style.display = "none";

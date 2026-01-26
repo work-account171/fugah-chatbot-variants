@@ -188,26 +188,19 @@
           return isMobile;
         };
 
-        // Function to get dynamic viewport height that accounts for browser bars and keyboard
+        // Function to get dynamic viewport height that accounts for browser bars
         const getDynamicViewportHeight = () => {
-          // Use visualViewport API if available (better for keyboard handling)
+          // Use window.innerHeight which accounts for browser UI bars
+          // This is more reliable than 100vh on mobile browsers
+          const height = window.innerHeight;
+          
+          // For iOS Safari, also check visualViewport if available
           if (window.visualViewport && window.visualViewport.height) {
-            // visualViewport.height accounts for keyboard, so use it directly
-            return window.visualViewport.height;
+            // Use the larger value to ensure full coverage
+            return Math.max(height, window.visualViewport.height);
           }
           
-          // Fallback to window.innerHeight which accounts for browser UI bars
-          // This is more reliable than 100vh on mobile browsers
-          return window.innerHeight;
-        };
-
-        // Function to get viewport offset top (for keyboard positioning)
-        const getViewportOffsetTop = () => {
-          // visualViewport.offsetTop indicates how much content is pushed up by keyboard
-          if (window.visualViewport && typeof window.visualViewport.offsetTop === 'number') {
-            return window.visualViewport.offsetTop;
-          }
-          return 0;
+          return height;
         };
 
         // Function to update chat window height dynamically (mobile only)
@@ -223,20 +216,11 @@
             }
           }
 
-          // Create new handler
           mobileHeightUpdateHandler = () => {
             if (isOpen && checkIsMobile()) {
               const dynamicHeight = getDynamicViewportHeight();
-              const offsetTop = getViewportOffsetTop();
-              
-              // Set height to visible viewport height (accounts for keyboard)
               chatWindow.style.setProperty("height", `${dynamicHeight}px`, "important");
-              
-              // Adjust top position to keep chat window aligned with visible area above keyboard
-              // When keyboard opens, offsetTop becomes negative, positioning chat window correctly
-              chatWindow.style.setProperty("top", `${offsetTop}px`, "important");
-              
-              console.log('Updated mobile height to:', dynamicHeight, 'offsetTop:', offsetTop);
+              console.log('Updated mobile height to:', dynamicHeight);
             }
           };
 
@@ -344,17 +328,14 @@
             // Make chat-window fullscreen with no border-radius and full height (mobile only)
             console.log('Setting fullscreen styles');
             
-            // Get dynamic viewport height that accounts for browser bars and keyboard
+            // Get dynamic viewport height that accounts for browser bars
             const dynamicHeight = getDynamicViewportHeight();
-            const offsetTop = getViewportOffsetTop();
             
             chatWindow.style.setProperty("position", "fixed", "important");
-            // Use offsetTop to position correctly when keyboard opens (0 when closed, negative when open)
-            chatWindow.style.setProperty("top", `${offsetTop}px`, "important");
+            chatWindow.style.setProperty("top", "0", "important");
             chatWindow.style.setProperty("left", "0", "important");
             chatWindow.style.setProperty("right", "0", "important");
-            // Remove bottom: 0 to allow proper height calculation with keyboard
-            chatWindow.style.setProperty("bottom", "auto", "important");
+            chatWindow.style.setProperty("bottom", "0", "important");
             chatWindow.style.setProperty("width", "100vw", "important");
             chatWindow.style.setProperty("height", `${dynamicHeight}px`, "important");
             chatWindow.style.setProperty("max-width", "none", "important");
@@ -366,14 +347,12 @@
             // Setup dynamic height updates for browser bar changes
             setupMobileHeightUpdates();
             
-            // Update height and position again after a short delay to ensure accuracy
-            // This handles cases where browser bars or keyboard haven't fully adjusted yet
+            // Update height again after a short delay to ensure accuracy
+            // This handles cases where browser bars haven't fully adjusted yet
             setTimeout(() => {
               if (isOpen && checkIsMobile()) {
                 const dynamicHeight = getDynamicViewportHeight();
-                const offsetTop = getViewportOffsetTop();
                 chatWindow.style.setProperty("height", `${dynamicHeight}px`, "important");
-                chatWindow.style.setProperty("top", `${offsetTop}px`, "important");
               }
             }, 100);
             
@@ -1715,74 +1694,6 @@
           autoResizeTextarea();
         });
 
-        // Handle keyboard opening on mobile - ensure input stays visible above keyboard
-        if (messageDetailInput) {
-          const messageDetailMessages = shadow.querySelector("#message-detail-messages");
-          const messageDetailInputContainer = shadow.querySelector(".message-detail-input-container");
-          let isUserTyping = false;
-          let scrollTimeout;
-          
-          // Track when user is typing to prevent unwanted scrolling
-          messageDetailInput.addEventListener("input", () => {
-            isUserTyping = true;
-            clearTimeout(scrollTimeout);
-            // Reset flag after user stops typing
-            scrollTimeout = setTimeout(() => {
-              isUserTyping = false;
-            }, 1000);
-          });
-          
-          // Function to scroll input into view when keyboard opens (only once, not while typing)
-          const scrollInputIntoView = () => {
-            if (!checkIsMobile() || isUserTyping) return;
-            
-            // Wait for keyboard to open, then scroll
-            setTimeout(() => {
-              if (messageDetailInputContainer && !isUserTyping) {
-                // Scroll the input container into view
-                messageDetailInputContainer.scrollIntoView({ 
-                  behavior: 'smooth', 
-                  block: 'end',
-                  inline: 'nearest'
-                });
-              }
-              
-              // Only scroll messages to bottom if user is not typing
-              if (messageDetailMessages && !isUserTyping) {
-                messageDetailMessages.scrollTop = messageDetailMessages.scrollHeight;
-              }
-            }, 300);
-          };
-          
-          // When input is focused (keyboard opens) - only scroll once
-          messageDetailInput.addEventListener("focus", () => {
-            isUserTyping = false; // Reset flag on focus
-            scrollInputIntoView();
-          });
-          
-          // Handle when visual viewport resizes (keyboard animation) - but not while typing
-          if (window.visualViewport) {
-            let resizeTimeout;
-            window.visualViewport.addEventListener("resize", () => {
-              if (checkIsMobile() && document.activeElement === messageDetailInput && !isUserTyping) {
-                clearTimeout(resizeTimeout);
-                resizeTimeout = setTimeout(() => {
-                  if (messageDetailInputContainer && !isUserTyping) {
-                    messageDetailInputContainer.scrollIntoView({ 
-                      behavior: 'smooth', 
-                      block: 'end',
-                      inline: 'nearest'
-                    });
-                  }
-                  // Don't scroll messages while user is typing
-                  if (messageDetailMessages && !isUserTyping) {
-                    messageDetailMessages.scrollTop = messageDetailMessages.scrollHeight;
-                  }
-                }, 100);
-              }
-            });
-          }
-        }
 
         // Initialize textarea size
         if (messageDetailInput) {

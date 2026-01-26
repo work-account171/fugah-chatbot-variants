@@ -439,8 +439,10 @@ border-radius: 16px;
 /* When message detail container is active, remove margin and hide tabs */
 #fugah-footer.detail-active {
   margin-top: 0;
-  /* Hide footer completely on message detail screen to prevent overlap */
-  display: none !important;
+}
+
+#fugah-footer.detail-active #fugah-footer-tab {
+  display: none;
 }
 
 #fugah-footer.detail-active #fugah-footer-tab {
@@ -1568,22 +1570,19 @@ border-radius: 16px;
   background-color: #ffffff;
   overflow: hidden;
   width: 100%;
-  position: relative;
 }
 
 .message-detail-messages {
   flex: 1;
   min-height: 0;
+  max-height: 100%;
   overflow-y: auto;
   overflow-x: hidden;
   padding: 14px;
-  padding-bottom: 14px;
   display: flex;
   flex-direction: column;
   gap: 24px;
   box-sizing: border-box;
-  /* Ensure messages container doesn't overlap input */
-  margin-bottom: 0;
 }
 
 .message-detail-messages::-webkit-scrollbar {
@@ -1715,103 +1714,9 @@ border-radius: 16px;
   box-sizing: border-box;
   padding: 8px 12px;
   flex-shrink: 0;
-  position: relative;
-  z-index: 10;
-  width: 100%;
-  /* Ensure input container is always on top and doesn't get overlapped */
-  order: 2;
-  /* Create new stacking context to prevent overlap */
-  isolation: isolate;
-}
-
-/* Mobile: Ensure input container stays fixed at bottom and messages don't overlap */
-@media screen and (max-width: 767px) {
-  /* Hide footer completely on message detail screen on mobile */
-  #fugah-footer.detail-active {
-    display: none !important;
-    visibility: hidden !important;
-    opacity: 0 !important;
-    height: 0 !important;
-    padding: 0 !important;
-    margin: 0 !important;
-    overflow: hidden !important;
-    position: absolute !important;
-    z-index: -1 !important;
-  }
-  
-  .message-detail-chat {
-    display: flex !important;
-    flex-direction: column !important;
-    height: 100% !important;
-    max-height: 100% !important;
-    overflow: hidden !important;
-    position: relative !important;
-  }
-  
-  .message-detail-messages {
-    flex: 1 1 auto !important;
-    min-height: 0 !important;
-    max-height: none !important;
-    overflow-y: auto !important;
-    overflow-x: hidden !important;
-    padding-bottom: 14px !important;
-    /* Ensure messages scroll within their container only */
-    contain: layout style paint !important;
-    /* Prevent messages from extending beyond container */
-    position: relative !important;
-    z-index: 1 !important;
-  }
-  
-  /* Ensure main container doesn't create stacking context issues */
-  #fugah-main-container {
-    position: relative !important;
-    z-index: 1 !important;
-  }
-  
-  .main-message-detail-container {
-    position: relative !important;
-    z-index: 2 !important;
-    /* Create stacking context for message detail */
-    isolation: isolate !important;
-  }
-  
-  .message-detail-input-container {
-    position: sticky !important;
-    bottom: 0 !important;
-    flex: 0 0 auto !important;
-    flex-shrink: 0 !important;
-    z-index: 999 !important;
-    background-color: white !important;
-    width: 100% !important;
-    /* Ensure input stays at bottom and is always visible */
-    margin-top: 0 !important;
-    /* Prevent any overlap from footer or other elements */
-    isolation: isolate !important;
-    /* Add shadow to visually separate from content above */
-    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1) !important;
-  }
-  
-  .message-detail-input-wrapper {
-    position: relative !important;
-    z-index: 1000 !important;
-    background-color: white !important;
-    /* Ensure wrapper is always visible and on top */
-    isolation: isolate !important;
-  }
-  
-  /* Ensure footer is completely hidden and doesn't interfere */
-  #fugah-footer.detail-active {
-    display: none !important;
-    visibility: hidden !important;
-    opacity: 0 !important;
-    height: 0 !important;
-    padding: 0 !important;
-    margin: 0 !important;
-    overflow: hidden !important;
-    position: absolute !important;
-    z-index: -999 !important;
-    pointer-events: none !important;
-  }
+  position: sticky;
+  bottom: 0;
+  z-index: 5;
 }
 
 .message-detail-input-wrapper {

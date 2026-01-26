@@ -2079,16 +2079,14 @@
           });
         });
         
-        // Add touch event listener for mobile devices
+        // Add touch event listener for mobile devices (preventDefault stops synthetic click closing modal on Android)
         messageDetailBackBtn.addEventListener("touchstart", (e) => {
           e.stopPropagation();
-          
-          // Show custom confirmation message
+          e.preventDefault();
           showCustomConfirmation("هل أنت متأكد من إغلاق الدردشة؟", () => {
-            // Show rating screen after confirmation
             showRatingScreen();
           });
-        });
+        }, { passive: false });
       }
 
       // Add click handler to rating screen back button (X button)
@@ -2111,10 +2109,10 @@
           toggleChat();
         });
         
-        // Add touch event listener for mobile devices
+        // Add touch event listener for mobile devices (preventDefault avoids double-fire / phantom close on Android)
         ratingBackBtn.addEventListener("touchstart", (e) => {
           e.stopPropagation();
-          
+          e.preventDefault();
           // Reset to home screen before closing
           if (mainHomeContainer) mainHomeContainer.style.display = "flex";
           if (mainMessageContainer) mainMessageContainer.style.display = "none";
@@ -2127,7 +2125,7 @@
           
           // Close chat
           toggleChat();
-        });
+        }, { passive: false });
       }
 
       // Function to reset emoji selection
@@ -2287,6 +2285,10 @@
       // ========================================
       // DROPDOWN MENU ACTIONS FUNCTIONALITY
       // ========================================
+      // Guard so overlay doesn’t close confirmation from same tap on Android
+      let lastConfirmationOpenAt = 0;
+      const CONFIRMATION_OPEN_GUARD_MS = 450;
+
       // Custom confirmation dialog function
       let currentConfirmCallback = null;
       function showCustomConfirmation(message, onConfirm) {
@@ -2294,12 +2296,21 @@
           confirmationDialogMessage.textContent = message;
           customConfirmationDialog.style.display = "flex";
           currentConfirmCallback = onConfirm;
+          lastConfirmationOpenAt = Date.now();
         } else {
           // Fallback to browser confirm
           if (confirm(message)) {
             if (onConfirm) onConfirm();
           }
         }
+      }
+
+      function closeConfirmationIfAllowed() {
+        if (Date.now() - lastConfirmationOpenAt < CONFIRMATION_OPEN_GUARD_MS) return;
+        if (customConfirmationDialog) {
+          customConfirmationDialog.style.display = "none";
+        }
+        currentConfirmCallback = null;
       }
       
       // Handle confirmation dialog buttons
@@ -2324,14 +2335,15 @@
         });
       }
       
-      // Close on overlay click
+      // Close on overlay click/tap (guard so Android same-tap doesn’t close)
       if (customConfirmationDialog) {
         const overlay = customConfirmationDialog.querySelector(".confirmation-dialog-overlay");
         if (overlay) {
-          overlay.addEventListener("click", () => {
-            customConfirmationDialog.style.display = "none";
-            currentConfirmCallback = null;
-          });
+          overlay.addEventListener("click", () => { closeConfirmationIfAllowed(); });
+          overlay.addEventListener("touchstart", (e) => {
+            e.preventDefault();
+            closeConfirmationIfAllowed();
+          }, { passive: false });
         }
       }
 

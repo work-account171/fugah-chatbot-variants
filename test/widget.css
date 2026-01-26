@@ -1577,11 +1577,49 @@ border-radius: 16px;
   .message-detail-chat {
     overflow: hidden !important;
     position: relative !important;
+    background-color: transparent !important; /* Remove white background to prevent white space */
+    display: flex !important;
+    flex-direction: column !important;
+    flex: 1 !important;
+    min-height: 0 !important;
+    gap: 0 !important; /* Remove any gap between children */
   }
   
   .message-detail-messages {
     overflow-y: auto !important;
     overflow-x: hidden !important;
+    flex: 1 !important;
+    min-height: 0 !important;
+    margin-bottom: 0 !important;
+    padding-bottom: 0 !important;
+  }
+  
+  /* Ensure input container sits directly above footer without white space */
+  .message-detail-input-container {
+    margin-bottom: 0 !important;
+    margin-top: 0 !important;
+    padding-bottom: 8px !important; /* Keep minimal padding for touch targets */
+    padding-top: 8px !important;
+    flex-shrink: 0 !important;
+    background-color: transparent !important; /* Make container background transparent to match parent */
+  }
+  
+  /* Make input wrapper background visible instead */
+  .message-detail-input-wrapper {
+    background-color: white !important; /* Keep white background only on the wrapper */
+  }
+  
+  /* Remove any gap between input and footer */
+  .main-message-detail-container {
+    padding-bottom: 0 !important;
+    margin-bottom: 0 !important;
+    gap: 0 !important;
+  }
+  
+  /* Ensure footer connects directly to input container */
+  #fugah-footer.detail-active {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
   }
 }
 

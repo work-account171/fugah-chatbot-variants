@@ -1647,56 +1647,7 @@
         messageDetailSendBtn.addEventListener("click", sendDetailMessage);
       }
 
-      // Handle mobile keyboard viewport changes
-      const handleMobileKeyboard = () => {
-        const isMobile = window.innerWidth <= 767;
-        if (!isMobile) return;
-
-        const messageDetailContainer = shadow.querySelector(".main-message-detail-container");
-        const messageDetailChat = shadow.querySelector(".message-detail-chat");
-        const inputContainer = shadow.querySelector(".message-detail-input-container");
-        
-        if (messageDetailContainer && messageDetailChat && inputContainer) {
-          // Ensure flexbox layout keeps input at bottom
-          messageDetailContainer.style.display = "flex";
-          messageDetailContainer.style.flexDirection = "column";
-          messageDetailContainer.style.height = "100%";
-          
-          messageDetailChat.style.display = "flex";
-          messageDetailChat.style.flexDirection = "column";
-          messageDetailChat.style.flex = "1";
-          messageDetailChat.style.minHeight = "0";
-          
-          inputContainer.style.position = "relative";
-          inputContainer.style.bottom = "auto";
-          inputContainer.style.marginTop = "auto";
-          inputContainer.style.flexShrink = "0";
-        }
-      };
-
-      // Call on input focus
       if (messageDetailInput) {
-        messageDetailInput.addEventListener("focus", () => {
-          handleMobileKeyboard();
-          // Small delay to ensure viewport has adjusted
-          setTimeout(() => {
-            handleMobileKeyboard();
-            // Scroll messages to bottom if needed
-            if (messageDetailMessages) {
-              setTimeout(() => {
-                messageDetailMessages.scrollTop = messageDetailMessages.scrollHeight;
-              }, 300);
-            }
-          }, 100);
-        });
-
-        messageDetailInput.addEventListener("blur", () => {
-          // Reset after keyboard closes
-          setTimeout(() => {
-            handleMobileKeyboard();
-          }, 300);
-        });
-
         messageDetailInput.addEventListener("keydown", (e) => {
           if (e.key === "Enter") {
             if (e.shiftKey) {

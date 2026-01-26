@@ -1710,48 +1710,9 @@ border-radius: 16px;
   box-sizing: border-box;
   padding: 8px 12px;
   flex-shrink: 0;
-  position: relative;
-  z-index: 10;
-}
-
-/* Mobile: Ensure input container stays above keyboard and doesn't get overlapped */
-/* Only apply when message detail container is visible */
-@media screen and (max-width: 767px) {
-  .main-message-detail-container[style*="display: flex"] .message-detail-input-container,
-  .main-message-detail-container[style*="display:block"] .message-detail-input-container {
-    position: relative !important;
-    flex-shrink: 0 !important;
-    z-index: 10 !important;
-    background-color: white !important;
-    width: 100% !important;
-  }
-  
-  .main-message-detail-container[style*="display: flex"] .message-detail-chat,
-  .main-message-detail-container[style*="display:block"] .message-detail-chat {
-    display: flex !important;
-    flex-direction: column !important;
-    height: 100% !important;
-    max-height: 100% !important;
-    overflow: hidden !important;
-  }
-  
-  .main-message-detail-container[style*="display: flex"] .message-detail-messages,
-  .main-message-detail-container[style*="display:block"] .message-detail-messages {
-    flex: 1 !important;
-    min-height: 0 !important;
-    overflow-y: auto !important;
-    overflow-x: hidden !important;
-    -webkit-overflow-scrolling: touch !important;
-    padding-bottom: 0 !important;
-  }
-  
-  .main-message-detail-container[style*="display: flex"],
-  .main-message-detail-container[style*="display:block"] {
-    flex-direction: column !important;
-    height: 100% !important;
-    max-height: 100% !important;
-    overflow: hidden !important;
-  }
+  position: sticky;
+  bottom: 0;
+  z-index: 5;
 }
 
 .message-detail-input-wrapper {

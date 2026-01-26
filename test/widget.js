@@ -142,11 +142,15 @@
             chatIcon.src = getAssetPath("message.png");
           }
 
-      // Fix initial arrow paths
+      // Fix initial arrow paths and chat/rating header exit icons
       const backArrow = shadow.querySelector("#message-detail-back-btn");
+      const ratingBackArrow = shadow.querySelector("#rating-back-btn");
       const messageListArrows = shadow.querySelectorAll(".message-item img");
       if (backArrow) {
-        backArrow.src = getAssetPath("right-arrow.png");
+        backArrow.src = getAssetPath("white-exit-button.png");
+      }
+      if (ratingBackArrow) {
+        ratingBackArrow.src = getAssetPath("white-exit-button.png");
       }
       // messageListArrows will be set correctly by changeTheme() 
 
@@ -2686,23 +2690,23 @@
           // Set message detail back button based on theme
           if (backArrow) {
             if (themeName === 'black') {
-              backArrow.src = getAssetPath("back-tick-black.png");
-              console.log("Set message detail back button to back-tick-black.png for black theme");
+              backArrow.src = getAssetPath("exit-button-for-black.png");
+              console.log("Set message detail back button to exit-button-for-black.png for black theme");
             } else {
-              backArrow.src = getAssetPath("right-arrow.png");
-              console.log("Set message detail back button to right-arrow.png for theme:", themeName);
+              backArrow.src = getAssetPath("white-exit-button.png");
+              console.log("Set message detail back button to white-exit-button.png for theme:", themeName);
             }
           }
           
-          // Set rating screen back button based on theme
+          // Set rating screen back button based on theme (same as chat screen – white-exit / exit-for-black)
           const ratingBackButton = shadow.querySelector("#rating-back-btn");
           if (ratingBackButton) {
             if (themeName === 'black') {
-              ratingBackButton.src = getAssetPath("back-tick-black.png");
-              console.log("Set rating back button to back-tick-black.png for black theme");
+              ratingBackButton.src = getAssetPath("exit-button-for-black.png");
+              console.log("Set rating back button to exit-button-for-black.png for black theme");
             } else {
-              ratingBackButton.src = getAssetPath("right-arrow.png");
-              console.log("Set rating back button to right-arrow.png for theme:", themeName);
+              ratingBackButton.src = getAssetPath("white-exit-button.png");
+              console.log("Set rating back button to white-exit-button.png for theme:", themeName);
             }
           }
           

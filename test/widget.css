@@ -1426,8 +1426,9 @@ border-radius: 16px;
 
 .chat-rating-header img {
   /* width: 15px; */
-  height: 24px;
+  height: 15px;
   object-fit: contain;
+  filter: brightness(0.5);
 }
 
 .chat-rating-header .message-back-icon {

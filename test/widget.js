@@ -1279,6 +1279,31 @@
             messageDetailMessages.scrollTop = messageDetailMessages.scrollHeight;
           }, 100);
         }
+
+        // Ensure proper layout for mobile when opening message detail
+        const isMobile = window.innerWidth <= 767;
+        if (isMobile && mainMessageDetailContainer) {
+          mainMessageDetailContainer.style.display = "flex";
+          mainMessageDetailContainer.style.flexDirection = "column";
+          mainMessageDetailContainer.style.height = "100%";
+          
+          const messageDetailChat = shadow.querySelector(".message-detail-chat");
+          const inputContainer = shadow.querySelector(".message-detail-input-container");
+          
+          if (messageDetailChat) {
+            messageDetailChat.style.display = "flex";
+            messageDetailChat.style.flexDirection = "column";
+            messageDetailChat.style.flex = "1";
+            messageDetailChat.style.minHeight = "0";
+          }
+          
+          if (inputContainer) {
+            inputContainer.style.position = "relative";
+            inputContainer.style.bottom = "auto";
+            inputContainer.style.marginTop = "auto";
+            inputContainer.style.flexShrink = "0";
+          }
+        }
       }
 
 
@@ -1647,7 +1672,130 @@
         messageDetailSendBtn.addEventListener("click", sendDetailMessage);
       }
 
+      // Handle mobile keyboard viewport changes to position input above keyboard
+      let keyboardHandler = null;
+      const handleMobileKeyboard = () => {
+        const isMobile = window.innerWidth <= 767;
+        if (!isMobile) return;
+
+        const messageDetailContainer = shadow.querySelector(".main-message-detail-container");
+        const messageDetailChat = shadow.querySelector(".message-detail-chat");
+        const inputContainer = shadow.querySelector(".message-detail-input-container");
+        const chatWindow = shadow.querySelector("#chat-window");
+        
+        if (messageDetailContainer && messageDetailChat && inputContainer && chatWindow) {
+          // Get the visible viewport height (accounts for keyboard)
+          let visibleHeight = window.innerHeight;
+          if (window.visualViewport && window.visualViewport.height) {
+            visibleHeight = window.visualViewport.height;
+          }
+          
+          // Set container height to visible viewport height (above keyboard)
+          messageDetailContainer.style.display = "flex";
+          messageDetailContainer.style.flexDirection = "column";
+          messageDetailContainer.style.height = `${visibleHeight}px`;
+          messageDetailContainer.style.maxHeight = `${visibleHeight}px`;
+          messageDetailContainer.style.position = "relative";
+          
+          messageDetailChat.style.display = "flex";
+          messageDetailChat.style.flexDirection = "column";
+          messageDetailChat.style.flex = "1";
+          messageDetailChat.style.minHeight = "0";
+          messageDetailChat.style.overflow = "hidden";
+          
+          // Input container stays at bottom (which is just above keyboard)
+          inputContainer.style.position = "relative";
+          inputContainer.style.bottom = "auto";
+          inputContainer.style.marginTop = "auto";
+          inputContainer.style.flexShrink = "0";
+          inputContainer.style.width = "100%";
+        }
+      };
+
+      // Set up visualViewport listener for keyboard changes
+      const setupKeyboardListener = () => {
+        // Remove existing listener if any
+        if (keyboardHandler) {
+          if (window.visualViewport) {
+            window.visualViewport.removeEventListener('resize', keyboardHandler);
+            window.visualViewport.removeEventListener('scroll', keyboardHandler);
+          }
+          window.removeEventListener('resize', keyboardHandler);
+        }
+
+        // Create handler
+        keyboardHandler = () => {
+          const isMobile = window.innerWidth <= 767;
+          const messageDetailInput = shadow.querySelector("#message-detail-input");
+          
+          // Only handle if on mobile and input is focused
+          if (isMobile && messageDetailInput && document.activeElement === messageDetailInput) {
+            handleMobileKeyboard();
+            
+            // Scroll messages to bottom after keyboard adjustment
+            const messageDetailMessages = shadow.querySelector(".message-detail-messages");
+            if (messageDetailMessages) {
+              setTimeout(() => {
+                messageDetailMessages.scrollTop = messageDetailMessages.scrollHeight;
+              }, 100);
+            }
+          }
+        };
+
+        // Add listeners
+        if (window.visualViewport) {
+          window.visualViewport.addEventListener('resize', keyboardHandler, { passive: true });
+          window.visualViewport.addEventListener('scroll', keyboardHandler, { passive: true });
+        }
+        window.addEventListener('resize', keyboardHandler, { passive: true });
+      };
+
+      // Remove keyboard listener
+      const removeKeyboardListener = () => {
+        if (keyboardHandler) {
+          if (window.visualViewport) {
+            window.visualViewport.removeEventListener('resize', keyboardHandler);
+            window.visualViewport.removeEventListener('scroll', keyboardHandler);
+          }
+          window.removeEventListener('resize', keyboardHandler);
+          keyboardHandler = null;
+        }
+      };
+
+      // Set up keyboard listener
+      setupKeyboardListener();
+
+      // Call on input focus - position input above keyboard
       if (messageDetailInput) {
+        messageDetailInput.addEventListener("focus", () => {
+          handleMobileKeyboard();
+          // Small delay to ensure viewport has adjusted to keyboard
+          setTimeout(() => {
+            handleMobileKeyboard();
+            // Scroll messages to bottom if needed
+            if (messageDetailMessages) {
+              setTimeout(() => {
+                messageDetailMessages.scrollTop = messageDetailMessages.scrollHeight;
+              }, 300);
+            }
+          }, 150);
+        });
+
+        messageDetailInput.addEventListener("blur", () => {
+          // Reset after keyboard closes - restore full height
+          setTimeout(() => {
+            const isMobile = window.innerWidth <= 767;
+            if (isMobile) {
+              const messageDetailContainer = shadow.querySelector(".main-message-detail-container");
+              if (messageDetailContainer) {
+                const fullHeight = window.innerHeight;
+                messageDetailContainer.style.height = `${fullHeight}px`;
+                messageDetailContainer.style.maxHeight = `${fullHeight}px`;
+              }
+            }
+          }, 300);
+        });
+
         messageDetailInput.addEventListener("keydown", (e) => {
           if (e.key === "Enter") {
             if (e.shiftKey) {

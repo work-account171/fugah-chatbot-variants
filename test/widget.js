@@ -180,6 +180,67 @@
           console.log('Mobile check - width:', width, 'isMobileWidth:', isMobileWidth, 'isMobileMedia:', isMobileMedia, 'isMobile:', isMobile);
           return isMobile;
         };
+
+        // Function to get dynamic viewport height that accounts for browser bars
+        const getDynamicViewportHeight = () => {
+          // Use window.innerHeight which accounts for browser UI bars
+          // This is more reliable than 100vh on mobile browsers
+          const height = window.innerHeight;
+          
+          // For iOS Safari, also check visualViewport if available
+          if (window.visualViewport && window.visualViewport.height) {
+            // Use the larger value to ensure full coverage
+            return Math.max(height, window.visualViewport.height);
+          }
+          
+          return height;
+        };
+
+        // Function to update chat window height dynamically (mobile only)
+        let mobileHeightUpdateHandler = null;
+        const setupMobileHeightUpdates = () => {
+          // Remove existing handler if any
+          if (mobileHeightUpdateHandler) {
+            window.removeEventListener('resize', mobileHeightUpdateHandler);
+            window.removeEventListener('orientationchange', mobileHeightUpdateHandler);
+            if (window.visualViewport) {
+              window.visualViewport.removeEventListener('resize', mobileHeightUpdateHandler);
+              window.visualViewport.removeEventListener('scroll', mobileHeightUpdateHandler);
+            }
+          }
+
+          // Create new handler
+          mobileHeightUpdateHandler = () => {
+            if (isOpen && checkIsMobile()) {
+              const dynamicHeight = getDynamicViewportHeight();
+              chatWindow.style.setProperty("height", `${dynamicHeight}px`, "important");
+              console.log('Updated mobile height to:', dynamicHeight);
+            }
+          };
+
+          // Add event listeners for viewport changes
+          window.addEventListener('resize', mobileHeightUpdateHandler, { passive: true });
+          window.addEventListener('orientationchange', mobileHeightUpdateHandler, { passive: true });
+          
+          // Use visualViewport API for better mobile browser support
+          if (window.visualViewport) {
+            window.visualViewport.addEventListener('resize', mobileHeightUpdateHandler, { passive: true });
+            window.visualViewport.addEventListener('scroll', mobileHeightUpdateHandler, { passive: true });
+          }
+        };
+
+        // Function to remove mobile height update listeners
+        const removeMobileHeightUpdates = () => {
+          if (mobileHeightUpdateHandler) {
+            window.removeEventListener('resize', mobileHeightUpdateHandler);
+            window.removeEventListener('orientationchange', mobileHeightUpdateHandler);
+            if (window.visualViewport) {
+              window.visualViewport.removeEventListener('resize', mobileHeightUpdateHandler);
+              window.visualViewport.removeEventListener('scroll', mobileHeightUpdateHandler);
+            }
+            mobileHeightUpdateHandler = null;
+          }
+        };
         
         // Clear phone input when closing chat (returning to home screen)
         if (!isOpen && phoneInput) {
@@ -260,18 +321,34 @@
             
             // Make chat-window fullscreen with no border-radius and full height (mobile only)
             console.log('Setting fullscreen styles');
+            
+            // Get dynamic viewport height that accounts for browser bars
+            const dynamicHeight = getDynamicViewportHeight();
+            
             chatWindow.style.setProperty("position", "fixed", "important");
             chatWindow.style.setProperty("top", "0", "important");
             chatWindow.style.setProperty("left", "0", "important");
             chatWindow.style.setProperty("right", "0", "important");
             chatWindow.style.setProperty("bottom", "0", "important");
             chatWindow.style.setProperty("width", "100vw", "important");
-            chatWindow.style.setProperty("height", "100vh", "important");
+            chatWindow.style.setProperty("height", `${dynamicHeight}px`, "important");
             chatWindow.style.setProperty("max-width", "none", "important");
             chatWindow.style.setProperty("max-height", "none", "important");
             chatWindow.style.setProperty("border-radius", "0", "important");
             chatWindow.style.setProperty("padding", "0", "important");
             chatWindow.style.setProperty("margin", "0", "important");
+            
+            // Setup dynamic height updates for browser bar changes
+            setupMobileHeightUpdates();
+            
+            // Update height again after a short delay to ensure accuracy
+            // This handles cases where browser bars haven't fully adjusted yet
+            setTimeout(() => {
+              if (isOpen && checkIsMobile()) {
+                const dynamicHeight = getDynamicViewportHeight();
+                chatWindow.style.setProperty("height", `${dynamicHeight}px`, "important");
+              }
+            }, 100);
             
             // Make chat-container full height (mobile only)
             if (chatContainer) {
@@ -368,6 +445,9 @@
           
           // Only restore styles if they were applied (mobile only)
           if (isMobile) {
+            // Remove mobile height update listeners when chat closes
+            removeMobileHeightUpdates();
+            
             // Restore background-image when chat closes based on current theme (mobile only)
             if (fugahBody) {
               let backgroundImagePath;

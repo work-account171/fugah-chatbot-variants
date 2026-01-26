@@ -1719,14 +1719,26 @@
         if (messageDetailInput) {
           const messageDetailMessages = shadow.querySelector("#message-detail-messages");
           const messageDetailInputContainer = shadow.querySelector(".message-detail-input-container");
+          let isUserTyping = false;
+          let scrollTimeout;
           
-          // Function to scroll input into view when keyboard opens
+          // Track when user is typing to prevent unwanted scrolling
+          messageDetailInput.addEventListener("input", () => {
+            isUserTyping = true;
+            clearTimeout(scrollTimeout);
+            // Reset flag after user stops typing
+            scrollTimeout = setTimeout(() => {
+              isUserTyping = false;
+            }, 1000);
+          });
+          
+          // Function to scroll input into view when keyboard opens (only once, not while typing)
           const scrollInputIntoView = () => {
-            if (!checkIsMobile()) return;
+            if (!checkIsMobile() || isUserTyping) return;
             
             // Wait for keyboard to open, then scroll
             setTimeout(() => {
-              if (messageDetailInputContainer) {
+              if (messageDetailInputContainer && !isUserTyping) {
                 // Scroll the input container into view
                 messageDetailInputContainer.scrollIntoView({ 
                   behavior: 'smooth', 
@@ -1735,31 +1747,35 @@
                 });
               }
               
-              // Also scroll messages to bottom to ensure input area is visible
-              if (messageDetailMessages) {
+              // Only scroll messages to bottom if user is not typing
+              if (messageDetailMessages && !isUserTyping) {
                 messageDetailMessages.scrollTop = messageDetailMessages.scrollHeight;
               }
             }, 300);
           };
           
-          // When input is focused (keyboard opens)
-          messageDetailInput.addEventListener("focus", scrollInputIntoView);
+          // When input is focused (keyboard opens) - only scroll once
+          messageDetailInput.addEventListener("focus", () => {
+            isUserTyping = false; // Reset flag on focus
+            scrollInputIntoView();
+          });
           
-          // Also handle when visual viewport resizes (keyboard animation)
+          // Handle when visual viewport resizes (keyboard animation) - but not while typing
           if (window.visualViewport) {
             let resizeTimeout;
             window.visualViewport.addEventListener("resize", () => {
-              if (checkIsMobile() && document.activeElement === messageDetailInput) {
+              if (checkIsMobile() && document.activeElement === messageDetailInput && !isUserTyping) {
                 clearTimeout(resizeTimeout);
                 resizeTimeout = setTimeout(() => {
-                  if (messageDetailInputContainer) {
+                  if (messageDetailInputContainer && !isUserTyping) {
                     messageDetailInputContainer.scrollIntoView({ 
                       behavior: 'smooth', 
                       block: 'end',
                       inline: 'nearest'
                     });
                   }
-                  if (messageDetailMessages) {
+                  // Don't scroll messages while user is typing
+                  if (messageDetailMessages && !isUserTyping) {
                     messageDetailMessages.scrollTop = messageDetailMessages.scrollHeight;
                   }
                 }, 100);

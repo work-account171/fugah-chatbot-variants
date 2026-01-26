@@ -1566,20 +1566,22 @@ border-radius: 16px;
   background-color: #ffffff;
   overflow: hidden;
   width: 100%;
+  position: relative;
 }
 
 .message-detail-messages {
   flex: 1;
   min-height: 0;
-  max-height: 100%;
   overflow-y: auto;
   overflow-x: hidden;
   padding: 14px;
-  padding-bottom: 0;
+  padding-bottom: 14px;
   display: flex;
   flex-direction: column;
   gap: 24px;
   box-sizing: border-box;
+  /* Ensure messages container doesn't overlap input */
+  margin-bottom: 0;
 }
 
 .message-detail-messages::-webkit-scrollbar {
@@ -1713,19 +1715,42 @@ border-radius: 16px;
   flex-shrink: 0;
   position: relative;
   z-index: 10;
+  width: 100%;
+  /* Ensure input container is always on top and doesn't get overlapped */
+  order: 2;
 }
 
-/* Mobile: Ensure input container stays fixed at bottom */
+/* Mobile: Ensure input container stays fixed at bottom and messages don't overlap */
 @media screen and (max-width: 767px) {
-  .message-detail-input-container {
+  .message-detail-chat {
+    display: flex !important;
+    flex-direction: column !important;
+    height: 100% !important;
+    max-height: 100% !important;
+    overflow: hidden !important;
     position: relative !important;
-    flex-shrink: 0 !important;
-    z-index: 10 !important;
-    background-color: white !important;
   }
   
   .message-detail-messages {
-    padding-bottom: 0 !important;
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    padding-bottom: 14px !important;
+    /* Ensure messages scroll within their container only */
+    contain: layout style paint !important;
+  }
+  
+  .message-detail-input-container {
+    position: relative !important;
+    flex: 0 0 auto !important;
+    flex-shrink: 0 !important;
+    z-index: 10 !important;
+    background-color: white !important;
+    width: 100% !important;
+    /* Ensure input stays at bottom and is always visible */
+    margin-top: 0 !important;
   }
 }
 

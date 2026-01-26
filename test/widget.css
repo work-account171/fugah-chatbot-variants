@@ -439,6 +439,8 @@ border-radius: 16px;
 /* When message detail container is active, remove margin and hide tabs */
 #fugah-footer.detail-active {
   margin-top: 0;
+  /* Hide footer completely on message detail screen to prevent overlap */
+  display: none !important;
 }
 
 #fugah-footer.detail-active #fugah-footer-tab {
@@ -1722,6 +1724,19 @@ border-radius: 16px;
 
 /* Mobile: Ensure input container stays fixed at bottom and messages don't overlap */
 @media screen and (max-width: 767px) {
+  /* Hide footer completely on message detail screen on mobile */
+  #fugah-footer.detail-active {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    height: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    overflow: hidden !important;
+    position: absolute !important;
+    z-index: -1 !important;
+  }
+  
   .message-detail-chat {
     display: flex !important;
     flex-direction: column !important;
@@ -1740,17 +1755,30 @@ border-radius: 16px;
     padding-bottom: 14px !important;
     /* Ensure messages scroll within their container only */
     contain: layout style paint !important;
+    /* Prevent messages from extending beyond container */
+    position: relative !important;
+    z-index: 1 !important;
   }
   
   .message-detail-input-container {
     position: relative !important;
     flex: 0 0 auto !important;
     flex-shrink: 0 !important;
-    z-index: 10 !important;
+    z-index: 100 !important;
     background-color: white !important;
     width: 100% !important;
     /* Ensure input stays at bottom and is always visible */
     margin-top: 0 !important;
+    /* Prevent any overlap from footer or other elements */
+    isolation: isolate !important;
+  }
+  
+  .message-detail-input-wrapper {
+    position: relative !important;
+    z-index: 101 !important;
+    background-color: white !important;
+    /* Ensure wrapper is always visible and on top */
+    isolation: isolate !important;
   }
 }
 
@@ -1763,7 +1791,10 @@ border-radius: 16px;
   border: 1px solid rgba(0, 0, 0, 0.08);
   background-color: white;
   padding: 8px 12px;
-    box-sizing: border-box;
+  box-sizing: border-box;
+  /* Ensure wrapper is above footer and other elements */
+  position: relative;
+  z-index: 15;
 }
 
 .message-detail-input-wrapper:focus-within {

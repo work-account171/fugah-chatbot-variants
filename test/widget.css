@@ -184,13 +184,6 @@
     flex-shrink: 0 !important;
     width: 100% !important;
     background-color: white !important;
-    z-index: 10 !important;
-  }
-
-  /* Ensure input wrapper stays visible above keyboard */
-  .message-detail-input-wrapper {
-    position: relative !important;
-    width: 100% !important;
   }
 }
 

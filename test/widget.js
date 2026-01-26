@@ -203,7 +203,8 @@
           return height;
         };
 
-        // Function to update chat window height dynamically (mobile only)
+        // Function to update chat window position and height dynamically (mobile only)
+        // Positions chat window just above keyboard when it appears
         let mobileHeightUpdateHandler = null;
         const setupMobileHeightUpdates = () => {
           // Remove existing handler if any
@@ -218,9 +219,35 @@
 
           mobileHeightUpdateHandler = () => {
             if (isOpen && checkIsMobile()) {
-              const dynamicHeight = getDynamicViewportHeight();
-              chatWindow.style.setProperty("height", `${dynamicHeight}px`, "important");
-              console.log('Updated mobile height to:', dynamicHeight);
+              // Use visualViewport API to detect keyboard and position accordingly
+              if (window.visualViewport) {
+                const viewportHeight = window.visualViewport.height;
+                const viewportOffsetTop = window.visualViewport.offsetTop || 0;
+                
+                // When keyboard is open, visualViewport.offsetTop will be > 0
+                // Position chat window at the top of visible viewport (just above keyboard)
+                if (viewportOffsetTop > 0) {
+                  // Keyboard is open - position just above it
+                  chatWindow.style.setProperty("top", `${viewportOffsetTop}px`, "important");
+                  chatWindow.style.setProperty("height", `${viewportHeight}px`, "important");
+                  chatWindow.style.setProperty("bottom", "auto", "important");
+                  console.log('Keyboard open - positioned at top:', viewportOffsetTop, 'height:', viewportHeight);
+                } else {
+                  // Keyboard is closed - use full viewport
+                  const dynamicHeight = getDynamicViewportHeight();
+                  chatWindow.style.setProperty("top", "0", "important");
+                  chatWindow.style.setProperty("height", `${dynamicHeight}px`, "important");
+                  chatWindow.style.setProperty("bottom", "0", "important");
+                  console.log('Keyboard closed - full viewport height:', dynamicHeight);
+                }
+              } else {
+                // Fallback for browsers without visualViewport support
+                const dynamicHeight = getDynamicViewportHeight();
+                chatWindow.style.setProperty("height", `${dynamicHeight}px`, "important");
+                chatWindow.style.setProperty("top", "0", "important");
+                chatWindow.style.setProperty("bottom", "0", "important");
+                console.log('Updated mobile height to:', dynamicHeight);
+              }
             }
           };
 
@@ -328,31 +355,55 @@
             // Make chat-window fullscreen with no border-radius and full height (mobile only)
             console.log('Setting fullscreen styles');
             
-            // Get dynamic viewport height that accounts for browser bars
-            const dynamicHeight = getDynamicViewportHeight();
+            // Position chat window based on visualViewport (accounts for keyboard)
+            const positionChatWindow = () => {
+              if (window.visualViewport) {
+                const viewportHeight = window.visualViewport.height;
+                const viewportOffsetTop = window.visualViewport.offsetTop || 0;
+                
+                // When keyboard is open, visualViewport.offsetTop will be > 0
+                if (viewportOffsetTop > 0) {
+                  // Keyboard is open - position just above it
+                  chatWindow.style.setProperty("top", `${viewportOffsetTop}px`, "important");
+                  chatWindow.style.setProperty("height", `${viewportHeight}px`, "important");
+                  chatWindow.style.setProperty("bottom", "auto", "important");
+                } else {
+                  // Keyboard is closed - use full viewport
+                  const dynamicHeight = getDynamicViewportHeight();
+                  chatWindow.style.setProperty("top", "0", "important");
+                  chatWindow.style.setProperty("height", `${dynamicHeight}px`, "important");
+                  chatWindow.style.setProperty("bottom", "0", "important");
+                }
+              } else {
+                // Fallback for browsers without visualViewport support
+                const dynamicHeight = getDynamicViewportHeight();
+                chatWindow.style.setProperty("top", "0", "important");
+                chatWindow.style.setProperty("height", `${dynamicHeight}px`, "important");
+                chatWindow.style.setProperty("bottom", "0", "important");
+              }
+            };
             
             chatWindow.style.setProperty("position", "fixed", "important");
-            chatWindow.style.setProperty("top", "0", "important");
             chatWindow.style.setProperty("left", "0", "important");
             chatWindow.style.setProperty("right", "0", "important");
-            chatWindow.style.setProperty("bottom", "0", "important");
             chatWindow.style.setProperty("width", "100vw", "important");
-            chatWindow.style.setProperty("height", `${dynamicHeight}px`, "important");
             chatWindow.style.setProperty("max-width", "none", "important");
             chatWindow.style.setProperty("max-height", "none", "important");
             chatWindow.style.setProperty("border-radius", "0", "important");
             chatWindow.style.setProperty("padding", "0", "important");
             chatWindow.style.setProperty("margin", "0", "important");
             
-            // Setup dynamic height updates for browser bar changes
+            // Initial positioning
+            positionChatWindow();
+            
+            // Setup dynamic height updates for browser bar changes and keyboard
             setupMobileHeightUpdates();
             
-            // Update height again after a short delay to ensure accuracy
-            // This handles cases where browser bars haven't fully adjusted yet
+            // Update position again after a short delay to ensure accuracy
+            // This handles cases where browser bars or keyboard haven't fully adjusted yet
             setTimeout(() => {
               if (isOpen && checkIsMobile()) {
-                const dynamicHeight = getDynamicViewportHeight();
-                chatWindow.style.setProperty("height", `${dynamicHeight}px`, "important");
+                positionChatWindow();
               }
             }, 100);
             

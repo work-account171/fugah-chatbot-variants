@@ -1279,31 +1279,6 @@
             messageDetailMessages.scrollTop = messageDetailMessages.scrollHeight;
           }, 100);
         }
-
-        // Ensure proper layout for mobile when opening message detail
-        const isMobile = window.innerWidth <= 767;
-        if (isMobile && mainMessageDetailContainer) {
-          mainMessageDetailContainer.style.display = "flex";
-          mainMessageDetailContainer.style.flexDirection = "column";
-          mainMessageDetailContainer.style.height = "100%";
-          
-          const messageDetailChat = shadow.querySelector(".message-detail-chat");
-          const inputContainer = shadow.querySelector(".message-detail-input-container");
-          
-          if (messageDetailChat) {
-            messageDetailChat.style.display = "flex";
-            messageDetailChat.style.flexDirection = "column";
-            messageDetailChat.style.flex = "1";
-            messageDetailChat.style.minHeight = "0";
-          }
-          
-          if (inputContainer) {
-            inputContainer.style.position = "relative";
-            inputContainer.style.bottom = "auto";
-            inputContainer.style.marginTop = "auto";
-            inputContainer.style.flexShrink = "0";
-          }
-        }
       }
 
 

@@ -193,12 +193,17 @@
 
         // Function to get dynamic viewport height that accounts for browser bars
         const getDynamicViewportHeight = () => {
-          // Best practice: Use visualViewport API only (not window.innerHeight)
+          // Use window.innerHeight which accounts for browser UI bars
+          // This is more reliable than 100vh on mobile browsers
+          const height = window.innerHeight;
+          
+          // For iOS Safari, also check visualViewport if available
           if (window.visualViewport && window.visualViewport.height) {
-            return window.visualViewport.height;
+            // Use the larger value to ensure full coverage
+            return Math.max(height, window.visualViewport.height);
           }
-          // Fallback only for browsers without visualViewport support
-          return window.innerHeight;
+          
+          return height;
         };
 
         // Function to update chat window position and height dynamically (mobile only)
@@ -225,19 +230,19 @@
                 // When keyboard is open, visualViewport.offsetTop will be > 0
                 // Keep chat window at top: 0 to avoid white blank space, only adjust height
                 if (viewportOffsetTop > 0) {
-                  // Keyboard is open - use visualViewport.height only (best practice)
-                  // Wait for keyboard animation to stabilize, then set correct height
+                  // Keyboard is open - wait for keyboard animation to complete, then set correct height
+                  // Use window.innerHeight when keyboard is open (more reliable than visualViewport.height on first open)
                   const getKeyboardOpenHeight = () => {
+                    // Wait a bit for keyboard to fully open, then get the correct height
                     return new Promise((resolve) => {
-                      // Small delay to let visualViewport stabilize after keyboard animation
                       setTimeout(() => {
-                        if (window.visualViewport && window.visualViewport.offsetTop > 0) {
-                          // Use visualViewport.height only (best practice)
-                          resolve(window.visualViewport.height);
-                        } else {
-                          resolve(viewportHeight);
-                        }
-                      }, 100);
+                        // Use window.innerHeight which gives visible area above keyboard
+                        const correctHeight = window.innerHeight;
+                        // Also check visualViewport as fallback
+                        const vpHeight = window.visualViewport ? window.visualViewport.height : correctHeight;
+                        // Use the smaller value to ensure no gap
+                        resolve(Math.min(correctHeight, vpHeight));
+                      }, 400);
                     });
                   };
                   
@@ -246,16 +251,12 @@
                   chatWindow.style.setProperty("height", `${viewportHeight}px`, "important");
                   chatWindow.style.setProperty("bottom", "auto", "important");
                   
-                  // Update to correct height after visualViewport stabilizes (fixes first-time gap)
+                  // Update to correct height after keyboard fully opens (fixes first-time gap)
                   getKeyboardOpenHeight().then((correctHeight) => {
                     chatWindow.style.setProperty("height", `${correctHeight}px`, "important");
-                    // Update CSS variable for viewport height
-                    chatWindow.style.setProperty("--viewport-height", `${correctHeight}px`);
                     console.log('Keyboard open - final height set to:', correctHeight);
                   });
                   
-                  // Set CSS variable immediately
-                  chatWindow.style.setProperty("--viewport-height", `${viewportHeight}px`);
                   console.log('Keyboard open - initial height set to:', viewportHeight);
                 } else {
                   // Keyboard is closed - use full viewport
@@ -263,8 +264,6 @@
                   chatWindow.style.setProperty("top", "0", "important");
                   chatWindow.style.setProperty("height", `${dynamicHeight}px`, "important");
                   chatWindow.style.setProperty("bottom", "0", "important");
-                  // Update CSS variable for viewport height
-                  chatWindow.style.setProperty("--viewport-height", `${dynamicHeight}px`);
                   console.log('Keyboard closed - full viewport height:', dynamicHeight);
                 }
               } else {
@@ -273,8 +272,6 @@
                 chatWindow.style.setProperty("height", `${dynamicHeight}px`, "important");
                 chatWindow.style.setProperty("top", "0", "important");
                 chatWindow.style.setProperty("bottom", "0", "important");
-                // Update CSS variable for viewport height
-                chatWindow.style.setProperty("--viewport-height", `${dynamicHeight}px`);
                 console.log('Updated mobile height to:', dynamicHeight);
               }
             }
@@ -392,19 +389,18 @@
                 
                 // When keyboard is open, visualViewport.offsetTop will be > 0
                 if (viewportOffsetTop > 0) {
-                  // Keyboard is open - use visualViewport.height only (best practice)
-                  // Wait for keyboard animation to stabilize, then set correct height
+                  // Keyboard is open - wait for keyboard animation to complete, then set correct height
+                  // Use window.innerHeight when keyboard is open (more reliable than visualViewport.height on first open)
                   const getKeyboardOpenHeight = () => {
                     return new Promise((resolve) => {
-                      // Small delay to let visualViewport stabilize after keyboard animation
                       setTimeout(() => {
-                        if (window.visualViewport && window.visualViewport.offsetTop > 0) {
-                          // Use visualViewport.height only (best practice)
-                          resolve(window.visualViewport.height);
-                        } else {
-                          resolve(viewportHeight);
-                        }
-                      }, 100);
+                        // Use window.innerHeight which gives visible area above keyboard
+                        const correctHeight = window.innerHeight;
+                        // Also check visualViewport as fallback
+                        const vpHeight = window.visualViewport ? window.visualViewport.height : correctHeight;
+                        // Use the smaller value to ensure no gap
+                        resolve(Math.min(correctHeight, vpHeight));
+                      }, 400);
                     });
                   };
                   
@@ -412,14 +408,10 @@
                   chatWindow.style.setProperty("top", "0", "important");
                   chatWindow.style.setProperty("height", `${viewportHeight}px`, "important");
                   chatWindow.style.setProperty("bottom", "auto", "important");
-                  // Set CSS variable immediately
-                  chatWindow.style.setProperty("--viewport-height", `${viewportHeight}px`);
                   
-                  // Update to correct height after visualViewport stabilizes (fixes first-time gap)
+                  // Update to correct height after keyboard fully opens (fixes first-time gap)
                   getKeyboardOpenHeight().then((correctHeight) => {
                     chatWindow.style.setProperty("height", `${correctHeight}px`, "important");
-                    // Update CSS variable for viewport height
-                    chatWindow.style.setProperty("--viewport-height", `${correctHeight}px`);
                   });
                 } else {
                   // Keyboard is closed - use full viewport
@@ -427,8 +419,6 @@
                   chatWindow.style.setProperty("top", "0", "important");
                   chatWindow.style.setProperty("height", `${dynamicHeight}px`, "important");
                   chatWindow.style.setProperty("bottom", "0", "important");
-                  // Update CSS variable for viewport height
-                  chatWindow.style.setProperty("--viewport-height", `${dynamicHeight}px`);
                 }
               } else {
                 // Fallback for browsers without visualViewport support
@@ -436,8 +426,6 @@
                 chatWindow.style.setProperty("top", "0", "important");
                 chatWindow.style.setProperty("height", `${dynamicHeight}px`, "important");
                 chatWindow.style.setProperty("bottom", "0", "important");
-                // Update CSS variable for viewport height
-                chatWindow.style.setProperty("--viewport-height", `${dynamicHeight}px`);
               }
             };
             
@@ -450,10 +438,6 @@
             chatWindow.style.setProperty("border-radius", "0", "important");
             chatWindow.style.setProperty("padding", "0", "important");
             chatWindow.style.setProperty("margin", "0", "important");
-            
-            // Initialize CSS variable for viewport height
-            const initialHeight = getDynamicViewportHeight();
-            chatWindow.style.setProperty("--viewport-height", `${initialHeight}px`);
             
             // Initial positioning
             positionChatWindow();
@@ -2003,12 +1987,11 @@
         // Trigger height update when input is focused (keyboard opens) - fixes first-time gap
         messageDetailInput.addEventListener("focus", () => {
           // Trigger viewport update after keyboard animation completes
-          // Using visualViewport API (best practice) - handler will use visualViewport.height only
           if (mobileHeightUpdateHandler) {
-            // Small delay to let visualViewport stabilize
+            // Wait for keyboard to fully open before updating
             setTimeout(() => {
               mobileHeightUpdateHandler();
-            }, 150);
+            }, 450);
           }
         });
 

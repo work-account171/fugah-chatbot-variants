@@ -27,11 +27,6 @@
                "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
 
-/* CSS Variable for viewport height (updated via JavaScript using visualViewport API) */
-#chat-window {
-  --viewport-height: 100dvh; /* Default: use 100dvh (dynamic viewport height) for mobile keyboard support */
-}
-
 
 
 /* ========================================
@@ -486,7 +481,7 @@ border-radius: 16px;
     right: 10px;
     left: 10px;
     width: auto;
-    height: calc(100dvh - 100px);
+    height: calc(100vh - 100px);
   }
 } */
 

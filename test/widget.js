@@ -237,7 +237,7 @@
                   
                   chatWindow.style.setProperty("top", "0", "important");
                   chatWindow.style.setProperty("height", `${viewportHeight}px`, "important");
-                  chatWindow.style.setProperty("bottom", "auto", "important");
+                  // chatWindow.style.setProperty("bottom", "auto", "important");
                   
                   // Restore scroll position immediately to prevent upward jump
                   if (messageDetailMessages) {
@@ -384,7 +384,7 @@
                   
                   chatWindow.style.setProperty("top", "0", "important");
                   chatWindow.style.setProperty("height", `${viewportHeight}px`, "important");
-                  chatWindow.style.setProperty("bottom", "auto", "important");
+                  // chatWindow.style.setProperty("bottom", "auto", "important");
                   
                   // Restore scroll position immediately to prevent upward jump
                   if (messageDetailMessages) {

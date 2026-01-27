@@ -1016,12 +1016,27 @@
           validatePhoneNumber();
           // Show placeholder if input is empty
           updatePlaceholderVisibility();
+          
+          // Show footer again when keyboard closes (home screen only)
+          const fugahFooter = shadow.querySelector("#fugah-footer");
+          if (fugahFooter) {
+            fugahFooter.style.setProperty("display", "flex", "important");
+            fugahFooter.style.removeProperty("visibility");
+            fugahFooter.style.removeProperty("opacity");
+          }
         });
 
         phoneInput.addEventListener("focus", () => {
           // Hide placeholder when focused
           if (customPlaceholder) {
             customPlaceholder.style.display = "none";
+          }
+          
+          // Hide footer when keyboard opens (home screen only)
+          // This allows keyboard to overlap footer and only show phone input + send button
+          const fugahFooter = shadow.querySelector("#fugah-footer");
+          if (fugahFooter) {
+            fugahFooter.style.setProperty("display", "none", "important");
           }
         });
 
@@ -1042,6 +1057,13 @@
           if (customPlaceholder) {
             customPlaceholder.style.display = "none";
           }
+          
+          // Hide footer when keyboard opens (home screen only)
+          const fugahFooter = shadow.querySelector("#fugah-footer");
+          if (fugahFooter) {
+            fugahFooter.style.setProperty("display", "none", "important");
+          }
+          
           // Focus the input to show keyboard
           phoneInput.focus();
         });

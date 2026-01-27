@@ -435,7 +435,7 @@ border-radius: 16px;
   font-size: 14px;
   color: #222;
   /* margin-top: 72px; */
-  transition: margin-top 0.3s ease;
+  transition: margin-top 0.3s ease, display 0.2s ease, opacity 0.2s ease;
   flex-shrink: 0;
 }
 

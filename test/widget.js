@@ -94,6 +94,7 @@
       const ratingBackBtn = shadow.querySelector("#rating-back-btn");
           const messageCloseBtn = shadow.querySelector("#message-close-btn");
           const messageDetailBackBtn = shadow.querySelector("#message-detail-back-btn");
+          const messageDetailBackTickBtn = shadow.querySelector("#message-detail-back-tick-btn");
           const fugahMessageDetailDropdownIcon = shadow.querySelector("#fugah-message-detail-dropdown-icon");
           const fugahMessageDetailDropdown = shadow.querySelector("#fugah-message-detail-dropdown");
           const closeChatDetailMenuItem = shadow.querySelector("#close-chat-detail-menu-item");
@@ -144,10 +145,14 @@
 
       // Fix initial arrow paths and chat/rating header exit icons
       const backArrow = shadow.querySelector("#message-detail-back-btn");
+      const backTickArrow = shadow.querySelector("#message-detail-back-tick-btn");
       const ratingBackArrow = shadow.querySelector("#rating-back-btn");
       const messageListArrows = shadow.querySelectorAll(".message-item img");
       if (backArrow) {
         backArrow.src = getAssetPath("white-exit-button.png");
+      }
+      if (backTickArrow) {
+        backTickArrow.src = getAssetPath("back-tick-black.png");
       }
       if (ratingBackArrow) {
         ratingBackArrow.src = getAssetPath("white-exit-button.png");
@@ -2142,6 +2147,29 @@
         }, { passive: false });
       }
 
+      // Add click handler to message detail back tick button (same functionality as white-exit-button)
+      // Flow: Chat page → Confirm → Rating screen
+      if (messageDetailBackTickBtn) {
+        messageDetailBackTickBtn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          
+          // Show custom confirmation message
+          showCustomConfirmation("هل أنت متأكد من إغلاق الدردشة؟", () => {
+            // Show rating screen after confirmation
+            showRatingScreen();
+          });
+        });
+        
+        // Add touch event listener for mobile devices (preventDefault stops synthetic click closing modal on Android)
+        messageDetailBackTickBtn.addEventListener("touchstart", (e) => {
+          e.stopPropagation();
+          e.preventDefault();
+          showCustomConfirmation("هل أنت متأكد من إغلاق الدردشة؟", () => {
+            showRatingScreen();
+          });
+        }, { passive: false });
+      }
+
       // Add click handler to rating screen back button (X button)
       // Flow: X again → Close page (no confirmation)
       if (ratingBackBtn) {
@@ -2785,6 +2813,13 @@
               backArrow.src = getAssetPath("white-exit-button.png");
               console.log("Set message detail back button to white-exit-button.png for theme:", themeName);
             }
+          }
+          
+          // Set message detail back tick button (always uses back-tick-black.png regardless of theme)
+          const backTickArrow = shadow.querySelector("#message-detail-back-tick-btn");
+          if (backTickArrow) {
+            backTickArrow.src = getAssetPath("back-tick-black.png");
+            console.log("Set message detail back tick button to back-tick-black.png");
           }
           
           // Set rating screen back button based on theme (same as chat screen – white-exit / exit-for-black)

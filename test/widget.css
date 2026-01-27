@@ -1437,6 +1437,12 @@ border-radius: 16px;
   transition: opacity 0.2s ease;
 }
 
+/* Add gap between back icons - margin-right on back-tick icons */
+.chat-rating-header #message-detail-back-tick-btn,
+.chat-rating-header #rating-back-tick-btn {
+  margin-right: 8px;
+}
+
 /* Message icon and dropdown icon – independent, 26×26 */
 .chat-rating-header #fugah-message-detail-icon,
 .chat-rating-header #fugah-rating-icon,
@@ -1652,12 +1658,28 @@ border-radius: 16px;
   justify-content: flex-start;
 }
 
-.chat-message-content {
+/* Original chat message content styling - commented for future use if needed */
+/* .chat-message-content {
   max-width: 75%;
   padding: 14px 20px;
   border-radius: 18px;
   word-wrap: break-word;
   box-sizing: border-box;
+} */
+
+/* Base chat message content styling */
+.chat-message-content {
+  padding: 14px 20px;
+  border-radius: 18px;
+  word-wrap: break-word;
+  box-sizing: border-box;
+}
+
+/* Full width styling for user and bot messages */
+.chat-message-user .chat-message-content,
+.chat-message-bot .chat-message-content {
+  width: 100%;
+  max-width: 100%;
 }
 
 .chat-message-datetime {

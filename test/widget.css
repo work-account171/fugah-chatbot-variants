@@ -1440,7 +1440,7 @@ border-radius: 16px;
 /* Add gap between back icons - margin-right on back-tick icons */
 .chat-rating-header #message-detail-back-tick-btn,
 .chat-rating-header #rating-back-tick-btn {
-  margin-right: 8px;
+  margin-right: 20px;
 }
 
 /* Message icon and dropdown icon – independent, 26×26 */
@@ -1724,7 +1724,7 @@ border-radius: 16px;
 /* Full width styling for user and bot messages */
 .chat-message-user .chat-message-content,
 .chat-message-bot .chat-message-content {
-  width: 100%;
+  width: fit-content;
   max-width: 100%;
 }
 
@@ -2116,7 +2116,7 @@ border-radius: 16px;
   justify-content: end;
   align-items: center;
   gap: 13px;
-  width: 100%;
+  width: 95%;
   height: fit-content;
   box-sizing: border-box;
   padding: 14px;

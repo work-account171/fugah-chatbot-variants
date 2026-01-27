@@ -209,6 +209,10 @@
         // Function to update chat window position and height dynamically (mobile only)
         // Positions chat window just above keyboard when it appears
         let mobileHeightUpdateHandler = null;
+        let heightUpdateRafId = null;
+        let lastHeightUpdate = 0;
+        const HEIGHT_UPDATE_DEBOUNCE_MS = 16; // ~1 frame at 60fps
+        
         const setupMobileHeightUpdates = () => {
           // Remove existing handler if any
           if (mobileHeightUpdateHandler) {
@@ -219,62 +223,66 @@
               window.visualViewport.removeEventListener('scroll', mobileHeightUpdateHandler);
             }
           }
+          
+          // Cancel any pending RAF
+          if (heightUpdateRafId) {
+            cancelAnimationFrame(heightUpdateRafId);
+            heightUpdateRafId = null;
+          }
+
+          const updateChatWindowHeight = () => {
+            if (!isOpen || !checkIsMobile()) return;
+            
+            const now = Date.now();
+            // Debounce rapid updates
+            if (now - lastHeightUpdate < HEIGHT_UPDATE_DEBOUNCE_MS) {
+              return;
+            }
+            lastHeightUpdate = now;
+            
+            // Use visualViewport API for accurate height calculation
+            if (window.visualViewport) {
+              // visualViewport.height is the most accurate - it represents the visible area above keyboard
+              const viewportHeight = window.visualViewport.height;
+              const viewportOffsetTop = window.visualViewport.offsetTop || 0;
+              
+              // When keyboard is open, visualViewport.offsetTop will be > 0
+              if (viewportOffsetTop > 0) {
+                // Keyboard is open - use visualViewport.height directly (most accurate)
+                // This ensures footer sits exactly above keyboard with no gap
+                chatWindow.style.setProperty("top", "0", "important");
+                chatWindow.style.setProperty("height", `${viewportHeight}px`, "important");
+                chatWindow.style.setProperty("bottom", "auto", "important");
+                console.log('Keyboard open - height set to:', viewportHeight, 'offsetTop:', viewportOffsetTop);
+              } else {
+                // Keyboard is closed - use full viewport
+                const dynamicHeight = getDynamicViewportHeight();
+                chatWindow.style.setProperty("top", "0", "important");
+                chatWindow.style.setProperty("height", `${dynamicHeight}px`, "important");
+                chatWindow.style.setProperty("bottom", "0", "important");
+                console.log('Keyboard closed - full viewport height:', dynamicHeight);
+              }
+            } else {
+              // Fallback for browsers without visualViewport support
+              const dynamicHeight = getDynamicViewportHeight();
+              chatWindow.style.setProperty("height", `${dynamicHeight}px`, "important");
+              chatWindow.style.setProperty("top", "0", "important");
+              chatWindow.style.setProperty("bottom", "0", "important");
+              console.log('Updated mobile height to:', dynamicHeight);
+            }
+          };
 
           mobileHeightUpdateHandler = () => {
-            if (isOpen && checkIsMobile()) {
-              // Use visualViewport API to detect keyboard and position accordingly
-              if (window.visualViewport) {
-                const viewportHeight = window.visualViewport.height;
-                const viewportOffsetTop = window.visualViewport.offsetTop || 0;
-                
-                // When keyboard is open, visualViewport.offsetTop will be > 0
-                // Keep chat window at top: 0 to avoid white blank space, only adjust height
-                if (viewportOffsetTop > 0) {
-                  // Keyboard is open - wait for keyboard animation to complete, then set correct height
-                  // Use window.innerHeight when keyboard is open (more reliable than visualViewport.height on first open)
-                  const getKeyboardOpenHeight = () => {
-                    // Wait a bit for keyboard to fully open, then get the correct height
-                    return new Promise((resolve) => {
-                      setTimeout(() => {
-                        // Use window.innerHeight which gives visible area above keyboard
-                        const correctHeight = window.innerHeight;
-                        // Also check visualViewport as fallback
-                        const vpHeight = window.visualViewport ? window.visualViewport.height : correctHeight;
-                        // Use the smaller value to ensure no gap
-                        resolve(Math.min(correctHeight, vpHeight));
-                      }, 400);
-                    });
-                  };
-                  
-                  // Set initial height immediately to prevent white space
-                  chatWindow.style.setProperty("top", "0", "important");
-                  chatWindow.style.setProperty("height", `${viewportHeight}px`, "important");
-                  chatWindow.style.setProperty("bottom", "auto", "important");
-                  
-                  // Update to correct height after keyboard fully opens (fixes first-time gap)
-                  getKeyboardOpenHeight().then((correctHeight) => {
-                    chatWindow.style.setProperty("height", `${correctHeight}px`, "important");
-                    console.log('Keyboard open - final height set to:', correctHeight);
-                  });
-                  
-                  console.log('Keyboard open - initial height set to:', viewportHeight);
-                } else {
-                  // Keyboard is closed - use full viewport
-                  const dynamicHeight = getDynamicViewportHeight();
-                  chatWindow.style.setProperty("top", "0", "important");
-                  chatWindow.style.setProperty("height", `${dynamicHeight}px`, "important");
-                  chatWindow.style.setProperty("bottom", "0", "important");
-                  console.log('Keyboard closed - full viewport height:', dynamicHeight);
-                }
-              } else {
-                // Fallback for browsers without visualViewport support
-                const dynamicHeight = getDynamicViewportHeight();
-                chatWindow.style.setProperty("height", `${dynamicHeight}px`, "important");
-                chatWindow.style.setProperty("top", "0", "important");
-                chatWindow.style.setProperty("bottom", "0", "important");
-                console.log('Updated mobile height to:', dynamicHeight);
-              }
+            // Cancel any pending RAF
+            if (heightUpdateRafId) {
+              cancelAnimationFrame(heightUpdateRafId);
             }
+            
+            // Use requestAnimationFrame for smooth, immediate updates
+            heightUpdateRafId = requestAnimationFrame(() => {
+              updateChatWindowHeight();
+              heightUpdateRafId = null;
+            });
           };
 
           // Add event listeners for viewport changes
@@ -286,10 +294,19 @@
             window.visualViewport.addEventListener('resize', mobileHeightUpdateHandler, { passive: true });
             window.visualViewport.addEventListener('scroll', mobileHeightUpdateHandler, { passive: true });
           }
+          
+          // Initial update
+          updateChatWindowHeight();
         };
 
         // Function to remove mobile height update listeners
         const removeMobileHeightUpdates = () => {
+          // Cancel any pending animation frame
+          if (heightUpdateRafId) {
+            cancelAnimationFrame(heightUpdateRafId);
+            heightUpdateRafId = null;
+          }
+          
           if (mobileHeightUpdateHandler) {
             window.removeEventListener('resize', mobileHeightUpdateHandler);
             window.removeEventListener('orientationchange', mobileHeightUpdateHandler);
@@ -384,41 +401,25 @@
             // Position chat window based on visualViewport (accounts for keyboard)
             const positionChatWindow = () => {
               if (window.visualViewport) {
+                // visualViewport.height is the most accurate - it represents the visible area above keyboard
                 const viewportHeight = window.visualViewport.height;
                 const viewportOffsetTop = window.visualViewport.offsetTop || 0;
                 
                 // When keyboard is open, visualViewport.offsetTop will be > 0
                 if (viewportOffsetTop > 0) {
-                  // Keyboard is open - wait for keyboard animation to complete, then set correct height
-                  // Use window.innerHeight when keyboard is open (more reliable than visualViewport.height on first open)
-                  const getKeyboardOpenHeight = () => {
-                    return new Promise((resolve) => {
-                      setTimeout(() => {
-                        // Use window.innerHeight which gives visible area above keyboard
-                        const correctHeight = window.innerHeight;
-                        // Also check visualViewport as fallback
-                        const vpHeight = window.visualViewport ? window.visualViewport.height : correctHeight;
-                        // Use the smaller value to ensure no gap
-                        resolve(Math.min(correctHeight, vpHeight));
-                      }, 400);
-                    });
-                  };
-                  
-                  // Set initial height immediately to prevent white space
+                  // Keyboard is open - use visualViewport.height directly (most accurate)
+                  // This ensures footer sits exactly above keyboard with no gap
                   chatWindow.style.setProperty("top", "0", "important");
                   chatWindow.style.setProperty("height", `${viewportHeight}px`, "important");
                   chatWindow.style.setProperty("bottom", "auto", "important");
-                  
-                  // Update to correct height after keyboard fully opens (fixes first-time gap)
-                  getKeyboardOpenHeight().then((correctHeight) => {
-                    chatWindow.style.setProperty("height", `${correctHeight}px`, "important");
-                  });
+                  console.log('Initial position - Keyboard open, height:', viewportHeight);
                 } else {
                   // Keyboard is closed - use full viewport
                   const dynamicHeight = getDynamicViewportHeight();
                   chatWindow.style.setProperty("top", "0", "important");
                   chatWindow.style.setProperty("height", `${dynamicHeight}px`, "important");
                   chatWindow.style.setProperty("bottom", "0", "important");
+                  console.log('Initial position - Keyboard closed, height:', dynamicHeight);
                 }
               } else {
                 // Fallback for browsers without visualViewport support
@@ -426,6 +427,7 @@
                 chatWindow.style.setProperty("top", "0", "important");
                 chatWindow.style.setProperty("height", `${dynamicHeight}px`, "important");
                 chatWindow.style.setProperty("bottom", "0", "important");
+                console.log('Initial position - No visualViewport, height:', dynamicHeight);
               }
             };
             
@@ -1986,12 +1988,10 @@
 
         // Trigger height update when input is focused (keyboard opens) - fixes first-time gap
         messageDetailInput.addEventListener("focus", () => {
-          // Trigger viewport update after keyboard animation completes
+          // Trigger viewport update - visualViewport events will fire automatically
+          // but we trigger it immediately for faster response
           if (mobileHeightUpdateHandler) {
-            // Wait for keyboard to fully open before updating
-            setTimeout(() => {
-              mobileHeightUpdateHandler();
-            }, 450);
+            mobileHeightUpdateHandler();
           }
         });
 

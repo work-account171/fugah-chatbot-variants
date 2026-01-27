@@ -1654,22 +1654,10 @@ border-radius: 16px;
     margin-bottom: 0 !important;
   }
   
-  /* iOS Fix: Ensure footer stays at bottom on mobile */
+  /* Ensure footer has no bottom spacing on mobile */
   #fugah-footer {
     padding-bottom: 0 !important;
     margin-bottom: 0 !important;
-    margin-top: auto !important;
-    position: relative !important;
-    flex-shrink: 0 !important;
-  }
-  
-  /* iOS Fix: Ensure main container uses flex for footer positioning */
-  #fugah-main-container {
-    display: flex !important;
-    flex-direction: column !important;
-    justify-content: space-between !important;
-    height: 100% !important;
-    min-height: 100% !important;
   }
 }
 

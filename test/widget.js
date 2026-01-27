@@ -231,23 +231,20 @@
                 // Keep chat window at top: 0 to avoid white blank space, only adjust height
                 if (viewportOffsetTop > 0) {
                   // Keyboard is open - keep at top: 0, reduce height to fit visible viewport
-                  // Add small delay to prevent excessive upward scroll when keyboard first opens
-                  setTimeout(() => {
-                    chatWindow.style.setProperty("top", "0", "important");
-                    chatWindow.style.setProperty("height", `${viewportHeight}px`, "important");
-                    chatWindow.style.setProperty("bottom", "auto", "important");
-                    
-                    // Prevent excessive upward scroll - keep messages container scroll position stable
-                    const messageDetailMessages = shadow.querySelector("#message-detail-messages");
-                    if (messageDetailMessages) {
-                      // Save current scroll position before height change
-                      const currentScroll = messageDetailMessages.scrollTop;
-                      // After a brief moment, restore scroll to prevent jumping up
-                      setTimeout(() => {
-                        messageDetailMessages.scrollTop = currentScroll;
-                      }, 50);
-                    }
-                  }, 100);
+                  // Prevent scroll jump by saving scroll position first
+                  const messageDetailMessages = shadow.querySelector("#message-detail-messages");
+                  const savedScrollTop = messageDetailMessages ? messageDetailMessages.scrollTop : 0;
+                  
+                  chatWindow.style.setProperty("top", "0", "important");
+                  chatWindow.style.setProperty("height", `${viewportHeight}px`, "important");
+                  chatWindow.style.setProperty("bottom", "auto", "important");
+                  
+                  // Restore scroll position immediately to prevent upward jump
+                  if (messageDetailMessages) {
+                    requestAnimationFrame(() => {
+                      messageDetailMessages.scrollTop = savedScrollTop;
+                    });
+                  }
                   console.log('Keyboard open - height adjusted to:', viewportHeight);
                 } else {
                   // Keyboard is closed - use full viewport
@@ -381,23 +378,20 @@
                 // When keyboard is open, visualViewport.offsetTop will be > 0
                 if (viewportOffsetTop > 0) {
                   // Keyboard is open - keep at top: 0 to avoid white blank space, only adjust height
-                  // Add small delay to prevent excessive upward scroll when keyboard first opens
-                  setTimeout(() => {
-                    chatWindow.style.setProperty("top", "0", "important");
-                    chatWindow.style.setProperty("height", `${viewportHeight}px`, "important");
-                    chatWindow.style.setProperty("bottom", "auto", "important");
-                    
-                    // Prevent excessive upward scroll - keep messages container scroll position stable
-                    const messageDetailMessages = shadow.querySelector("#message-detail-messages");
-                    if (messageDetailMessages) {
-                      // Save current scroll position before height change
-                      const currentScroll = messageDetailMessages.scrollTop;
-                      // After a brief moment, restore scroll to prevent jumping up
-                      setTimeout(() => {
-                        messageDetailMessages.scrollTop = currentScroll;
-                      }, 50);
-                    }
-                  }, 100);
+                  // Prevent scroll jump by saving scroll position first
+                  const messageDetailMessages = shadow.querySelector("#message-detail-messages");
+                  const savedScrollTop = messageDetailMessages ? messageDetailMessages.scrollTop : 0;
+                  
+                  chatWindow.style.setProperty("top", "0", "important");
+                  chatWindow.style.setProperty("height", `${viewportHeight}px`, "important");
+                  chatWindow.style.setProperty("bottom", "auto", "important");
+                  
+                  // Restore scroll position immediately to prevent upward jump
+                  if (messageDetailMessages) {
+                    requestAnimationFrame(() => {
+                      messageDetailMessages.scrollTop = savedScrollTop;
+                    });
+                  }
                 } else {
                   // Keyboard is closed - use full viewport
                   const dynamicHeight = getDynamicViewportHeight();
@@ -1969,6 +1963,27 @@
           autoResizeTextarea();
         });
 
+        // Prevent excessive upward scroll when input is focused (keyboard opens)
+        messageDetailInput.addEventListener("focus", () => {
+          // Save current scroll position before browser auto-scrolls
+          const messageDetailMessages = shadow.querySelector("#message-detail-messages");
+          if (messageDetailMessages) {
+            const savedScroll = messageDetailMessages.scrollTop;
+            // Lock scroll position multiple times to override browser's auto-scroll
+            requestAnimationFrame(() => {
+              messageDetailMessages.scrollTop = savedScroll;
+            });
+            setTimeout(() => {
+              messageDetailMessages.scrollTop = savedScroll;
+            }, 50);
+            setTimeout(() => {
+              messageDetailMessages.scrollTop = savedScroll;
+            }, 150);
+            setTimeout(() => {
+              messageDetailMessages.scrollTop = savedScroll;
+            }, 300);
+          }
+        });
 
         // Initialize textarea size
         if (messageDetailInput) {

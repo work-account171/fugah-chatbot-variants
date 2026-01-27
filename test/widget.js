@@ -206,6 +206,41 @@
           return height;
         };
 
+        // Function to get footer and input container heights for accurate calculation
+        const getFooterAndInputHeights = () => {
+          const fugahFooter = shadow.querySelector("#fugah-footer");
+          const messageDetailInputContainer = shadow.querySelector(".message-detail-input-container");
+          const ratingInputContainer = shadow.querySelector(".rating-input-container");
+          
+          let footerHeight = 0;
+          let inputContainerHeight = 0;
+          
+          // Get footer height if visible (including margins)
+          if (fugahFooter && fugahFooter.offsetParent !== null) {
+            const footerRect = fugahFooter.getBoundingClientRect();
+            const footerStyle = window.getComputedStyle(fugahFooter);
+            footerHeight = footerRect.height;
+            // Add margin-top and margin-bottom if they exist
+            const marginTop = parseFloat(footerStyle.marginTop) || 0;
+            const marginBottom = parseFloat(footerStyle.marginBottom) || 0;
+            footerHeight += marginTop + marginBottom;
+          }
+          
+          // Get input container height if visible (for message detail or rating screens)
+          const activeInputContainer = messageDetailInputContainer || ratingInputContainer;
+          if (activeInputContainer && activeInputContainer.offsetParent !== null) {
+            const inputRect = activeInputContainer.getBoundingClientRect();
+            const inputStyle = window.getComputedStyle(activeInputContainer);
+            inputContainerHeight = inputRect.height;
+            // Add margin-top and margin-bottom if they exist
+            const marginTop = parseFloat(inputStyle.marginTop) || 0;
+            const marginBottom = parseFloat(inputStyle.marginBottom) || 0;
+            inputContainerHeight += marginTop + marginBottom;
+          }
+          
+          return { footerHeight, inputContainerHeight };
+        };
+
         // Function to update chat window position and height dynamically (mobile only)
         // Positions chat window just above keyboard when it appears
         let mobileHeightUpdateHandler = null;
@@ -231,30 +266,81 @@
                 // Keep chat window at top: 0 to avoid white blank space, only adjust height
                 if (viewportOffsetTop > 0) {
                   // Keyboard is open - wait for keyboard animation to complete, then set correct height
-                  // Use window.innerHeight when keyboard is open (more reliable than visualViewport.height on first open)
                   const getKeyboardOpenHeight = () => {
                     // Wait a bit for keyboard to fully open, then get the correct height
                     return new Promise((resolve) => {
+                      let resolved = false;
+                      
+                      // Helper function to calculate and resolve height
+                      const calculateHeight = () => {
+                        if (resolved) return;
+                        
+                        // Get the visible viewport height (area above keyboard)
+                        const innerHeight = window.innerHeight;
+                        const vpHeight = window.visualViewport ? window.visualViewport.height : innerHeight;
+                        
+                        // Get footer and input container heights
+                        const { footerHeight, inputContainerHeight } = getFooterAndInputHeights();
+                        
+                        // Calculate the maximum available height
+                        // Use the smaller of innerHeight and visualViewport.height to ensure no gap
+                        let availableHeight = Math.min(innerHeight, vpHeight);
+                        
+                        // Verify the height by checking if footer would be visible
+                        // If footer + input container would exceed available space, adjust
+                        const totalFixedHeight = footerHeight + inputContainerHeight;
+                        
+                        // Ensure we have enough space for footer and input
+                        // If not, use a slightly smaller height to prevent overlap
+                        if (totalFixedHeight > 0 && availableHeight < totalFixedHeight + 50) {
+                          // Not enough space - this shouldn't happen, but handle gracefully
+                          // Use viewport height minus a small buffer
+                          availableHeight = Math.max(vpHeight - 10, vpHeight * 0.9);
+                        }
+                        
+                        // Final check: ensure height is reasonable (at least 300px)
+                        const finalHeight = Math.max(300, availableHeight);
+                        
+                        return finalHeight;
+                      };
+                      
+                      // First check after 100ms (quick update)
                       setTimeout(() => {
-                        // Use window.innerHeight which gives visible area above keyboard
-                        const correctHeight = window.innerHeight;
-                        // Also check visualViewport as fallback
-                        const vpHeight = window.visualViewport ? window.visualViewport.height : correctHeight;
-                        // Use the smaller value to ensure no gap
-                        resolve(Math.min(correctHeight, vpHeight));
+                        const height = calculateHeight();
+                        if (height && !resolved) {
+                          resolved = true;
+                          resolve(height);
+                        }
+                      }, 100);
+                      
+                      // Second check after 400ms (more accurate after keyboard fully opens)
+                      setTimeout(() => {
+                        const height = calculateHeight();
+                        if (height && !resolved) {
+                          resolved = true;
+                          resolve(height);
+                        } else if (!resolved) {
+                          // Fallback: resolve with current calculation
+                          resolved = true;
+                          resolve(calculateHeight() || viewportHeight);
+                        }
                       }, 400);
                     });
                   };
                   
                   // Set initial height immediately to prevent white space
+                  // Use visualViewport height as initial value
                   chatWindow.style.setProperty("top", "0", "important");
                   chatWindow.style.setProperty("height", `${viewportHeight}px`, "important");
                   chatWindow.style.setProperty("bottom", "auto", "important");
                   
-                  // Update to correct height after keyboard fully opens (fixes first-time gap)
+                  // Update to correct height after keyboard fully opens
                   getKeyboardOpenHeight().then((correctHeight) => {
                     chatWindow.style.setProperty("height", `${correctHeight}px`, "important");
                     console.log('Keyboard open - final height set to:', correctHeight);
+                    
+                    // Force a reflow to ensure layout is updated
+                    void chatWindow.offsetHeight;
                   });
                   
                   console.log('Keyboard open - initial height set to:', viewportHeight);
@@ -390,16 +476,49 @@
                 // When keyboard is open, visualViewport.offsetTop will be > 0
                 if (viewportOffsetTop > 0) {
                   // Keyboard is open - wait for keyboard animation to complete, then set correct height
-                  // Use window.innerHeight when keyboard is open (more reliable than visualViewport.height on first open)
                   const getKeyboardOpenHeight = () => {
                     return new Promise((resolve) => {
+                      let resolved = false;
+                      
+                      // Helper function to calculate and resolve height
+                      const calculateHeight = () => {
+                        if (resolved) return;
+                        
+                        const innerHeight = window.innerHeight;
+                        const vpHeight = window.visualViewport ? window.visualViewport.height : innerHeight;
+                        const { footerHeight, inputContainerHeight } = getFooterAndInputHeights();
+                        
+                        let availableHeight = Math.min(innerHeight, vpHeight);
+                        const totalFixedHeight = footerHeight + inputContainerHeight;
+                        
+                        if (totalFixedHeight > 0 && availableHeight < totalFixedHeight + 50) {
+                          availableHeight = Math.max(vpHeight - 10, vpHeight * 0.9);
+                        }
+                        
+                        const finalHeight = Math.max(300, availableHeight);
+                        return finalHeight;
+                      };
+                      
+                      // First check after 100ms (quick update)
                       setTimeout(() => {
-                        // Use window.innerHeight which gives visible area above keyboard
-                        const correctHeight = window.innerHeight;
-                        // Also check visualViewport as fallback
-                        const vpHeight = window.visualViewport ? window.visualViewport.height : correctHeight;
-                        // Use the smaller value to ensure no gap
-                        resolve(Math.min(correctHeight, vpHeight));
+                        const height = calculateHeight();
+                        if (height && !resolved) {
+                          resolved = true;
+                          resolve(height);
+                        }
+                      }, 100);
+                      
+                      // Second check after 400ms (more accurate after keyboard fully opens)
+                      setTimeout(() => {
+                        const height = calculateHeight();
+                        if (height && !resolved) {
+                          resolved = true;
+                          resolve(height);
+                        } else if (!resolved) {
+                          // Fallback: resolve with current calculation
+                          resolved = true;
+                          resolve(calculateHeight() || viewportHeight);
+                        }
                       }, 400);
                     });
                   };
@@ -409,9 +528,10 @@
                   chatWindow.style.setProperty("height", `${viewportHeight}px`, "important");
                   chatWindow.style.setProperty("bottom", "auto", "important");
                   
-                  // Update to correct height after keyboard fully opens (fixes first-time gap)
+                  // Update to correct height after keyboard fully opens
                   getKeyboardOpenHeight().then((correctHeight) => {
                     chatWindow.style.setProperty("height", `${correctHeight}px`, "important");
+                    void chatWindow.offsetHeight; // Force reflow
                   });
                 } else {
                   // Keyboard is closed - use full viewport
@@ -1988,10 +2108,29 @@
         messageDetailInput.addEventListener("focus", () => {
           // Trigger viewport update after keyboard animation completes
           if (mobileHeightUpdateHandler) {
-            // Wait for keyboard to fully open before updating
+            // Multiple updates to ensure accurate height calculation
+            // First update after short delay
             setTimeout(() => {
               mobileHeightUpdateHandler();
-            }, 450);
+            }, 100);
+            // Second update after keyboard fully opens
+            setTimeout(() => {
+              mobileHeightUpdateHandler();
+            }, 400);
+            // Final update to ensure accuracy
+            setTimeout(() => {
+              mobileHeightUpdateHandler();
+            }, 600);
+          }
+        });
+        
+        // Also trigger on blur to reset height when keyboard closes
+        messageDetailInput.addEventListener("blur", () => {
+          if (mobileHeightUpdateHandler) {
+            // Small delay to allow keyboard to close
+            setTimeout(() => {
+              mobileHeightUpdateHandler();
+            }, 200);
           }
         });
 

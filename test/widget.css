@@ -437,6 +437,8 @@ border-radius: 16px;
   /* margin-top: 72px; */
   transition: margin-top 0.3s ease;
   flex-shrink: 0;
+  position: relative;
+  z-index: 10;
 }
 
 /* When message detail container is active, remove margin and hide tabs */

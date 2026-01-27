@@ -228,13 +228,13 @@
                 const viewportOffsetTop = window.visualViewport.offsetTop || 0;
                 
                 // When keyboard is open, visualViewport.offsetTop will be > 0
-                // Position chat window at the top of visible viewport (just above keyboard)
+                // Keep chat window at top: 0 to avoid white blank space, only adjust height
                 if (viewportOffsetTop > 0) {
-                  // Keyboard is open - position just above it
-                  chatWindow.style.setProperty("top", `${viewportOffsetTop}px`, "important");
+                  // Keyboard is open - keep at top: 0, reduce height to fit visible viewport
+                  chatWindow.style.setProperty("top", "0", "important");
                   chatWindow.style.setProperty("height", `${viewportHeight}px`, "important");
                   chatWindow.style.setProperty("bottom", "auto", "important");
-                  console.log('Keyboard open - positioned at top:', viewportOffsetTop, 'height:', viewportHeight);
+                  console.log('Keyboard open - height adjusted to:', viewportHeight);
                 } else {
                   // Keyboard is closed - use full viewport
                   const dynamicHeight = getDynamicViewportHeight();
@@ -366,8 +366,8 @@
                 
                 // When keyboard is open, visualViewport.offsetTop will be > 0
                 if (viewportOffsetTop > 0) {
-                  // Keyboard is open - position just above it
-                  chatWindow.style.setProperty("top", `${viewportOffsetTop}px`, "important");
+                  // Keyboard is open - keep at top: 0 to avoid white blank space, only adjust height
+                  chatWindow.style.setProperty("top", "0", "important");
                   chatWindow.style.setProperty("height", `${viewportHeight}px`, "important");
                   chatWindow.style.setProperty("bottom", "auto", "important");
                 } else {

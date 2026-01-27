@@ -1661,24 +1661,6 @@ border-radius: 16px;
     padding-bottom: 0 !important;
     margin-bottom: 0 !important;
   }
-  
-  /* iOS Fix: Ensure footer stays at bottom and returns properly */
-  @supports (-webkit-touch-callout: none) {
-    /* This targets iOS Safari specifically */
-    #fugah-footer {
-      margin-top: auto !important;
-      position: relative !important;
-      flex-shrink: 0 !important;
-    }
-    
-    #fugah-main-container {
-      display: flex !important;
-      flex-direction: column !important;
-      justify-content: space-between !important;
-      height: 100% !important;
-      min-height: 100% !important;
-    }
-  }
 }
 
 .message-detail-messages {

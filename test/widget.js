@@ -111,6 +111,8 @@
           const messageDetailSendBtn = shadow.querySelector("#message-detail-send-btn");
           const messageDetailMessages = shadow.querySelector("#message-detail-messages");
           const messageItems = shadow.querySelectorAll(".message-item");
+          const messageContainer = shadow.querySelector(".message-container");
+          const noMessagesEmptyState = shadow.querySelector("#no-messages-empty-state");
           const footerTabItems = shadow.querySelectorAll(".fugah-footer-tab-item");
           const fugahFooter = shadow.querySelector("#fugah-footer");
           
@@ -1523,6 +1525,8 @@
           if (fugahFooter) fugahFooter.classList.remove("detail-active");
           // Reset to message list when switching tabs
           goBackToMessageList();
+          // Check and update empty state
+          checkAndUpdateEmptyState();
         }
       }
 
@@ -2042,6 +2046,22 @@
       // ========================================
       // MESSAGE LIST NAVIGATION FUNCTIONALITY
       // ========================================
+      // Check if there are messages and show/hide empty state
+      function checkAndUpdateEmptyState() {
+        if (!messageContainer || !noMessagesEmptyState) return;
+        
+        // Get all message items (excluding the empty state)
+        const messageItems = messageContainer.querySelectorAll(".message-item");
+        const hasMessages = messageItems.length > 0;
+        
+        // Show empty state if no messages, hide if there are messages
+        if (hasMessages) {
+          noMessagesEmptyState.style.display = "none";
+        } else {
+          noMessagesEmptyState.style.display = "flex";
+        }
+      }
+      
       // Handle navigation back to message list from detail view
       function goBackToMessageList() {
         if (mainMessageContainer) mainMessageContainer.style.display = "block";
@@ -2061,6 +2081,9 @@
           messageDetailInput.value = "";
           toggleMessageDetailSendButtonState();
         }
+        
+        // Check and update empty state when returning to message list
+        checkAndUpdateEmptyState();
       }
 
       // Helper function to show rating screen (used by message detail close button and submit ticket)
@@ -2564,6 +2587,9 @@
       
       // Initialize tab state (Home active by default)
       switchTab("home");
+      
+      // Check and update empty state on initial load
+      checkAndUpdateEmptyState();
 
 
       // ========================================

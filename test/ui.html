@@ -142,6 +142,11 @@ fetch("https://n8n.srv1196634.hstgr.cloud/webhook-test/user", {
         
         <!-- Message items container -->
         <div class="message-container">
+          <!-- Empty state message (shown when no messages) -->
+          <div id="no-messages-empty-state" class="no-messages-empty-state" style="display: none;">
+            <p>لا توجد رسائل</p>
+          </div>
+          
           <!-- First message item -->
           <div class="message-item" data-message-id="1">
             <div class="fugah-message-content">

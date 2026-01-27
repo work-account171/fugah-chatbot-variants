@@ -1510,6 +1510,26 @@ border-radius: 16px;
   padding-bottom: 14px;
   flex-shrink: 0;
 }
+
+/* Empty state message when no messages exist */
+.no-messages-empty-state {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  padding: 40px 20px;
+  text-align: center;
+  flex: 1;
+  min-height: 200px;
+}
+
+.no-messages-empty-state p {
+  font-size: 16px;
+  font-weight: 500;
+  color: #666;
+  margin: 0;
+  padding: 0;
+}
 .fugah-message-content{
   display: flex;
   flex-direction: column;

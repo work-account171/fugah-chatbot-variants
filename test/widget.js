@@ -235,15 +235,31 @@
                   const messageDetailMessages = shadow.querySelector("#message-detail-messages");
                   const savedScrollTop = messageDetailMessages ? messageDetailMessages.scrollTop : 0;
                   
+                  // Set initial height immediately
                   chatWindow.style.setProperty("top", "0", "important");
                   chatWindow.style.setProperty("height", `${viewportHeight}px`, "important");
                   chatWindow.style.setProperty("bottom", "auto", "important");
                   
-                  // Restore scroll position immediately to prevent upward jump
+                  // Re-check and update height after keyboard animation completes (fixes first-time gap)
+                  setTimeout(() => {
+                    if (window.visualViewport && window.visualViewport.offsetTop > 0) {
+                      const updatedHeight = window.visualViewport.height;
+                      chatWindow.style.setProperty("height", `${updatedHeight}px`, "important");
+                      console.log('Keyboard open - height re-adjusted to:', updatedHeight);
+                    }
+                  }, 300);
+                  
+                  // Restore scroll position immediately and multiple times to prevent upward jump
                   if (messageDetailMessages) {
                     requestAnimationFrame(() => {
                       messageDetailMessages.scrollTop = savedScrollTop;
                     });
+                    setTimeout(() => {
+                      messageDetailMessages.scrollTop = savedScrollTop;
+                    }, 100);
+                    setTimeout(() => {
+                      messageDetailMessages.scrollTop = savedScrollTop;
+                    }, 300);
                   }
                   console.log('Keyboard open - height adjusted to:', viewportHeight);
                 } else {
@@ -382,15 +398,30 @@
                   const messageDetailMessages = shadow.querySelector("#message-detail-messages");
                   const savedScrollTop = messageDetailMessages ? messageDetailMessages.scrollTop : 0;
                   
+                  // Set initial height immediately
                   chatWindow.style.setProperty("top", "0", "important");
                   chatWindow.style.setProperty("height", `${viewportHeight}px`, "important");
                   chatWindow.style.setProperty("bottom", "auto", "important");
                   
-                  // Restore scroll position immediately to prevent upward jump
+                  // Re-check and update height after keyboard animation completes (fixes first-time gap)
+                  setTimeout(() => {
+                    if (window.visualViewport && window.visualViewport.offsetTop > 0) {
+                      const updatedHeight = window.visualViewport.height;
+                      chatWindow.style.setProperty("height", `${updatedHeight}px`, "important");
+                    }
+                  }, 300);
+                  
+                  // Restore scroll position immediately and multiple times to prevent upward jump
                   if (messageDetailMessages) {
                     requestAnimationFrame(() => {
                       messageDetailMessages.scrollTop = savedScrollTop;
                     });
+                    setTimeout(() => {
+                      messageDetailMessages.scrollTop = savedScrollTop;
+                    }, 100);
+                    setTimeout(() => {
+                      messageDetailMessages.scrollTop = savedScrollTop;
+                    }, 300);
                   }
                 } else {
                   // Keyboard is closed - use full viewport
@@ -1970,8 +2001,15 @@
           if (messageDetailMessages) {
             const savedScroll = messageDetailMessages.scrollTop;
             // Lock scroll position multiple times to override browser's auto-scroll
+            // Also trigger height update after keyboard fully opens to fix first-time gap
             requestAnimationFrame(() => {
               messageDetailMessages.scrollTop = savedScroll;
+              // Trigger viewport update after keyboard animation
+              if (mobileHeightUpdateHandler) {
+                setTimeout(() => {
+                  mobileHeightUpdateHandler();
+                }, 350);
+              }
             });
             setTimeout(() => {
               messageDetailMessages.scrollTop = savedScroll;
@@ -1981,7 +2019,11 @@
             }, 150);
             setTimeout(() => {
               messageDetailMessages.scrollTop = savedScroll;
-            }, 300);
+              // Final height check after keyboard fully settled
+              if (mobileHeightUpdateHandler) {
+                mobileHeightUpdateHandler();
+              }
+            }, 400);
           }
         });
 

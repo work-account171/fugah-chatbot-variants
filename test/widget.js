@@ -237,34 +237,69 @@
                 // When keyboard is open, visualViewport.offsetTop will be > 0
                 // Keep chat window at top: 0 to avoid white blank space, only adjust height
                 if (viewportOffsetTop > 0) {
-                  // Keyboard is open - wait for keyboard animation to complete, then set correct height
-                  // Use window.innerHeight when keyboard is open (more reliable than visualViewport.height on first open)
+                  // Keyboard is open - use window.innerHeight which is most accurate
+                  // window.innerHeight gives the actual visible area above keyboard
                   const getKeyboardOpenHeight = () => {
-                    // Wait a bit for keyboard to fully open, then get the correct height
                     return new Promise((resolve) => {
+                      // Get height immediately
+                      const immediateHeight = window.innerHeight;
+                      
+                      // Then check again after keyboard fully opens
                       setTimeout(() => {
-                        // Use window.innerHeight which gives visible area above keyboard
-                        const correctHeight = window.innerHeight;
-                        // Also check visualViewport as fallback
-                        const vpHeight = window.visualViewport ? window.visualViewport.height : correctHeight;
-                        // Use the smaller value to ensure no gap
-                        resolve(Math.min(correctHeight, vpHeight));
-                      }, 400);
+                        const height1 = window.innerHeight;
+                        // Check one more time to ensure accuracy
+                        setTimeout(() => {
+                          const height2 = window.innerHeight;
+                          // Use the smallest value to ensure no gap
+                          const finalHeight = Math.min(immediateHeight, height1, height2);
+                          resolve(finalHeight);
+                        }, 200);
+                      }, 300);
                     });
                   };
                   
-                  // Set initial height immediately to prevent white space
+                  // Set initial height immediately using window.innerHeight (most accurate)
+                  const initialHeight = window.innerHeight;
+                  
+                  // CRITICAL: Remove inset and bottom to prevent gap - only use top positioning
+                  chatWindow.style.setProperty("inset", "unset", "important");
+                  chatWindow.style.removeProperty("inset");
+                  chatWindow.style.removeProperty("bottom"); // Don't set bottom - causes gap
                   chatWindow.style.setProperty("top", "0", "important");
-                  chatWindow.style.setProperty("height", `${viewportHeight}px`, "important");
-                  chatWindow.style.setProperty("bottom", "auto", "important");
+                  chatWindow.style.setProperty("left", "0", "important");
+                  chatWindow.style.setProperty("right", "0", "important");
+                  chatWindow.style.setProperty("height", `${initialHeight}px`, "important");
+                  chatWindow.style.setProperty("width", "100vw", "important");
                   
                   // Update to correct height after keyboard fully opens (fixes first-time gap)
                   getKeyboardOpenHeight().then((correctHeight) => {
-                    chatWindow.style.setProperty("height", `${correctHeight}px`, "important");
-                    console.log('Keyboard open - final height set to:', correctHeight);
+                    // Subtract 1px to ensure no gap (accounts for rounding/borders)
+                    const finalHeight = Math.max(correctHeight - 1, 300);
+                    
+                    // Remove inset again when updating height (browser may regenerate it)
+                    chatWindow.style.setProperty("inset", "unset", "important");
+                    chatWindow.style.removeProperty("inset");
+                    chatWindow.style.removeProperty("bottom");
+                    chatWindow.style.setProperty("height", `${finalHeight}px`, "important");
+                    chatWindow.style.setProperty("max-height", `${finalHeight}px`, "important");
+                    // Ensure no bottom spacing
+                    chatWindow.style.setProperty("padding-bottom", "0", "important");
+                    chatWindow.style.setProperty("margin-bottom", "0", "important");
+                    console.log('Keyboard open - final height set to:', finalHeight);
+                    
+                    // Final check after a delay to ensure no gap
+                    setTimeout(() => {
+                      const finalCheck = window.innerHeight;
+                      const adjustedHeight = Math.max(finalCheck - 1, 300);
+                      if (Math.abs(finalCheck - finalHeight) > 5) {
+                        chatWindow.style.setProperty("height", `${adjustedHeight}px`, "important");
+                        chatWindow.style.setProperty("max-height", `${adjustedHeight}px`, "important");
+                        console.log('Keyboard open - adjusted height to:', adjustedHeight);
+                      }
+                    }, 100);
                   });
                   
-                  console.log('Keyboard open - initial height set to:', viewportHeight);
+                  console.log('Keyboard open - initial height set to:', initialHeight);
                 } else {
                   // Keyboard is closed - use full viewport
                   const dynamicHeight = getDynamicViewportHeight();
@@ -396,29 +431,69 @@
                 
                 // When keyboard is open, visualViewport.offsetTop will be > 0
                 if (viewportOffsetTop > 0) {
-                  // Keyboard is open - wait for keyboard animation to complete, then set correct height
-                  // Use window.innerHeight when keyboard is open (more reliable than visualViewport.height on first open)
+                  // Keyboard is open - use window.innerHeight which is most accurate
+                  // window.innerHeight gives the actual visible area above keyboard
                   const getKeyboardOpenHeight = () => {
                     return new Promise((resolve) => {
+                      // Get height immediately
+                      const immediateHeight = window.innerHeight;
+                      
+                      // Then check again after keyboard fully opens
                       setTimeout(() => {
-                        // Use window.innerHeight which gives visible area above keyboard
-                        const correctHeight = window.innerHeight;
-                        // Also check visualViewport as fallback
-                        const vpHeight = window.visualViewport ? window.visualViewport.height : correctHeight;
-                        // Use the smaller value to ensure no gap
-                        resolve(Math.min(correctHeight, vpHeight));
-                      }, 400);
+                        const height1 = window.innerHeight;
+                        // Check one more time to ensure accuracy
+                        setTimeout(() => {
+                          const height2 = window.innerHeight;
+                          // Use the smallest value to ensure no gap
+                          const finalHeight = Math.min(immediateHeight, height1, height2);
+                          resolve(finalHeight);
+                        }, 200);
+                      }, 300);
                     });
                   };
                   
-                  // Set initial height immediately to prevent white space
+                  // Set initial height immediately using window.innerHeight (most accurate)
+                  // Subtract 1px to account for any rounding/border issues and ensure no gap
+                  const initialHeight = Math.max(window.innerHeight - 1, 300);
+                  
+                  // CRITICAL: Remove inset and bottom to prevent gap - only use top positioning
+                  chatWindow.style.setProperty("inset", "unset", "important");
+                  chatWindow.style.removeProperty("inset");
+                  chatWindow.style.removeProperty("bottom"); // Don't set bottom - causes gap
                   chatWindow.style.setProperty("top", "0", "important");
-                  chatWindow.style.setProperty("height", `${viewportHeight}px`, "important");
-                  chatWindow.style.setProperty("bottom", "auto", "important");
+                  chatWindow.style.setProperty("left", "0", "important");
+                  chatWindow.style.setProperty("right", "0", "important");
+                  chatWindow.style.setProperty("height", `${initialHeight}px`, "important");
+                  chatWindow.style.setProperty("width", "100vw", "important");
+                  chatWindow.style.setProperty("max-height", `${initialHeight}px`, "important");
+                  // Ensure no bottom spacing
+                  chatWindow.style.setProperty("padding-bottom", "0", "important");
+                  chatWindow.style.setProperty("margin-bottom", "0", "important");
                   
                   // Update to correct height after keyboard fully opens (fixes first-time gap)
                   getKeyboardOpenHeight().then((correctHeight) => {
-                    chatWindow.style.setProperty("height", `${correctHeight}px`, "important");
+                    // Subtract 1px to ensure no gap (accounts for rounding/borders)
+                    const finalHeight = Math.max(correctHeight - 1, 300);
+                    
+                    // Remove inset again when updating height (browser may regenerate it)
+                    chatWindow.style.setProperty("inset", "unset", "important");
+                    chatWindow.style.removeProperty("inset");
+                    chatWindow.style.removeProperty("bottom");
+                    chatWindow.style.setProperty("height", `${finalHeight}px`, "important");
+                    chatWindow.style.setProperty("max-height", `${finalHeight}px`, "important");
+                    // Ensure no bottom spacing
+                    chatWindow.style.setProperty("padding-bottom", "0", "important");
+                    chatWindow.style.setProperty("margin-bottom", "0", "important");
+                    
+                    // Final check after a delay to ensure no gap
+                    setTimeout(() => {
+                      const finalCheck = window.innerHeight;
+                      const adjustedHeight = Math.max(finalCheck - 1, 300);
+                      if (Math.abs(finalCheck - finalHeight) > 5) {
+                        chatWindow.style.setProperty("height", `${adjustedHeight}px`, "important");
+                        chatWindow.style.setProperty("max-height", `${adjustedHeight}px`, "important");
+                      }
+                    }, 100);
                   });
                 } else {
                   // Keyboard is closed - use full viewport
@@ -437,6 +512,10 @@
             };
             
             chatWindow.style.setProperty("position", "fixed", "important");
+            // Remove inset to prevent gap - browser auto-generates it from top/left/right/bottom
+            chatWindow.style.setProperty("inset", "unset", "important");
+            chatWindow.style.removeProperty("inset");
+            chatWindow.style.setProperty("top", "0", "important");
             chatWindow.style.setProperty("left", "0", "important");
             chatWindow.style.setProperty("right", "0", "important");
             chatWindow.style.setProperty("width", "100vw", "important");

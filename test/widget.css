@@ -1635,6 +1635,30 @@ border-radius: 16px;
   .message-detail-input-wrapper {
     background-color: white !important;
   }
+  
+  /* CRITICAL: Remove inset property on mobile - it causes gap between chat and keyboard */
+  /* inset: 0px forces element to stretch top-to-bottom, creating gap when keyboard opens */
+  #chat-window.chat-window-open {
+    inset: unset !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    /* Don't set bottom - let height control the size */
+    padding-bottom: 0 !important;
+    margin-bottom: 0 !important;
+  }
+  
+  /* Ensure input container has no bottom spacing on mobile */
+  .message-detail-input-container {
+    padding-bottom: 0 !important;
+    margin-bottom: 0 !important;
+  }
+  
+  /* Ensure footer has no bottom spacing on mobile */
+  #fugah-footer {
+    padding-bottom: 0 !important;
+    margin-bottom: 0 !important;
+  }
 }
 
 .message-detail-messages {

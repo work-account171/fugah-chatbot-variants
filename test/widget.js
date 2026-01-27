@@ -230,38 +230,34 @@
                 // When keyboard is open, visualViewport.offsetTop will be > 0
                 // Keep chat window at top: 0 to avoid white blank space, only adjust height
                 if (viewportOffsetTop > 0) {
-                  // Keyboard is open - keep at top: 0, reduce height to fit visible viewport
-                  // Prevent scroll jump by saving scroll position first
-                  const messageDetailMessages = shadow.querySelector("#message-detail-messages");
-                  const savedScrollTop = messageDetailMessages ? messageDetailMessages.scrollTop : 0;
+                  // Keyboard is open - wait for keyboard animation to complete, then set correct height
+                  // Use window.innerHeight when keyboard is open (more reliable than visualViewport.height on first open)
+                  const getKeyboardOpenHeight = () => {
+                    // Wait a bit for keyboard to fully open, then get the correct height
+                    return new Promise((resolve) => {
+                      setTimeout(() => {
+                        // Use window.innerHeight which gives visible area above keyboard
+                        const correctHeight = window.innerHeight;
+                        // Also check visualViewport as fallback
+                        const vpHeight = window.visualViewport ? window.visualViewport.height : correctHeight;
+                        // Use the smaller value to ensure no gap
+                        resolve(Math.min(correctHeight, vpHeight));
+                      }, 400);
+                    });
+                  };
                   
-                  // Set initial height immediately
+                  // Set initial height immediately to prevent white space
                   chatWindow.style.setProperty("top", "0", "important");
                   chatWindow.style.setProperty("height", `${viewportHeight}px`, "important");
                   chatWindow.style.setProperty("bottom", "auto", "important");
                   
-                  // Re-check and update height after keyboard animation completes (fixes first-time gap)
-                  setTimeout(() => {
-                    if (window.visualViewport && window.visualViewport.offsetTop > 0) {
-                      const updatedHeight = window.visualViewport.height;
-                      chatWindow.style.setProperty("height", `${updatedHeight}px`, "important");
-                      console.log('Keyboard open - height re-adjusted to:', updatedHeight);
-                    }
-                  }, 300);
+                  // Update to correct height after keyboard fully opens (fixes first-time gap)
+                  getKeyboardOpenHeight().then((correctHeight) => {
+                    chatWindow.style.setProperty("height", `${correctHeight}px`, "important");
+                    console.log('Keyboard open - final height set to:', correctHeight);
+                  });
                   
-                  // Restore scroll position immediately and multiple times to prevent upward jump
-                  if (messageDetailMessages) {
-                    requestAnimationFrame(() => {
-                      messageDetailMessages.scrollTop = savedScrollTop;
-                    });
-                    setTimeout(() => {
-                      messageDetailMessages.scrollTop = savedScrollTop;
-                    }, 100);
-                    setTimeout(() => {
-                      messageDetailMessages.scrollTop = savedScrollTop;
-                    }, 300);
-                  }
-                  console.log('Keyboard open - height adjusted to:', viewportHeight);
+                  console.log('Keyboard open - initial height set to:', viewportHeight);
                 } else {
                   // Keyboard is closed - use full viewport
                   const dynamicHeight = getDynamicViewportHeight();
@@ -393,36 +389,30 @@
                 
                 // When keyboard is open, visualViewport.offsetTop will be > 0
                 if (viewportOffsetTop > 0) {
-                  // Keyboard is open - keep at top: 0 to avoid white blank space, only adjust height
-                  // Prevent scroll jump by saving scroll position first
-                  const messageDetailMessages = shadow.querySelector("#message-detail-messages");
-                  const savedScrollTop = messageDetailMessages ? messageDetailMessages.scrollTop : 0;
+                  // Keyboard is open - wait for keyboard animation to complete, then set correct height
+                  // Use window.innerHeight when keyboard is open (more reliable than visualViewport.height on first open)
+                  const getKeyboardOpenHeight = () => {
+                    return new Promise((resolve) => {
+                      setTimeout(() => {
+                        // Use window.innerHeight which gives visible area above keyboard
+                        const correctHeight = window.innerHeight;
+                        // Also check visualViewport as fallback
+                        const vpHeight = window.visualViewport ? window.visualViewport.height : correctHeight;
+                        // Use the smaller value to ensure no gap
+                        resolve(Math.min(correctHeight, vpHeight));
+                      }, 400);
+                    });
+                  };
                   
-                  // Set initial height immediately
+                  // Set initial height immediately to prevent white space
                   chatWindow.style.setProperty("top", "0", "important");
                   chatWindow.style.setProperty("height", `${viewportHeight}px`, "important");
                   chatWindow.style.setProperty("bottom", "auto", "important");
                   
-                  // Re-check and update height after keyboard animation completes (fixes first-time gap)
-                  setTimeout(() => {
-                    if (window.visualViewport && window.visualViewport.offsetTop > 0) {
-                      const updatedHeight = window.visualViewport.height;
-                      chatWindow.style.setProperty("height", `${updatedHeight}px`, "important");
-                    }
-                  }, 300);
-                  
-                  // Restore scroll position immediately and multiple times to prevent upward jump
-                  if (messageDetailMessages) {
-                    requestAnimationFrame(() => {
-                      messageDetailMessages.scrollTop = savedScrollTop;
-                    });
-                    setTimeout(() => {
-                      messageDetailMessages.scrollTop = savedScrollTop;
-                    }, 100);
-                    setTimeout(() => {
-                      messageDetailMessages.scrollTop = savedScrollTop;
-                    }, 300);
-                  }
+                  // Update to correct height after keyboard fully opens (fixes first-time gap)
+                  getKeyboardOpenHeight().then((correctHeight) => {
+                    chatWindow.style.setProperty("height", `${correctHeight}px`, "important");
+                  });
                 } else {
                   // Keyboard is closed - use full viewport
                   const dynamicHeight = getDynamicViewportHeight();
@@ -1994,36 +1984,14 @@
           autoResizeTextarea();
         });
 
-        // Prevent excessive upward scroll when input is focused (keyboard opens)
+        // Trigger height update when input is focused (keyboard opens) - fixes first-time gap
         messageDetailInput.addEventListener("focus", () => {
-          // Save current scroll position before browser auto-scrolls
-          const messageDetailMessages = shadow.querySelector("#message-detail-messages");
-          if (messageDetailMessages) {
-            const savedScroll = messageDetailMessages.scrollTop;
-            // Lock scroll position multiple times to override browser's auto-scroll
-            // Also trigger height update after keyboard fully opens to fix first-time gap
-            requestAnimationFrame(() => {
-              messageDetailMessages.scrollTop = savedScroll;
-              // Trigger viewport update after keyboard animation
-              if (mobileHeightUpdateHandler) {
-                setTimeout(() => {
-                  mobileHeightUpdateHandler();
-                }, 350);
-              }
-            });
+          // Trigger viewport update after keyboard animation completes
+          if (mobileHeightUpdateHandler) {
+            // Wait for keyboard to fully open before updating
             setTimeout(() => {
-              messageDetailMessages.scrollTop = savedScroll;
-            }, 50);
-            setTimeout(() => {
-              messageDetailMessages.scrollTop = savedScroll;
-            }, 150);
-            setTimeout(() => {
-              messageDetailMessages.scrollTop = savedScroll;
-              // Final height check after keyboard fully settled
-              if (mobileHeightUpdateHandler) {
-                mobileHeightUpdateHandler();
-              }
-            }, 400);
+              mobileHeightUpdateHandler();
+            }, 450);
           }
         });
 

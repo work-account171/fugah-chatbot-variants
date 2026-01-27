@@ -285,6 +285,25 @@
                     // Ensure no bottom spacing
                     chatWindow.style.setProperty("padding-bottom", "0", "important");
                     chatWindow.style.setProperty("margin-bottom", "0", "important");
+                    
+                    // iOS Fix: Ensure footer stays visible when keyboard is open
+                    const fugahFooter = shadow.querySelector("#fugah-footer");
+                    if (fugahFooter) {
+                      fugahFooter.style.setProperty("margin-top", "auto", "important");
+                      fugahFooter.style.setProperty("position", "relative", "important");
+                      fugahFooter.style.removeProperty("bottom");
+                    }
+                    
+                    // Ensure container uses flex layout for footer positioning
+                    const fugahMainContainer = shadow.querySelector("#fugah-main-container");
+                    if (fugahMainContainer) {
+                      fugahMainContainer.style.setProperty("display", "flex", "important");
+                      fugahMainContainer.style.setProperty("flex-direction", "column", "important");
+                      fugahMainContainer.style.setProperty("justify-content", "space-between", "important");
+                      fugahMainContainer.style.setProperty("height", "100%", "important");
+                      fugahMainContainer.style.setProperty("min-height", "100%", "important");
+                    }
+                    
                     console.log('Keyboard open - final height set to:', finalHeight);
                     
                     // Final check after a delay to ensure no gap
@@ -303,9 +322,34 @@
                 } else {
                   // Keyboard is closed - use full viewport
                   const dynamicHeight = getDynamicViewportHeight();
+                  // Remove inset to prevent browser auto-generation
+                  chatWindow.style.setProperty("inset", "unset", "important");
+                  chatWindow.style.removeProperty("inset");
                   chatWindow.style.setProperty("top", "0", "important");
-                  chatWindow.style.setProperty("height", `${dynamicHeight}px`, "important");
+                  chatWindow.style.setProperty("left", "0", "important");
+                  chatWindow.style.setProperty("right", "0", "important");
                   chatWindow.style.setProperty("bottom", "0", "important");
+                  chatWindow.style.setProperty("width", "100vw", "important");
+                  chatWindow.style.setProperty("height", `${dynamicHeight}px`, "important");
+                  
+                  // iOS Fix: Ensure footer returns to bottom when keyboard closes
+                  const fugahFooter = shadow.querySelector("#fugah-footer");
+                  if (fugahFooter) {
+                    fugahFooter.style.setProperty("margin-top", "auto", "important");
+                    fugahFooter.style.setProperty("position", "relative", "important");
+                    fugahFooter.style.removeProperty("bottom");
+                  }
+                  
+                  // Ensure container uses flex layout for footer positioning
+                  const fugahMainContainer = shadow.querySelector("#fugah-main-container");
+                  if (fugahMainContainer) {
+                    fugahMainContainer.style.setProperty("display", "flex", "important");
+                    fugahMainContainer.style.setProperty("flex-direction", "column", "important");
+                    fugahMainContainer.style.setProperty("justify-content", "space-between", "important");
+                    fugahMainContainer.style.setProperty("height", "100%", "important");
+                    fugahMainContainer.style.setProperty("min-height", "100%", "important");
+                  }
+                  
                   console.log('Keyboard closed - full viewport height:', dynamicHeight);
                 }
               } else {
@@ -485,6 +529,24 @@
                     chatWindow.style.setProperty("padding-bottom", "0", "important");
                     chatWindow.style.setProperty("margin-bottom", "0", "important");
                     
+                    // iOS Fix: Ensure footer stays visible when keyboard is open
+                    const fugahFooter = shadow.querySelector("#fugah-footer");
+                    if (fugahFooter) {
+                      fugahFooter.style.setProperty("margin-top", "auto", "important");
+                      fugahFooter.style.setProperty("position", "relative", "important");
+                      fugahFooter.style.removeProperty("bottom");
+                    }
+                    
+                    // Ensure container uses flex layout for footer positioning
+                    const fugahMainContainer = shadow.querySelector("#fugah-main-container");
+                    if (fugahMainContainer) {
+                      fugahMainContainer.style.setProperty("display", "flex", "important");
+                      fugahMainContainer.style.setProperty("flex-direction", "column", "important");
+                      fugahMainContainer.style.setProperty("justify-content", "space-between", "important");
+                      fugahMainContainer.style.setProperty("height", "100%", "important");
+                      fugahMainContainer.style.setProperty("min-height", "100%", "important");
+                    }
+                    
                     // Final check after a delay to ensure no gap
                     setTimeout(() => {
                       const finalCheck = window.innerHeight;
@@ -498,9 +560,33 @@
                 } else {
                   // Keyboard is closed - use full viewport
                   const dynamicHeight = getDynamicViewportHeight();
+                  // Remove inset to prevent browser auto-generation
+                  chatWindow.style.setProperty("inset", "unset", "important");
+                  chatWindow.style.removeProperty("inset");
                   chatWindow.style.setProperty("top", "0", "important");
-                  chatWindow.style.setProperty("height", `${dynamicHeight}px`, "important");
+                  chatWindow.style.setProperty("left", "0", "important");
+                  chatWindow.style.setProperty("right", "0", "important");
                   chatWindow.style.setProperty("bottom", "0", "important");
+                  chatWindow.style.setProperty("width", "100vw", "important");
+                  chatWindow.style.setProperty("height", `${dynamicHeight}px`, "important");
+                  
+                  // iOS Fix: Ensure footer returns to bottom when keyboard closes
+                  const fugahFooter = shadow.querySelector("#fugah-footer");
+                  if (fugahFooter) {
+                    fugahFooter.style.setProperty("margin-top", "auto", "important");
+                    fugahFooter.style.setProperty("position", "relative", "important");
+                    fugahFooter.style.removeProperty("bottom");
+                  }
+                  
+                  // Ensure container uses flex layout for footer positioning
+                  const fugahMainContainer = shadow.querySelector("#fugah-main-container");
+                  if (fugahMainContainer) {
+                    fugahMainContainer.style.setProperty("display", "flex", "important");
+                    fugahMainContainer.style.setProperty("flex-direction", "column", "important");
+                    fugahMainContainer.style.setProperty("justify-content", "space-between", "important");
+                    fugahMainContainer.style.setProperty("height", "100%", "important");
+                    fugahMainContainer.style.setProperty("min-height", "100%", "important");
+                  }
                 }
               } else {
                 // Fallback for browsers without visualViewport support
@@ -1108,6 +1194,37 @@
           // Hide placeholder when focused
           if (customPlaceholder) {
             customPlaceholder.style.display = "none";
+          }
+        });
+        
+        // iOS Fix: Ensure footer returns to bottom when phone input loses focus (keyboard closes)
+        phoneInput.addEventListener("blur", () => {
+          if (checkIsMobile()) {
+            // Wait for keyboard to fully close, then update
+            setTimeout(() => {
+              if (mobileHeightUpdateHandler) {
+                mobileHeightUpdateHandler();
+              }
+              
+              // Force footer to bottom on iOS
+              const fugahFooter = shadow.querySelector("#fugah-footer");
+              const fugahMainContainer = shadow.querySelector("#fugah-main-container");
+              
+              if (fugahFooter && fugahMainContainer) {
+                // Ensure container has proper flex layout
+                fugahMainContainer.style.setProperty("display", "flex", "important");
+                fugahMainContainer.style.setProperty("flex-direction", "column", "important");
+                fugahMainContainer.style.setProperty("justify-content", "space-between", "important");
+                fugahMainContainer.style.setProperty("height", "100%", "important");
+                fugahMainContainer.style.setProperty("min-height", "100%", "important");
+                
+                // Force footer to bottom
+                fugahFooter.style.setProperty("margin-top", "auto", "important");
+                fugahFooter.style.setProperty("position", "relative", "important");
+                fugahFooter.style.setProperty("flex-shrink", "0", "important");
+                fugahFooter.style.removeProperty("bottom");
+              }
+            }, 300);
           }
         });
 
@@ -2080,6 +2197,35 @@
             setTimeout(() => {
               mobileHeightUpdateHandler();
             }, 450);
+          }
+        });
+        
+        // iOS Fix: Ensure footer returns to bottom when keyboard closes (input loses focus)
+        messageDetailInput.addEventListener("blur", () => {
+          if (mobileHeightUpdateHandler && checkIsMobile()) {
+            // Wait for keyboard to fully close, then update
+            setTimeout(() => {
+              mobileHeightUpdateHandler();
+              
+              // Force footer to bottom on iOS
+              const fugahFooter = shadow.querySelector("#fugah-footer");
+              const fugahMainContainer = shadow.querySelector("#fugah-main-container");
+              
+              if (fugahFooter && fugahMainContainer) {
+                // Ensure container has proper flex layout
+                fugahMainContainer.style.setProperty("display", "flex", "important");
+                fugahMainContainer.style.setProperty("flex-direction", "column", "important");
+                fugahMainContainer.style.setProperty("justify-content", "space-between", "important");
+                fugahMainContainer.style.setProperty("height", "100%", "important");
+                fugahMainContainer.style.setProperty("min-height", "100%", "important");
+                
+                // Force footer to bottom
+                fugahFooter.style.setProperty("margin-top", "auto", "important");
+                fugahFooter.style.setProperty("position", "relative", "important");
+                fugahFooter.style.setProperty("flex-shrink", "0", "important");
+                fugahFooter.style.removeProperty("bottom");
+              }
+            }, 300);
           }
         });
 

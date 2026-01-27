@@ -1627,7 +1627,7 @@ border-radius: 16px;
   }
   
   .message-detail-input-container {
-    background-color: #f0f0f0 !important; /* Match parent to eliminate white gap */
+   /* background-color: #f0f0f0 !important;  Match parent to eliminate white gap */
     margin-bottom: 0 !important;
   }
   
@@ -1654,10 +1654,22 @@ border-radius: 16px;
     margin-bottom: 0 !important;
   }
   
-  /* Ensure footer has no bottom spacing on mobile */
+  /* iOS Fix: Ensure footer stays at bottom on mobile */
   #fugah-footer {
     padding-bottom: 0 !important;
     margin-bottom: 0 !important;
+    margin-top: auto !important;
+    position: relative !important;
+    flex-shrink: 0 !important;
+  }
+  
+  /* iOS Fix: Ensure main container uses flex for footer positioning */
+  #fugah-main-container {
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: space-between !important;
+    height: 100% !important;
+    min-height: 100% !important;
   }
 }
 

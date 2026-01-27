@@ -197,6 +197,12 @@
           console.log('Mobile check - width:', width, 'isMobileWidth:', isMobileWidth, 'isMobileMedia:', isMobileMedia, 'isMobile:', isMobile);
           return isMobile;
         };
+        
+        // Detect iOS specifically for iPhone/iPad fixes
+        const checkIsIOS = () => {
+          return /iPad|iPhone|iPod/.test(navigator.userAgent) || 
+                 (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+        };
 
         // Function to get dynamic viewport height that accounts for browser bars
         const getDynamicViewportHeight = () => {
@@ -262,8 +268,13 @@
                   const initialHeight = window.innerHeight;
                   
                   // CRITICAL: Remove inset and bottom to prevent gap - only use top positioning
+                  // iOS Fix: More aggressive inset removal for iPhone
                   chatWindow.style.setProperty("inset", "unset", "important");
+                  chatWindow.style.setProperty("inset-block", "unset", "important");
+                  chatWindow.style.setProperty("inset-inline", "unset", "important");
                   chatWindow.style.removeProperty("inset");
+                  chatWindow.style.removeProperty("inset-block");
+                  chatWindow.style.removeProperty("inset-inline");
                   chatWindow.style.removeProperty("bottom"); // Don't set bottom - causes gap
                   chatWindow.style.setProperty("top", "0", "important");
                   chatWindow.style.setProperty("left", "0", "important");
@@ -271,21 +282,45 @@
                   chatWindow.style.setProperty("height", `${initialHeight}px`, "important");
                   chatWindow.style.setProperty("width", "100vw", "important");
                   
+                  // iOS Fix: Force remove any remaining bottom positioning
+                  if (checkIsIOS()) {
+                    chatWindow.style.setProperty("bottom", "auto", "important");
+                    setTimeout(() => {
+                      chatWindow.style.removeProperty("bottom");
+                    }, 0);
+                  }
+                  
                   // Update to correct height after keyboard fully opens (fixes first-time gap)
                   getKeyboardOpenHeight().then((correctHeight) => {
-                    // Subtract 1px to ensure no gap (accounts for rounding/borders)
-                    const finalHeight = Math.max(correctHeight - 1, 300);
+                    // iOS Fix: For iPhone, use exact window.innerHeight without subtracting
+                    // iOS Safari is more precise, subtracting causes gap
+                    const isIOS = checkIsIOS();
+                    const finalHeight = isIOS ? Math.max(correctHeight, 300) : Math.max(correctHeight - 1, 300);
                     
                     // Remove inset again when updating height (browser may regenerate it)
+                    // iOS Fix: More aggressive inset removal
                     chatWindow.style.setProperty("inset", "unset", "important");
+                    chatWindow.style.setProperty("inset-block", "unset", "important");
+                    chatWindow.style.setProperty("inset-inline", "unset", "important");
                     chatWindow.style.removeProperty("inset");
+                    chatWindow.style.removeProperty("inset-block");
+                    chatWindow.style.removeProperty("inset-inline");
                     chatWindow.style.removeProperty("bottom");
+                    
+                    // iOS Fix: Force bottom to auto then remove
+                    if (isIOS) {
+                      chatWindow.style.setProperty("bottom", "auto", "important");
+                      setTimeout(() => {
+                        chatWindow.style.removeProperty("bottom");
+                      }, 0);
+                    }
+                    
                     chatWindow.style.setProperty("height", `${finalHeight}px`, "important");
                     chatWindow.style.setProperty("max-height", `${finalHeight}px`, "important");
                     // Ensure no bottom spacing
                     chatWindow.style.setProperty("padding-bottom", "0", "important");
                     chatWindow.style.setProperty("margin-bottom", "0", "important");
-                    console.log('Keyboard open - final height set to:', finalHeight);
+                    console.log('Keyboard open - final height set to:', finalHeight, 'isIOS:', isIOS);
                     
                     // Final check after a delay to ensure no gap
                     setTimeout(() => {
@@ -303,23 +338,82 @@
                 } else {
                   // Keyboard is closed - use full viewport
                   const dynamicHeight = getDynamicViewportHeight();
+                  const isIOS = checkIsIOS();
+                  
                   // Remove inset to prevent browser auto-generation
                   chatWindow.style.setProperty("inset", "unset", "important");
+                  chatWindow.style.setProperty("inset-block", "unset", "important");
+                  chatWindow.style.setProperty("inset-inline", "unset", "important");
                   chatWindow.style.removeProperty("inset");
+                  chatWindow.style.removeProperty("inset-block");
+                  chatWindow.style.removeProperty("inset-inline");
                   chatWindow.style.setProperty("top", "0", "important");
                   chatWindow.style.setProperty("left", "0", "important");
                   chatWindow.style.setProperty("right", "0", "important");
                   chatWindow.style.setProperty("bottom", "0", "important");
                   chatWindow.style.setProperty("width", "100vw", "important");
                   chatWindow.style.setProperty("height", `${dynamicHeight}px`, "important");
+                  
+                  // iOS Fix: Ensure footer returns to bottom when keyboard closes
+                  if (isIOS) {
+                    const fugahFooter = shadow.querySelector("#fugah-footer");
+                    const fugahMainContainer = shadow.querySelector("#fugah-main-container");
+                    
+                    if (fugahFooter && fugahMainContainer) {
+                      // Ensure container has proper flex layout
+                      fugahMainContainer.style.setProperty("display", "flex", "important");
+                      fugahMainContainer.style.setProperty("flex-direction", "column", "important");
+                      fugahMainContainer.style.setProperty("justify-content", "space-between", "important");
+                      fugahMainContainer.style.setProperty("height", "100%", "important");
+                      fugahMainContainer.style.setProperty("min-height", "100%", "important");
+                      
+                      // Force footer to bottom
+                      fugahFooter.style.setProperty("margin-top", "auto", "important");
+                      fugahFooter.style.setProperty("position", "relative", "important");
+                      fugahFooter.style.setProperty("flex-shrink", "0", "important");
+                      fugahFooter.style.removeProperty("bottom");
+                    }
+                  }
+                  
                   console.log('Keyboard closed - full viewport height:', dynamicHeight);
                 }
               } else {
                 // Fallback for browsers without visualViewport support
                 const dynamicHeight = getDynamicViewportHeight();
+                const isIOS = checkIsIOS();
+                
+                // iOS Fix: Remove inset in fallback too
+                if (isIOS) {
+                  chatWindow.style.setProperty("inset", "unset", "important");
+                  chatWindow.style.setProperty("inset-block", "unset", "important");
+                  chatWindow.style.setProperty("inset-inline", "unset", "important");
+                  chatWindow.style.removeProperty("inset");
+                  chatWindow.style.removeProperty("inset-block");
+                  chatWindow.style.removeProperty("inset-inline");
+                }
+                
                 chatWindow.style.setProperty("height", `${dynamicHeight}px`, "important");
                 chatWindow.style.setProperty("top", "0", "important");
                 chatWindow.style.setProperty("bottom", "0", "important");
+                
+                // iOS Fix: Ensure footer positioning in fallback
+                if (isIOS) {
+                  const fugahFooter = shadow.querySelector("#fugah-footer");
+                  const fugahMainContainer = shadow.querySelector("#fugah-main-container");
+                  
+                  if (fugahFooter && fugahMainContainer) {
+                    fugahMainContainer.style.setProperty("display", "flex", "important");
+                    fugahMainContainer.style.setProperty("flex-direction", "column", "important");
+                    fugahMainContainer.style.setProperty("justify-content", "space-between", "important");
+                    fugahMainContainer.style.setProperty("height", "100%", "important");
+                    fugahMainContainer.style.setProperty("min-height", "100%", "important");
+                    
+                    fugahFooter.style.setProperty("margin-top", "auto", "important");
+                    fugahFooter.style.setProperty("position", "relative", "important");
+                    fugahFooter.style.setProperty("flex-shrink", "0", "important");
+                  }
+                }
+                
                 console.log('Updated mobile height to:', dynamicHeight);
               }
             }
@@ -459,13 +553,28 @@
                   };
                   
                   // Set initial height immediately using window.innerHeight (most accurate)
-                  // Subtract 1px to account for any rounding/border issues and ensure no gap
-                  const initialHeight = Math.max(window.innerHeight - 1, 300);
+                  const isIOS = checkIsIOS();
+                  // iOS Fix: Don't subtract for iOS, it causes gap
+                  const initialHeight = isIOS ? Math.max(window.innerHeight, 300) : Math.max(window.innerHeight - 1, 300);
                   
                   // CRITICAL: Remove inset and bottom to prevent gap - only use top positioning
+                  // iOS Fix: More aggressive inset removal
                   chatWindow.style.setProperty("inset", "unset", "important");
+                  chatWindow.style.setProperty("inset-block", "unset", "important");
+                  chatWindow.style.setProperty("inset-inline", "unset", "important");
                   chatWindow.style.removeProperty("inset");
+                  chatWindow.style.removeProperty("inset-block");
+                  chatWindow.style.removeProperty("inset-inline");
                   chatWindow.style.removeProperty("bottom"); // Don't set bottom - causes gap
+                  
+                  // iOS Fix: Force remove bottom
+                  if (isIOS) {
+                    chatWindow.style.setProperty("bottom", "auto", "important");
+                    setTimeout(() => {
+                      chatWindow.style.removeProperty("bottom");
+                    }, 0);
+                  }
+                  
                   chatWindow.style.setProperty("top", "0", "important");
                   chatWindow.style.setProperty("left", "0", "important");
                   chatWindow.style.setProperty("right", "0", "important");
@@ -478,13 +587,27 @@
                   
                   // Update to correct height after keyboard fully opens (fixes first-time gap)
                   getKeyboardOpenHeight().then((correctHeight) => {
-                    // Subtract 1px to ensure no gap (accounts for rounding/borders)
-                    const finalHeight = Math.max(correctHeight - 1, 300);
+                    // iOS Fix: For iPhone, use exact window.innerHeight without subtracting
+                    const finalHeight = isIOS ? Math.max(correctHeight, 300) : Math.max(correctHeight - 1, 300);
                     
                     // Remove inset again when updating height (browser may regenerate it)
+                    // iOS Fix: More aggressive inset removal
                     chatWindow.style.setProperty("inset", "unset", "important");
+                    chatWindow.style.setProperty("inset-block", "unset", "important");
+                    chatWindow.style.setProperty("inset-inline", "unset", "important");
                     chatWindow.style.removeProperty("inset");
+                    chatWindow.style.removeProperty("inset-block");
+                    chatWindow.style.removeProperty("inset-inline");
                     chatWindow.style.removeProperty("bottom");
+                    
+                    // iOS Fix: Force bottom to auto then remove
+                    if (isIOS) {
+                      chatWindow.style.setProperty("bottom", "auto", "important");
+                      setTimeout(() => {
+                        chatWindow.style.removeProperty("bottom");
+                      }, 0);
+                    }
+                    
                     chatWindow.style.setProperty("height", `${finalHeight}px`, "important");
                     chatWindow.style.setProperty("max-height", `${finalHeight}px`, "important");
                     // Ensure no bottom spacing
@@ -494,7 +617,8 @@
                     // Final check after a delay to ensure no gap
                     setTimeout(() => {
                       const finalCheck = window.innerHeight;
-                      const adjustedHeight = Math.max(finalCheck - 1, 300);
+                      // iOS Fix: Don't subtract for final check on iOS
+                      const adjustedHeight = isIOS ? Math.max(finalCheck, 300) : Math.max(finalCheck - 1, 300);
                       if (Math.abs(finalCheck - finalHeight) > 5) {
                         chatWindow.style.setProperty("height", `${adjustedHeight}px`, "important");
                         chatWindow.style.setProperty("max-height", `${adjustedHeight}px`, "important");
@@ -504,22 +628,79 @@
                 } else {
                   // Keyboard is closed - use full viewport
                   const dynamicHeight = getDynamicViewportHeight();
+                  const isIOS = checkIsIOS();
+                  
                   // Remove inset to prevent browser auto-generation
                   chatWindow.style.setProperty("inset", "unset", "important");
+                  chatWindow.style.setProperty("inset-block", "unset", "important");
+                  chatWindow.style.setProperty("inset-inline", "unset", "important");
                   chatWindow.style.removeProperty("inset");
+                  chatWindow.style.removeProperty("inset-block");
+                  chatWindow.style.removeProperty("inset-inline");
                   chatWindow.style.setProperty("top", "0", "important");
                   chatWindow.style.setProperty("left", "0", "important");
                   chatWindow.style.setProperty("right", "0", "important");
                   chatWindow.style.setProperty("bottom", "0", "important");
                   chatWindow.style.setProperty("width", "100vw", "important");
                   chatWindow.style.setProperty("height", `${dynamicHeight}px`, "important");
+                  
+                  // iOS Fix: Ensure footer returns to bottom when keyboard closes
+                  if (isIOS) {
+                    const fugahFooter = shadow.querySelector("#fugah-footer");
+                    const fugahMainContainer = shadow.querySelector("#fugah-main-container");
+                    
+                    if (fugahFooter && fugahMainContainer) {
+                      // Ensure container has proper flex layout
+                      fugahMainContainer.style.setProperty("display", "flex", "important");
+                      fugahMainContainer.style.setProperty("flex-direction", "column", "important");
+                      fugahMainContainer.style.setProperty("justify-content", "space-between", "important");
+                      fugahMainContainer.style.setProperty("height", "100%", "important");
+                      fugahMainContainer.style.setProperty("min-height", "100%", "important");
+                      
+                      // Force footer to bottom
+                      fugahFooter.style.setProperty("margin-top", "auto", "important");
+                      fugahFooter.style.setProperty("position", "relative", "important");
+                      fugahFooter.style.setProperty("flex-shrink", "0", "important");
+                      fugahFooter.style.removeProperty("bottom");
+                    }
+                  }
                 }
               } else {
                 // Fallback for browsers without visualViewport support
                 const dynamicHeight = getDynamicViewportHeight();
+                const isIOS = checkIsIOS();
+                
+                // iOS Fix: Remove inset in fallback too
+                if (isIOS) {
+                  chatWindow.style.setProperty("inset", "unset", "important");
+                  chatWindow.style.setProperty("inset-block", "unset", "important");
+                  chatWindow.style.setProperty("inset-inline", "unset", "important");
+                  chatWindow.style.removeProperty("inset");
+                  chatWindow.style.removeProperty("inset-block");
+                  chatWindow.style.removeProperty("inset-inline");
+                }
+                
                 chatWindow.style.setProperty("top", "0", "important");
                 chatWindow.style.setProperty("height", `${dynamicHeight}px`, "important");
                 chatWindow.style.setProperty("bottom", "0", "important");
+                
+                // iOS Fix: Ensure footer positioning in fallback
+                if (isIOS) {
+                  const fugahFooter = shadow.querySelector("#fugah-footer");
+                  const fugahMainContainer = shadow.querySelector("#fugah-main-container");
+                  
+                  if (fugahFooter && fugahMainContainer) {
+                    fugahMainContainer.style.setProperty("display", "flex", "important");
+                    fugahMainContainer.style.setProperty("flex-direction", "column", "important");
+                    fugahMainContainer.style.setProperty("justify-content", "space-between", "important");
+                    fugahMainContainer.style.setProperty("height", "100%", "important");
+                    fugahMainContainer.style.setProperty("min-height", "100%", "important");
+                    
+                    fugahFooter.style.setProperty("margin-top", "auto", "important");
+                    fugahFooter.style.setProperty("position", "relative", "important");
+                    fugahFooter.style.setProperty("flex-shrink", "0", "important");
+                  }
+                }
               }
             };
             
@@ -1120,6 +1301,37 @@
           // Hide placeholder when focused
           if (customPlaceholder) {
             customPlaceholder.style.display = "none";
+          }
+        });
+        
+        // iOS Fix: Ensure footer returns to bottom when phone input loses focus (keyboard closes)
+        phoneInput.addEventListener("blur", () => {
+          if (checkIsMobile() && checkIsIOS()) {
+            // Wait for keyboard to fully close, then update
+            setTimeout(() => {
+              if (mobileHeightUpdateHandler) {
+                mobileHeightUpdateHandler();
+              }
+              
+              // Force footer to bottom on iOS
+              const fugahFooter = shadow.querySelector("#fugah-footer");
+              const fugahMainContainer = shadow.querySelector("#fugah-main-container");
+              
+              if (fugahFooter && fugahMainContainer) {
+                // Ensure container has proper flex layout
+                fugahMainContainer.style.setProperty("display", "flex", "important");
+                fugahMainContainer.style.setProperty("flex-direction", "column", "important");
+                fugahMainContainer.style.setProperty("justify-content", "space-between", "important");
+                fugahMainContainer.style.setProperty("height", "100%", "important");
+                fugahMainContainer.style.setProperty("min-height", "100%", "important");
+                
+                // Force footer to bottom
+                fugahFooter.style.setProperty("margin-top", "auto", "important");
+                fugahFooter.style.setProperty("position", "relative", "important");
+                fugahFooter.style.setProperty("flex-shrink", "0", "important");
+                fugahFooter.style.removeProperty("bottom");
+              }
+            }, 350);
           }
         });
 
@@ -2088,10 +2300,42 @@
         messageDetailInput.addEventListener("focus", () => {
           // Trigger viewport update after keyboard animation completes
           if (mobileHeightUpdateHandler) {
-            // Wait for keyboard to fully open before updating
+            // iOS Fix: Longer delay for iPhone keyboard animation
+            const delay = checkIsIOS() ? 500 : 450;
             setTimeout(() => {
               mobileHeightUpdateHandler();
-            }, 450);
+            }, delay);
+          }
+        });
+        
+        // iOS Fix: Ensure footer returns to bottom when keyboard closes (input loses focus)
+        messageDetailInput.addEventListener("blur", () => {
+          if (checkIsMobile() && checkIsIOS()) {
+            // Wait for keyboard to fully close, then update
+            setTimeout(() => {
+              if (mobileHeightUpdateHandler) {
+                mobileHeightUpdateHandler();
+              }
+              
+              // Force footer to bottom on iOS
+              const fugahFooter = shadow.querySelector("#fugah-footer");
+              const fugahMainContainer = shadow.querySelector("#fugah-main-container");
+              
+              if (fugahFooter && fugahMainContainer) {
+                // Ensure container has proper flex layout
+                fugahMainContainer.style.setProperty("display", "flex", "important");
+                fugahMainContainer.style.setProperty("flex-direction", "column", "important");
+                fugahMainContainer.style.setProperty("justify-content", "space-between", "important");
+                fugahMainContainer.style.setProperty("height", "100%", "important");
+                fugahMainContainer.style.setProperty("min-height", "100%", "important");
+                
+                // Force footer to bottom
+                fugahFooter.style.setProperty("margin-top", "auto", "important");
+                fugahFooter.style.setProperty("position", "relative", "important");
+                fugahFooter.style.setProperty("flex-shrink", "0", "important");
+                fugahFooter.style.removeProperty("bottom");
+              }
+            }, 350);
           }
         });
 

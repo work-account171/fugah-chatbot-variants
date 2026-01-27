@@ -1640,6 +1640,8 @@ border-radius: 16px;
   /* inset: 0px forces element to stretch top-to-bottom, creating gap when keyboard opens */
   #chat-window.chat-window-open {
     inset: unset !important;
+    inset-block: unset !important;
+    inset-inline: unset !important;
     top: 0 !important;
     left: 0 !important;
     right: 0 !important;
@@ -1658,6 +1660,24 @@ border-radius: 16px;
   #fugah-footer {
     padding-bottom: 0 !important;
     margin-bottom: 0 !important;
+  }
+  
+  /* iOS Fix: Ensure footer stays at bottom and returns properly */
+  @supports (-webkit-touch-callout: none) {
+    /* This targets iOS Safari specifically */
+    #fugah-footer {
+      margin-top: auto !important;
+      position: relative !important;
+      flex-shrink: 0 !important;
+    }
+    
+    #fugah-main-container {
+      display: flex !important;
+      flex-direction: column !important;
+      justify-content: space-between !important;
+      height: 100% !important;
+      min-height: 100% !important;
+    }
   }
 }
 

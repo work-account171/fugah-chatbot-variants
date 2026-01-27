@@ -1762,7 +1762,7 @@ border-radius: 16px;
 @media screen and (max-width: 767px) {
   .message-detail-input-container {
     position: relative !important;
-    bottom: auto !important;
+    /* bottom: auto !important; */
   }
 }
 

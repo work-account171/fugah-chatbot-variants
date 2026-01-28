@@ -27,6 +27,34 @@
                "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
 
+/* Remove blue tap highlight on mobile for all interactive elements */
+#chat-window * {
+  -webkit-tap-highlight-color: transparent !important;
+  -webkit-touch-callout: none !important;
+  tap-highlight-color: transparent !important;
+}
+
+/* Specifically remove tap highlight for buttons, tabs, icons, and links */
+#chat-window button,
+#chat-window .fugah-footer-tab-item,
+#chat-window .close-button,
+#chat-window .fugah-send-button,
+#chat-window .country-code-dropdown-btn,
+#chat-window .message-detail-send-btn,
+#chat-window .message-detail-file-label,
+#chat-window .fugah-dropdown-trigger,
+#chat-window .fugah-dropdown-item,
+#chat-window .rating-emoji,
+#chat-window .confirmation-btn,
+#chat-window img,
+#chat-window a,
+#chat-window .message-back-icon {
+  -webkit-tap-highlight-color: transparent !important;
+  -webkit-touch-callout: none !important;
+  tap-highlight-color: transparent !important;
+  outline: none !important;
+}
+
 
 
 /* ========================================
@@ -1660,6 +1688,35 @@ border-radius: 16px;
   #fugah-footer {
     padding-bottom: 0 !important;
     margin-bottom: 0 !important;
+  }
+  
+  /* Remove blue tap highlight on mobile for all interactive elements */
+  * {
+    -webkit-tap-highlight-color: transparent !important;
+    -webkit-touch-callout: none !important;
+    tap-highlight-color: transparent !important;
+  }
+  
+  /* Specifically remove tap highlight for buttons, tabs, and icons */
+  button,
+  .fugah-footer-tab-item,
+  .close-button,
+  .fugah-send-button,
+  .country-code-dropdown-btn,
+  .message-detail-send-btn,
+  .message-detail-file-label,
+  .fugah-dropdown-trigger,
+  .fugah-dropdown-item,
+  .rating-emoji,
+  .confirmation-btn,
+  img,
+  a {
+    -webkit-tap-highlight-color: transparent !important;
+    -webkit-touch-callout: none !important;
+    tap-highlight-color: transparent !important;
+    outline: none !important;
+    -webkit-user-select: none !important;
+    user-select: none !important;
   }
 }
 

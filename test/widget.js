@@ -184,10 +184,108 @@
         isOpen = !isOpen;
         chatWindow.style.display = isOpen ? "flex" : "none";
         
+        // ========================================
+        // PREVENT BACKGROUND PAGE SCROLLING
+        // ========================================
+        // When chat window is open, prevent the background page (images/content behind chat)
+        // from scrolling on all devices (desktop, mobile, tablets)
+        // This ensures the background remains static while user interacts with chat
+        if (isOpen) {
+          // Store current scroll position before preventing scroll
+          // This allows us to restore the exact scroll position when chat closes
+          // Using multiple fallbacks for cross-browser compatibility
+          const scrollY = window.scrollY || window.pageYOffset || document.documentElement.scrollTop;
+          window.fugahChatScrollPosition = scrollY;
+          
+          // Add CSS class to body and html for additional scroll prevention via CSS
+          // This works together with inline styles for maximum compatibility
+          document.body.classList.add('chat-open');
+          document.documentElement.classList.add('chat-open');
+          
+          // Prevent scrolling on body and html elements
+          // position: fixed prevents scrolling while maintaining visual position
+          // top: -scrollY keeps the page visually in the same place
+          document.body.style.overflow = 'hidden';           // Hide scrollbars
+          document.body.style.position = 'fixed';           // Lock body position
+          document.body.style.width = '100%';                // Maintain full width
+          document.body.style.top = `-${scrollY}px`;        // Offset by scroll amount to keep visual position
+          document.body.style.left = '0';                    // Prevent horizontal shift
+          document.body.style.right = '0';                    // Prevent horizontal shift
+          document.documentElement.style.overflow = 'hidden'; // Also prevent html element scrolling
+          document.documentElement.style.position = 'fixed';  // Lock html position (mobile fix)
+          document.documentElement.style.width = '100%';      // Maintain full width
+          document.documentElement.style.height = '100%';     // Lock height
+          
+          // ========================================
+          // MOBILE-SPECIFIC: Additional touch scroll prevention
+          // ========================================
+          // On mobile devices, add touch event listeners to prevent background scrolling
+          // This is especially important for iOS Safari which can still scroll with touch gestures
+          const preventBackgroundScroll = (e) => {
+            // Only prevent if touch is outside the chat window
+            const chatWindowElement = document.querySelector('#chat-window');
+            if (chatWindowElement && !chatWindowElement.contains(e.target)) {
+              e.preventDefault();
+              e.stopPropagation();
+              return false;
+            }
+          };
+          
+          // Store handler for cleanup
+          window.fugahBackgroundScrollPrevention = preventBackgroundScroll;
+          
+          // Add touch event listeners to prevent background scrolling on mobile
+          // Use capture phase to catch events before they bubble
+          document.addEventListener('touchmove', preventBackgroundScroll, { passive: false, capture: true });
+          document.addEventListener('touchstart', preventBackgroundScroll, { passive: false, capture: true });
+          document.body.addEventListener('touchmove', preventBackgroundScroll, { passive: false });
+          document.body.addEventListener('touchstart', preventBackgroundScroll, { passive: false });
+        } else {
+          // Restore scrolling when chat is closed
+          // Get the stored scroll position (default to 0 if not set)
+          const scrollY = window.fugahChatScrollPosition || 0;
+          
+          // Remove touch event listeners if they exist
+          if (window.fugahBackgroundScrollPrevention) {
+            document.removeEventListener('touchmove', window.fugahBackgroundScrollPrevention, { capture: true });
+            document.removeEventListener('touchstart', window.fugahBackgroundScrollPrevention, { capture: true });
+            document.body.removeEventListener('touchmove', window.fugahBackgroundScrollPrevention);
+            document.body.removeEventListener('touchstart', window.fugahBackgroundScrollPrevention);
+            window.fugahBackgroundScrollPrevention = undefined;
+          }
+          
+          // Remove CSS classes that prevent scrolling
+          document.body.classList.remove('chat-open');
+          document.documentElement.classList.remove('chat-open');
+          
+          // Remove all scroll prevention styles to restore normal scrolling
+          document.body.style.overflow = '';           // Restore default overflow
+          document.body.style.position = '';           // Restore default position
+          document.body.style.width = '';               // Restore default width
+          document.body.style.top = '';                 // Remove top offset
+          document.body.style.left = '';                // Remove left
+          document.body.style.right = '';                // Remove right
+          document.documentElement.style.overflow = '';  // Restore html overflow
+          document.documentElement.style.position = '';   // Restore html position
+          document.documentElement.style.width = '';       // Restore html width
+          document.documentElement.style.height = '';      // Restore html height
+          
+          // Restore the page to its original scroll position
+          // This ensures user returns to where they were before opening chat
+          window.scrollTo(0, scrollY);
+          window.fugahChatScrollPosition = undefined;  // Clear stored position
+        }
+        // ========================================
+        // END PREVENT BACKGROUND PAGE SCROLLING
+        // ========================================
+        
         // Get the body element with fugah-body class (from main document, not shadow DOM)
         const fugahBody = document.querySelector('.fugah-body');
         
-        // Helper function to check if device is mobile
+        // ========================================
+        // DEVICE DETECTION FUNCTIONS
+        // ========================================
+        // Helper function to check if device is mobile (max-width: 767px)
         const checkIsMobile = () => {
           // Check both window width and matchMedia for better mobile detection
           const width = window.innerWidth;
@@ -197,6 +295,34 @@
           console.log('Mobile check - width:', width, 'isMobileWidth:', isMobileWidth, 'isMobileMedia:', isMobileMedia, 'isMobile:', isMobile);
           return isMobile;
         };
+
+        // Helper function to check if device is tablet (600px to 991px)
+        // Tablets include iPads and Android tablets
+        const checkIsTablet = () => {
+          const width = window.innerWidth;
+          const isTabletWidth = width >= 600 && width <= 991;
+          const isTabletMedia = window.matchMedia && window.matchMedia('(min-width: 600px) and (max-width: 991px)').matches;
+          const isTablet = isTabletWidth || isTabletMedia;
+          console.log('Tablet check - width:', width, 'isTabletWidth:', isTabletWidth, 'isTabletMedia:', isTabletMedia, 'isTablet:', isTablet);
+          return isTablet;
+        };
+
+        // Helper function to check if device is mobile OR tablet
+        // This is used for keyboard handling - both mobile and tablets need keyboard adjustments
+        // Mobile: max-width: 767px
+        // Tablet: 600px to 991px
+        // Combined: max-width: 991px (covers both mobile and tablets)
+        const checkIsMobileOrTablet = () => {
+          const width = window.innerWidth;
+          const isMobileOrTabletWidth = width <= 991;
+          const isMobileOrTabletMedia = window.matchMedia && window.matchMedia('(max-width: 991px)').matches;
+          const isMobileOrTablet = isMobileOrTabletWidth || isMobileOrTabletMedia;
+          console.log('Mobile/Tablet check - width:', width, 'isMobileOrTabletWidth:', isMobileOrTabletWidth, 'isMobileOrTabletMedia:', isMobileOrTabletMedia, 'isMobileOrTablet:', isMobileOrTablet);
+          return isMobileOrTablet;
+        };
+        // ========================================
+        // END DEVICE DETECTION FUNCTIONS
+        // ========================================
 
         // Function to get dynamic viewport height that accounts for browser bars
         const getDynamicViewportHeight = () => {
@@ -213,8 +339,13 @@
           return height;
         };
 
-        // Function to update chat window position and height dynamically (mobile only)
+        // ========================================
+        // KEYBOARD HANDLING FOR MOBILE AND TABLETS
+        // ========================================
+        // Function to update chat window position and height dynamically
+        // Works for both mobile (max-width: 767px) and tablets (600px to 991px)
         // Positions chat window just above keyboard when it appears
+        // This prevents the keyboard from covering the input area
         let mobileHeightUpdateHandler = null;
         const setupMobileHeightUpdates = () => {
           // Remove existing handler if any
@@ -228,14 +359,21 @@
           }
 
           mobileHeightUpdateHandler = () => {
-            if (isOpen && checkIsMobile()) {
+            // Apply keyboard handling for both mobile AND tablets
+            // Mobile: max-width: 767px (fullscreen behavior)
+            // Tablets: 600px to 991px (iPads, Android tablets - normal window size)
+            // Combined check: max-width: 991px covers both
+            if (isOpen && checkIsMobileOrTablet()) {
+              // Determine if device is mobile or tablet for different behavior
+              const isMobile = checkIsMobile();
+              const isTablet = checkIsTablet();
+              
               // Use visualViewport API to detect keyboard and position accordingly
               if (window.visualViewport) {
                 const viewportHeight = window.visualViewport.height;
                 const viewportOffsetTop = window.visualViewport.offsetTop || 0;
                 
                 // When keyboard is open, visualViewport.offsetTop will be > 0
-                // Keep chat window at top: 0 to avoid white blank space, only adjust height
                 if (viewportOffsetTop > 0) {
                   // Keyboard is open - use window.innerHeight which is most accurate
                   // window.innerHeight gives the actual visible area above keyboard
@@ -261,82 +399,210 @@
                   // Set initial height immediately using window.innerHeight (most accurate)
                   const initialHeight = window.innerHeight;
                   
-                  // CRITICAL: Remove inset and bottom to prevent gap - only use top positioning
-                  chatWindow.style.setProperty("inset", "unset", "important");
-                  chatWindow.style.removeProperty("inset");
-                  chatWindow.style.removeProperty("bottom"); // Don't set bottom - causes gap
-                  chatWindow.style.setProperty("top", "0", "important");
-                  chatWindow.style.setProperty("left", "0", "important");
-                  chatWindow.style.setProperty("right", "0", "important");
-                  chatWindow.style.setProperty("height", `${initialHeight}px`, "important");
-                  chatWindow.style.setProperty("width", "100vw", "important");
+                  // Check if iOS for special handling
+                  const isIOS = checkIsIOS();
+                  
+                  // Get footer element for iOS-specific hiding
+                  const fugahFooter = shadow.querySelector("#fugah-footer");
+                  
+                  if (isMobile) {
+                    // ========================================
+                    // MOBILE KEYBOARD HANDLING (max-width: 767px)
+                    // ========================================
+                    // Mobile: Fullscreen behavior - chat window takes full viewport
+                    // CRITICAL: Remove inset and bottom to prevent gap - only use top positioning
+                    chatWindow.style.setProperty("inset", "unset", "important");
+                    chatWindow.style.removeProperty("inset");
+                    chatWindow.style.removeProperty("bottom"); // Don't set bottom - causes gap
+                    chatWindow.style.setProperty("top", "0", "important");
+                    chatWindow.style.setProperty("left", "0", "important");
+                    chatWindow.style.setProperty("right", "0", "important");
+                    chatWindow.style.setProperty("height", `${initialHeight}px`, "important");
+                    chatWindow.style.setProperty("width", "100vw", "important");
+                    
+                    // ========================================
+                    // iOS-SPECIFIC: Hide footer when keyboard opens, show only input container
+                    // ========================================
+                    // On iOS, hide footer completely when keyboard opens so user can see what they type
+                    // Only the input container will be visible above the keyboard
+                    if (isIOS && fugahFooter) {
+                      fugahFooter.style.setProperty("display", "none", "important");
+                    }
+                  } else if (isTablet) {
+                    // ========================================
+                    // TABLET KEYBOARD HANDLING (600px to 991px)
+                    // ========================================
+                    // Tablet: Keep normal window position and size, only adjust height
+                    // Tablets maintain their fixed position (bottom: 20px, right: 20px)
+                    // Only reduce height to account for keyboard, keeping width at 390px
+                    const keyboardHeight = window.innerHeight;
+                    // Calculate available height above keyboard
+                    // For tablets, we want to keep the window in its normal position
+                    // but reduce its height so input area is visible above keyboard
+                    const maxTabletHeight = Math.min(keyboardHeight - 40, 670); // 40px for margins, max 670px
+                    chatWindow.style.setProperty("height", `${maxTabletHeight}px`, "important");
+                    chatWindow.style.setProperty("max-height", `${maxTabletHeight}px`, "important");
+                    // Keep normal tablet positioning (don't go fullscreen)
+                    chatWindow.style.setProperty("position", "fixed", "important");
+                    chatWindow.style.setProperty("bottom", "20px", "important");
+                    chatWindow.style.setProperty("right", "20px", "important");
+                    chatWindow.style.setProperty("width", "390px", "important");
+                    chatWindow.style.setProperty("top", "auto", "important");
+                    chatWindow.style.setProperty("left", "auto", "important");
+                  }
                   
                   // Update to correct height after keyboard fully opens (fixes first-time gap)
                   getKeyboardOpenHeight().then((correctHeight) => {
-                    // Subtract 1px to ensure no gap (accounts for rounding/borders)
-                    const finalHeight = Math.max(correctHeight - 1, 300);
-                    
-                    // Remove inset again when updating height (browser may regenerate it)
-                    chatWindow.style.setProperty("inset", "unset", "important");
-                    chatWindow.style.removeProperty("inset");
-                    chatWindow.style.removeProperty("bottom");
-                    chatWindow.style.setProperty("height", `${finalHeight}px`, "important");
-                    chatWindow.style.setProperty("max-height", `${finalHeight}px`, "important");
-                    // Ensure no bottom spacing
-                    chatWindow.style.setProperty("padding-bottom", "0", "important");
-                    chatWindow.style.setProperty("margin-bottom", "0", "important");
-                    console.log('Keyboard open - final height set to:', finalHeight);
-                    
-                    // Final check after a delay to ensure no gap
-                    setTimeout(() => {
-                      const finalCheck = window.innerHeight;
-                      const adjustedHeight = Math.max(finalCheck - 1, 300);
-                      if (Math.abs(finalCheck - finalHeight) > 5) {
-                        chatWindow.style.setProperty("height", `${adjustedHeight}px`, "important");
-                        chatWindow.style.setProperty("max-height", `${adjustedHeight}px`, "important");
-                        console.log('Keyboard open - adjusted height to:', adjustedHeight);
+                    if (isMobile) {
+                      // ========================================
+                      // MOBILE: Update height after keyboard fully opens
+                      // ========================================
+                      // For iOS, use exact height without subtraction to prevent gap
+                      // For Android, subtract 1px to ensure no gap
+                      const isIOS = checkIsIOS();
+                      const finalHeight = isIOS ? correctHeight : Math.max(correctHeight - 1, 300);
+                      
+                      // ========================================
+                      // iOS-SPECIFIC: Keep footer hidden when keyboard is open
+                      // ========================================
+                      if (isIOS) {
+                        const fugahFooter = shadow.querySelector("#fugah-footer");
+                        if (fugahFooter) {
+                          fugahFooter.style.setProperty("display", "none", "important");
+                        }
                       }
-                    }, 100);
+                      
+                      // Remove inset again when updating height (browser may regenerate it)
+                      chatWindow.style.setProperty("inset", "unset", "important");
+                      chatWindow.style.removeProperty("inset");
+                      chatWindow.style.removeProperty("bottom");
+                      chatWindow.style.setProperty("height", `${finalHeight}px`, "important");
+                      chatWindow.style.setProperty("max-height", `${finalHeight}px`, "important");
+                      // Ensure no bottom spacing
+                      chatWindow.style.setProperty("padding-bottom", "0", "important");
+                      chatWindow.style.setProperty("margin-bottom", "0", "important");
+                      console.log('Mobile - Keyboard open - final height set to:', finalHeight);
+                      
+                      // Final check after a delay to ensure no gap
+                      setTimeout(() => {
+                        const finalCheck = window.innerHeight;
+                        const adjustedHeight = Math.max(finalCheck - 1, 300);
+                        if (Math.abs(finalCheck - finalHeight) > 5) {
+                          chatWindow.style.setProperty("height", `${adjustedHeight}px`, "important");
+                          chatWindow.style.setProperty("max-height", `${adjustedHeight}px`, "important");
+                          console.log('Mobile - Keyboard open - adjusted height to:', adjustedHeight);
+                        }
+                      }, 100);
+                    } else if (isTablet) {
+                      // ========================================
+                      // TABLET: Update height after keyboard fully opens
+                      // ========================================
+                      // For tablets, calculate height that keeps input visible above keyboard
+                      // Keep window in normal position, just reduce height
+                      const maxTabletHeight = Math.min(correctHeight - 40, 670); // 40px margin, max 670px
+                      chatWindow.style.setProperty("height", `${maxTabletHeight}px`, "important");
+                      chatWindow.style.setProperty("max-height", `${maxTabletHeight}px`, "important");
+                      console.log('Tablet - Keyboard open - height set to:', maxTabletHeight);
+                      
+                      // Final check after a delay for tablets
+                      setTimeout(() => {
+                        const finalCheck = window.innerHeight;
+                        const adjustedTabletHeight = Math.min(finalCheck - 40, 670);
+                        if (Math.abs(finalCheck - correctHeight) > 5) {
+                          chatWindow.style.setProperty("height", `${adjustedTabletHeight}px`, "important");
+                          chatWindow.style.setProperty("max-height", `${adjustedTabletHeight}px`, "important");
+                          console.log('Tablet - Keyboard open - adjusted height to:', adjustedTabletHeight);
+                        }
+                      }, 100);
+                    }
                   });
                   
-                  console.log('Keyboard open - initial height set to:', initialHeight);
+                  console.log('Keyboard open - initial height set to:', initialHeight, 'Device:', isMobile ? 'Mobile' : isTablet ? 'Tablet' : 'Unknown');
                 } else {
-                  // Keyboard is closed - use full viewport
-                  const dynamicHeight = getDynamicViewportHeight();
-                  // Remove inset to prevent browser auto-generation
-                  chatWindow.style.setProperty("inset", "unset", "important");
-                  chatWindow.style.removeProperty("inset");
-                  chatWindow.style.setProperty("top", "0", "important");
-                  chatWindow.style.setProperty("left", "0", "important");
-                  chatWindow.style.setProperty("right", "0", "important");
-                  chatWindow.style.setProperty("bottom", "0", "important");
-                  chatWindow.style.setProperty("width", "100vw", "important");
-                  chatWindow.style.setProperty("height", `${dynamicHeight}px`, "important");
-                  console.log('Keyboard closed - full viewport height:', dynamicHeight);
+                  // ========================================
+                  // KEYBOARD CLOSED - Restore normal sizing
+                  // ========================================
+                  if (isMobile) {
+                    // Mobile: Restore fullscreen viewport
+                    const dynamicHeight = getDynamicViewportHeight();
+                    // Remove inset to prevent browser auto-generation
+                    chatWindow.style.setProperty("inset", "unset", "important");
+                    chatWindow.style.removeProperty("inset");
+                    chatWindow.style.setProperty("top", "0", "important");
+                    chatWindow.style.setProperty("left", "0", "important");
+                    chatWindow.style.setProperty("right", "0", "important");
+                    chatWindow.style.setProperty("bottom", "0", "important");
+                    chatWindow.style.setProperty("width", "100vw", "important");
+                    chatWindow.style.setProperty("height", `${dynamicHeight}px`, "important");
+                    
+                    // ========================================
+                    // iOS-SPECIFIC: Show footer again when keyboard closes
+                    // ========================================
+                    if (isIOS) {
+                      const fugahFooter = shadow.querySelector("#fugah-footer");
+                      if (fugahFooter) {
+                        fugahFooter.style.setProperty("display", "flex", "important");
+                        fugahFooter.style.removeProperty("display"); // Remove inline style to use CSS default
+                      }
+                    }
+                    
+                    console.log('Mobile - Keyboard closed - full viewport height:', dynamicHeight, 'iOS:', isIOS);
+                  } else if (isTablet) {
+                    // Tablet: Restore normal tablet window size
+                    chatWindow.style.setProperty("height", "670px", "important");
+                    chatWindow.style.setProperty("max-height", "90vh", "important");
+                    chatWindow.style.setProperty("width", "390px", "important");
+                    chatWindow.style.setProperty("position", "fixed", "important");
+                    chatWindow.style.setProperty("bottom", "20px", "important");
+                    chatWindow.style.setProperty("right", "20px", "important");
+                    chatWindow.style.setProperty("top", "auto", "important");
+                    chatWindow.style.setProperty("left", "auto", "important");
+                    console.log('Tablet - Keyboard closed - restored to normal size');
+                  }
                 }
               } else {
-                // Fallback for browsers without visualViewport support
+                // ========================================
+                // FALLBACK: Browsers without visualViewport support
+                // ========================================
+                // Use window.innerHeight as fallback for both mobile and tablets
                 const dynamicHeight = getDynamicViewportHeight();
-                chatWindow.style.setProperty("height", `${dynamicHeight}px`, "important");
-                chatWindow.style.setProperty("top", "0", "important");
-                chatWindow.style.setProperty("bottom", "0", "important");
-                console.log('Updated mobile height to:', dynamicHeight);
+                const isMobile = checkIsMobile();
+                const isTablet = checkIsTablet();
+                
+                if (isMobile) {
+                  // Mobile fallback: fullscreen
+                  chatWindow.style.setProperty("height", `${dynamicHeight}px`, "important");
+                  chatWindow.style.setProperty("top", "0", "important");
+                  chatWindow.style.setProperty("bottom", "0", "important");
+                  console.log('Mobile fallback - Updated height to:', dynamicHeight);
+                } else if (isTablet) {
+                  // Tablet fallback: normal size
+                  chatWindow.style.setProperty("height", "670px", "important");
+                  chatWindow.style.setProperty("max-height", "90vh", "important");
+                  console.log('Tablet fallback - Restored to normal size');
+                }
               }
             }
           };
 
           // Add event listeners for viewport changes
+          // These listeners detect when keyboard opens/closes and adjust chat window accordingly
           window.addEventListener('resize', mobileHeightUpdateHandler, { passive: true });
           window.addEventListener('orientationchange', mobileHeightUpdateHandler, { passive: true });
           
-          // Use visualViewport API for better mobile browser support
+          // Use visualViewport API for better mobile and tablet browser support
+          // visualViewport provides accurate viewport dimensions when keyboard is visible
           if (window.visualViewport) {
             window.visualViewport.addEventListener('resize', mobileHeightUpdateHandler, { passive: true });
             window.visualViewport.addEventListener('scroll', mobileHeightUpdateHandler, { passive: true });
           }
         };
+        // ========================================
+        // END KEYBOARD HANDLING FOR MOBILE AND TABLETS
+        // ========================================
 
-        // Function to remove mobile height update listeners
+        // Function to remove mobile/tablet height update listeners
+        // Called when chat window closes to clean up event listeners
         const removeMobileHeightUpdates = () => {
           if (mobileHeightUpdateHandler) {
             window.removeEventListener('resize', mobileHeightUpdateHandler);
@@ -1121,6 +1387,45 @@
           if (customPlaceholder) {
             customPlaceholder.style.display = "none";
           }
+          
+          // ========================================
+          // iOS-SPECIFIC: Hide footer when phone input is focused (keyboard opens)
+          // ========================================
+          const isIOS = checkIsIOS();
+          if (isIOS && checkIsMobile()) {
+            const fugahFooter = shadow.querySelector("#fugah-footer");
+            // Hide footer completely so user can see what they type
+            if (fugahFooter) {
+              fugahFooter.style.setProperty("display", "none", "important");
+            }
+          }
+        });
+        
+        // ========================================
+        // iOS-SPECIFIC: Show footer when phone input loses focus (keyboard closes)
+        // ========================================
+        phoneInput.addEventListener("blur", () => {
+          validatePhoneNumber();
+          // Show placeholder if input is empty
+          updatePlaceholderVisibility();
+          
+          const isIOS = checkIsIOS();
+          if (isIOS && checkIsMobile()) {
+            // Small delay to ensure keyboard is fully closed
+            setTimeout(() => {
+              const fugahFooter = shadow.querySelector("#fugah-footer");
+              // Show footer again when keyboard closes
+              if (fugahFooter) {
+                fugahFooter.style.setProperty("display", "flex", "important");
+                fugahFooter.style.removeProperty("display"); // Remove inline style to use CSS default
+              }
+              
+              // Trigger viewport update to restore full height
+              if (mobileHeightUpdateHandler) {
+                mobileHeightUpdateHandler();
+              }
+            }, 300);
+          }
         });
 
         // Handle Enter key
@@ -1816,7 +2121,17 @@
         contentDiv.className = "chat-message-content";
         
         const textP = document.createElement("p");
-        textP.textContent = text;
+        // ========================================
+        // PRESERVE LINE BREAKS IN MESSAGES
+        // ========================================
+        // When user presses Enter/Return key on mobile keyboard, it creates a new line
+        // This code preserves those line breaks so messages display exactly as typed
+        // Replace newline characters (\n) with HTML line break tags (<br>)
+        // This ensures multi-line messages show on separate lines in the chat
+        textP.innerHTML = text.replace(/\n/g, '<br>');
+        // ========================================
+        // END PRESERVE LINE BREAKS IN MESSAGES
+        // ========================================
         contentDiv.appendChild(textP);
         
         messageDiv.appendChild(contentDiv);
@@ -2038,17 +2353,8 @@
 
       if (messageDetailInput) {
         messageDetailInput.addEventListener("keydown", (e) => {
-          if (e.key === "Enter") {
-            if (e.shiftKey) {
-              // Shift+Enter: Allow new line (default behavior)
-              return;
-            } else {
-              // Enter: Send message
-              e.preventDefault();
-            sendDetailMessage();
-            }
-          }
-          
+          // Allow Enter key to work normally (create new line) - do not send message
+          // Users should use the send button to send messages
           // Allow all arrow keys and navigation keys for proper textarea navigation
           if (e.key === "ArrowUp" || e.key === "ArrowDown" || 
               e.key === "ArrowLeft" || e.key === "ArrowRight" ||
@@ -2086,12 +2392,49 @@
 
         // Trigger height update when input is focused (keyboard opens) - fixes first-time gap
         messageDetailInput.addEventListener("focus", () => {
+          // ========================================
+          // iOS-SPECIFIC: Hide footer when input is focused (keyboard opens)
+          // ========================================
+          const isIOS = checkIsIOS();
+          if (isIOS && checkIsMobile()) {
+            const fugahFooter = shadow.querySelector("#fugah-footer");
+            // Hide footer completely so only input container is visible
+            if (fugahFooter) {
+              fugahFooter.style.setProperty("display", "none", "important");
+            }
+          }
+          
           // Trigger viewport update after keyboard animation completes
           if (mobileHeightUpdateHandler) {
             // Wait for keyboard to fully open before updating
+            // iOS needs slightly longer delay
+            const delay = isIOS ? 500 : 450;
             setTimeout(() => {
               mobileHeightUpdateHandler();
-            }, 450);
+            }, delay);
+          }
+        });
+        
+        // ========================================
+        // iOS-SPECIFIC: Show footer when input loses focus (keyboard closes)
+        // ========================================
+        messageDetailInput.addEventListener("blur", () => {
+          const isIOS = checkIsIOS();
+          if (isIOS && checkIsMobile()) {
+            // Small delay to ensure keyboard is fully closed
+            setTimeout(() => {
+              const fugahFooter = shadow.querySelector("#fugah-footer");
+              // Show footer again when keyboard closes
+              if (fugahFooter) {
+                fugahFooter.style.setProperty("display", "flex", "important");
+                fugahFooter.style.removeProperty("display"); // Remove inline style to use CSS default
+              }
+              
+              // Trigger viewport update to restore full height
+              if (mobileHeightUpdateHandler) {
+                mobileHeightUpdateHandler();
+              }
+            }, 300);
           }
         });
 

@@ -1,4 +1,30 @@
 /* ========================================
+   PREVENT BACKGROUND SCROLLING WHEN CHAT IS OPEN
+   ======================================== */
+/* When chat window is open, prevent background page from scrolling */
+/* This is especially important on mobile devices where touch gestures can still scroll */
+body.chat-open,
+html.chat-open {
+  overflow: hidden !important;
+  position: fixed !important;
+  width: 100% !important;
+  height: 100% !important;
+  touch-action: none !important; /* Prevent all touch gestures on background */
+  overscroll-behavior: none !important; /* Prevent overscroll bounce effect */
+  overscroll-behavior-y: none !important;
+  overscroll-behavior-x: none !important;
+  -webkit-overflow-scrolling: none !important; /* Disable iOS momentum scrolling */
+}
+
+/* Prevent scrolling on main document elements when chat is open */
+body.chat-open * {
+  overscroll-behavior: none !important;
+}
+/* ========================================
+   END PREVENT BACKGROUND SCROLLING
+   ======================================== */
+
+/* ========================================
    FONT DEFINITIONS
    ======================================== */
 /* Custom Rubik font for Latin characters */
@@ -1853,6 +1879,17 @@ border-radius: 16px;
   margin: 0;
   font-size: 14px;
   line-height: 1.5;
+  /* ========================================
+     PRESERVE LINE BREAKS IN MESSAGE DISPLAY
+     ========================================
+     white-space: pre-wrap - Preserves whitespace and line breaks from user input
+     word-wrap & overflow-wrap - Ensures long words wrap properly instead of overflowing
+     This works together with JavaScript code that converts \n to <br> tags
+     to ensure multi-line messages display correctly with line breaks preserved
+     ======================================== */
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 /* Loading Indicator with Bouncing Dots */

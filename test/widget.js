@@ -806,11 +806,11 @@
               iconPath = getAssetPath("message-cyan.png");
               break;
             case 'white':
-              iconPath = getAssetPath("message.png");
+              iconPath = getAssetPath("message-white.png");
               break;
             case 'black':
             default:
-              iconPath = getAssetPath("message-white.png");
+              iconPath = getAssetPath("message.png");
               break;
           }
           chatIcon.src = iconPath;
@@ -2261,26 +2261,22 @@
         }, { passive: false });
       }
 
-      // Add click handler to message detail back tick button (same functionality as white-exit-button)
-      // Flow: Chat page → Confirm → Rating screen
+      // Add click handler to message detail back tick button
+      // Flow: Chat page → Messages list (no confirmation)
       if (messageDetailBackTickBtn) {
         messageDetailBackTickBtn.addEventListener("click", (e) => {
           e.stopPropagation();
           
-          // Show custom confirmation message
-          showCustomConfirmation("هل أنت متأكد من إغلاق الدردشة؟", () => {
-            // Show rating screen after confirmation
-            showRatingScreen();
-          });
+          // Navigate directly to messages list without confirmation
+          goBackToMessageList();
         });
         
         // Add touch event listener for mobile devices (preventDefault stops synthetic click closing modal on Android)
         messageDetailBackTickBtn.addEventListener("touchstart", (e) => {
           e.stopPropagation();
           e.preventDefault();
-          showCustomConfirmation("هل أنت متأكد من إغلاق الدردشة؟", () => {
-            showRatingScreen();
-          });
+          // Navigate directly to messages list without confirmation
+          goBackToMessageList();
         }, { passive: false });
       }
 

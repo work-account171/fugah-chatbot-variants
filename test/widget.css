@@ -48,7 +48,9 @@
 #chat-window .confirmation-btn,
 #chat-window img,
 #chat-window a,
-#chat-window .message-back-icon {
+#chat-window .message-back-icon,
+#chat-window .message-back-tick-icon,
+#chat-window .message-back-exit-icon {
   -webkit-tap-highlight-color: transparent !important;
   -webkit-touch-callout: none !important;
   tap-highlight-color: transparent !important;
@@ -1455,8 +1457,19 @@ border-radius: 16px;
   flex-shrink: 0;
 }
 
-/* White-exit / back icons only – message and dropdown icons are styled below */
-.chat-rating-header .message-back-icon {
+/* Back tick icons (arrow icons) - separate styling */
+.chat-rating-header .message-back-tick-icon {
+  width: 15px;
+  height: 15px;
+  object-fit: contain;
+  filter: brightness(0.5);
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+  margin-right: 20px;
+}
+
+/* Back exit icons (X/exit buttons) - separate styling */
+.chat-rating-header .message-back-exit-icon {
   width: 15px;
   height: 15px;
   object-fit: contain;
@@ -1482,8 +1495,17 @@ border-radius: 16px;
   filter: none;
 }
 
-.chat-rating-header .message-back-icon:hover {
+.chat-rating-header .message-back-tick-icon:hover,
+.chat-rating-header .message-back-exit-icon:hover {
   opacity: 0.7;
+}
+
+/* Ensure exit icons maintain proper size */
+.chat-rating-header #message-detail-back-btn,
+.chat-rating-header #rating-back-btn {
+  width: 15px;
+  height: 15px;
+  object-fit: contain;
 }
 
 .chat-rating-header p {
@@ -2417,6 +2439,12 @@ border-radius: 16px;
     height: 15px !important;
   }
   
+  /* Mobile-specific size for exit icon class */
+  .message-back-exit-icon {
+    width: 15px !important;
+    height: 15px !important;
+  }
+  
   /* Mobile-specific size for message detail send button image */
   .message-detail-send-btn img {
     width: 34px !important;
@@ -2762,6 +2790,62 @@ border-radius: 16px;
 
 .theme-black .main-message-detail-container {
   background-color: black !important;
+}
+
+/* Black theme: Set fugah-message-detail-header width to 90% */
+.theme-black .fugah-message-detail-header {
+  width: 90% !important;
+}
+
+/* Black theme: Remove brightness filter from close button images */
+.theme-black .close-button img {
+  filter: none !important;
+}
+
+.theme-black .flex-1 .close-button img {
+  filter: none !important;
+}
+
+/* Black theme: Ensure exit button (X) is larger and visible - only affects exit icons, not tick icons */
+.theme-black .chat-rating-header .message-back-exit-icon,
+.theme-black .chat-rating-header #message-detail-back-btn,
+.theme-black .chat-rating-header #rating-back-btn,
+.theme-black .message-back-exit-icon,
+.theme-black img.message-back-exit-icon,
+.theme-black img#message-detail-back-btn,
+.theme-black img#rating-back-btn {
+  width: 24px !important;
+  height: 24px !important;
+  min-width: 24px !important;
+  min-height: 24px !important;
+  max-width: 24px !important;
+  max-height: 24px !important;
+  object-fit: contain !important;
+  filter: none !important;
+}
+
+/* Mobile: Black theme exit buttons should also be larger */
+@media screen and (max-width: 767px) {
+  .theme-black #message-detail-back-btn,
+  .theme-black #rating-back-btn,
+  .theme-black .message-back-exit-icon {
+    width: 24px !important;
+    height: 24px !important;
+    min-width: 24px !important;
+    min-height: 24px !important;
+    max-width: 24px !important;
+    max-height: 24px !important;
+  }
+}
+
+/* Black theme: Keep tick icons (back arrows) with their own styling - no filter removal */
+.theme-black .chat-rating-header .message-back-tick-icon,
+.theme-black .chat-rating-header #message-detail-back-tick-btn,
+.theme-black .chat-rating-header #rating-back-tick-btn {
+  width: 15px !important;
+  height: 15px !important;
+  object-fit: contain !important;
+  /* Keep filter: brightness(0.5) for tick icons */
 }
 
 /* White Theme */

@@ -2107,6 +2107,26 @@
       // ========================================
       // MESSAGE CREATION FUNCTIONALITY
       // ========================================
+      
+      // ========================================
+      // CONVERT URLS TO CLICKABLE LINKS
+      // ========================================
+      // This function detects URLs in text and converts them to clickable anchor tags
+      // Links open in a new tab and are styled blue for visibility
+      function linkifyText(text) {
+        // Regular expression to match URLs (http, https, ftp, and www)
+        const urlPattern = /(\b(https?|ftp):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])|(\bwww\.[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/gi;
+        
+        return text.replace(urlPattern, function(url) {
+          // Add https:// if the URL starts with www.
+          const href = url.startsWith('www.') ? 'https://' + url : url;
+          return `<a href="${href}" target="_blank" rel="noopener noreferrer" class="chat-link">${url}</a>`;
+        });
+      }
+      // ========================================
+      // END CONVERT URLS TO CLICKABLE LINKS
+      // ========================================
+      
       // Add messages to detail chat without individual timestamps
       function addDetailMessage(text, isUser = true, updateTimestamp = false) {
         if (!messageDetailMessages) return;
@@ -2128,7 +2148,8 @@
         // This code preserves those line breaks so messages display exactly as typed
         // Replace newline characters (\n) with HTML line break tags (<br>)
         // This ensures multi-line messages show on separate lines in the chat
-        textP.innerHTML = text.replace(/\n/g, '<br>');
+        // Also convert URLs to clickable links
+        textP.innerHTML = linkifyText(text.replace(/\n/g, '<br>'));
         // ========================================
         // END PRESERVE LINE BREAKS IN MESSAGES
         // ========================================

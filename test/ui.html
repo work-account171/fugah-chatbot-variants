@@ -244,14 +244,13 @@ fetch("https://n8n.srv1196634.hstgr.cloud/webhook-test/user", {
               
               <!-- Actions row with file upload and send button -->
               <div class="message-detail-actions-row">
-                <!-- File upload button - Icon visible but click functionality disabled -->
-                <div class="message-detail-file-label">
+                <!-- File upload button -->
+                <label for="message-detail-file-input" class="message-detail-file-label">
                   <img id="file-upload-icon" src="../assets/fugah-file-icon.png" alt="Upload file" />
-                </div>
-                <!-- File input disabled: Users cannot attach files, images, or videos -->
-                <!-- <input type="file" id="message-detail-file-input" class="message-detail-file-input" style="display: none;" /> -->
+                </label>
+                <input type="file" id="message-detail-file-input" class="message-detail-file-input" style="display: none;" />
                 
-                <!-- Send message button -->
+                <!-- Send message button --> 
                 <button id="message-detail-send-btn" class="message-detail-send-btn">
                   <img src="../assets/fugah-send-button.png" alt="Send" />
                 </button>

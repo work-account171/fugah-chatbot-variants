@@ -180,6 +180,119 @@
         chatWindow: null
       };
 
+      // Force close chat - ensures complete cleanup (iOS fix)
+      const forceCloseChat = () => {
+        console.log('forceCloseChat called');
+        
+        // Force hide chat window
+        chatWindow.classList.remove('opening', 'open', 'closing');
+        chatWindow.style.display = "none";
+        chatWindow.classList.remove("chat-window-open");
+        
+        // Remove chat window inline background styles (let CSS handle it)
+        chatWindow.style.removeProperty("background-image");
+        chatWindow.style.removeProperty("background-size");
+        chatWindow.style.removeProperty("background-position");
+        chatWindow.style.removeProperty("background-repeat");
+        
+        // Force show bubble
+        bubble.classList.remove("chat-open");
+        bubble.style.display = "flex";
+        bubble.style.visibility = "visible";
+        bubble.style.opacity = "1";
+        bubble.style.pointerEvents = "auto";
+        
+        // Get current theme and restore correct icon
+        const currentTheme = chatWindow.classList.toString().match(/theme-(\w+)/);
+        const themeName = currentTheme ? currentTheme[1] : 'black';
+        let iconPath;
+        switch(themeName) {
+          case 'green':
+            iconPath = getAssetPath("message-green.png");
+            break;
+          case 'red':
+            iconPath = getAssetPath("message-red.png");
+            break;
+          case 'blue':
+            iconPath = getAssetPath("message-blue.png");
+            break;
+          case 'yellow':
+            iconPath = getAssetPath("message-yellow.png");
+            break;
+          case 'cyan':
+            iconPath = getAssetPath("message-cyan.png");
+            break;
+          case 'white':
+            iconPath = getAssetPath("message-white.png");
+            break;
+          case 'black':
+          default:
+            iconPath = getAssetPath("message.png");
+            break;
+        }
+        if (chatIcon) chatIcon.src = iconPath;
+        
+        // Restore main page background image (fugah-body is in main document, not shadow DOM)
+        const fugahBody = document.querySelector('.fugah-body');
+        if (fugahBody) {
+          let backgroundImagePath;
+          switch(themeName) {
+            case 'green':
+              backgroundImagePath = "url('assets/main-bg.png')";
+              break;
+            case 'red':
+              backgroundImagePath = "url('assets/main-red-bg.png')";
+              break;
+            case 'blue':
+              backgroundImagePath = "url('assets/main-blue-bg.png')";
+              break;
+            case 'yellow':
+              backgroundImagePath = "url('assets/main-yellow-bg.png')";
+              break;
+            case 'cyan':
+              backgroundImagePath = "url('assets/main-cyan-bg.png')";
+              break;
+            case 'black':
+              backgroundImagePath = "url('assets/main-black-bg.png')";
+              break;
+            case 'white':
+              backgroundImagePath = "url('assets/main-white-bg.png')";
+              break;
+            default:
+              backgroundImagePath = "url('assets/main-bg.png')";
+              break;
+          }
+          fugahBody.style.removeProperty("background-image");
+          fugahBody.style.backgroundImage = backgroundImagePath;
+          console.log('Restored background image:', backgroundImagePath);
+        }
+        
+        // Remove scroll locks
+        document.body.classList.remove('chat-open');
+        document.documentElement.classList.remove('chat-open');
+        document.body.style.overflow = '';
+        document.documentElement.style.overflow = '';
+        
+        // Remove touch event listeners
+        if (window.fugahBackgroundScrollPrevention) {
+          document.removeEventListener('touchmove', window.fugahBackgroundScrollPrevention, { capture: true });
+          document.removeEventListener('touchstart', window.fugahBackgroundScrollPrevention, { capture: true });
+          document.body.removeEventListener('touchmove', window.fugahBackgroundScrollPrevention);
+          document.body.removeEventListener('touchstart', window.fugahBackgroundScrollPrevention);
+          window.fugahBackgroundScrollPrevention = undefined;
+        }
+        
+        // Restore scroll position
+        const scrollY = window.fugahChatScrollPosition || 0;
+        window.scrollTo(0, scrollY);
+        window.fugahChatScrollPosition = undefined;
+        
+        // Reset state
+        isOpen = false;
+        
+        console.log('forceCloseChat completed - bubble and background should be visible');
+      };
+
       const toggleChat = () => {
         isOpen = !isOpen;
         
@@ -197,12 +310,26 @@
           // Add opening class to trigger animation
           chatWindow.classList.add('opening');
           
+          // Track if animation completed
+          let openAnimationCompleted = false;
+          
           // After animation completes, switch to open state
           chatWindow.addEventListener('animationend', function onOpenComplete() {
+            if (openAnimationCompleted) return;
+            openAnimationCompleted = true;
             chatWindow.removeEventListener('animationend', onOpenComplete);
             chatWindow.classList.remove('opening');
             chatWindow.classList.add('open');
           }, { once: true });
+          
+          // iOS fallback: If animationend doesn't fire within 500ms, force open state
+          setTimeout(() => {
+            if (!openAnimationCompleted) {
+              openAnimationCompleted = true;
+              chatWindow.classList.remove('opening');
+              chatWindow.classList.add('open');
+            }
+          }, 500);
         } else {
           // Closing: Zoom Out + Fade Out
           // Remove opening/open classes
@@ -210,12 +337,27 @@
           // Add closing class to trigger animation
           chatWindow.classList.add('closing');
           
+          // Track if animation completed
+          let animationCompleted = false;
+          
           // After animation completes, hide the element
           chatWindow.addEventListener('animationend', function onCloseComplete() {
+            if (animationCompleted) return;
+            animationCompleted = true;
             chatWindow.removeEventListener('animationend', onCloseComplete);
             chatWindow.classList.remove('closing');
             chatWindow.style.display = "none";
           }, { once: true });
+          
+          // iOS fallback: If animationend doesn't fire within 500ms, force close
+          // This fixes issues on iOS Safari where animationend event may not fire
+          setTimeout(() => {
+            if (!animationCompleted) {
+              animationCompleted = true;
+              chatWindow.classList.remove('closing');
+              chatWindow.style.display = "none";
+            }
+          }, 500);
         }
         // ========================================
         // END CHAT WINDOW OPEN/CLOSE ANIMATIONS
@@ -249,8 +391,9 @@
           // This is especially important for iOS Safari which can still scroll with touch gestures
           const preventBackgroundScroll = (e) => {
             // Only prevent if touch is outside the chat window
-            const chatWindowElement = document.querySelector('#chat-window');
-            if (chatWindowElement && !chatWindowElement.contains(e.target)) {
+            // Note: chatWindow is in shadow DOM, so we check if target is inside the wrapper
+            const widgetRoot = document.querySelector('#chatbot-widget-root');
+            if (widgetRoot && !widgetRoot.contains(e.target)) {
               e.preventDefault();
               e.stopPropagation();
               return false;
@@ -936,6 +1079,8 @@
           */
           // Hide chat bubble - screens will appear in its place
           bubble.classList.add("chat-open");
+          // iOS fix: Also set display none explicitly to ensure bubble is hidden
+          bubble.style.display = "none";
         } else {
           // Check if device is mobile (max-width: 767px)
           const isMobile = checkIsMobile();
@@ -1094,6 +1239,8 @@
           }
           chatIcon.src = iconPath;
           bubble.classList.remove("chat-open");
+          // iOS fix: Explicitly restore bubble display to ensure it's visible
+          bubble.style.display = "flex";
           
           // Stop timestamp updates when chat is closed
           stopTimestampUpdates();
@@ -1111,8 +1258,24 @@
       // ========================================
       // Add event listeners for opening and closing chat window
       
-      // Open chat from bubble click
+      // Open chat from bubble click/touch
+      let bubbleTouchHandled = false;
+      
+      bubble.addEventListener("touchend", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (bubbleTouchHandled) return;
+        bubbleTouchHandled = true;
+        console.log('Chat bubble touchend, window width:', window.innerWidth);
+        toggleChat();
+        setTimeout(() => { bubbleTouchHandled = false; }, 500);
+      }, { passive: false });
+      
       bubble.addEventListener("click", (e) => {
+        if (bubbleTouchHandled) {
+          bubbleTouchHandled = false;
+          return;
+        }
         console.log('Chat bubble clicked, window width:', window.innerWidth);
         toggleChat();
       });
@@ -1120,13 +1283,43 @@
       // Close chat from header close button (and message-list close – same class .close-button)
       const closeButtons = shadow.querySelectorAll(".close-button");
       closeButtons.forEach((btn) => {
+        // Track if touch already handled to prevent double-fire
+        let touchHandled = false;
+        
+        btn.addEventListener("touchend", (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          if (touchHandled) return;
+          touchHandled = true;
+          console.log('Close button touchend - closing chat');
+          
+          // On iOS, use forceCloseChat for reliability
+          if (isOpen) {
+            forceCloseChat();
+          } else {
+            toggleChat();
+          }
+          
+          // Reset touch flag after a short delay
+          setTimeout(() => { touchHandled = false; }, 500);
+        }, { passive: false });
+        
         btn.addEventListener("click", (e) => {
           e.stopPropagation();
-          toggleChat();
-        });
-        btn.addEventListener("touchstart", (e) => {
-          e.stopPropagation();
-          toggleChat();
+          e.preventDefault();
+          // Skip if touch already handled
+          if (touchHandled) {
+            touchHandled = false;
+            return;
+          }
+          console.log('Close button click - closing chat');
+          
+          // Use forceCloseChat when closing for reliability
+          if (isOpen) {
+            forceCloseChat();
+          } else {
+            toggleChat();
+          }
         });
       });
       if (closeButtons.length === 0) {
@@ -2915,7 +3108,7 @@
         if (!document.getElementById("fugah-preview-close-body-style")) {
           var style = document.createElement("style");
           style.id = "fugah-preview-close-body-style";
-          style.textContent = "#fugah-file-preview-close-body{position:fixed !important;top:max(12px, env(safe-area-inset-top, 12px)) !important;right:max(12px, env(safe-area-inset-right, 12px)) !important;width:50px !important;height:50px !important;min-width:50px !important;min-height:50px !important;border:none !important;border-radius:50% !important;background:#000 !important;color:#fff !important;font-size:32px !important;line-height:1 !important;cursor:pointer !important;z-index:2147483647 !important;display:flex !important;align-items:center !important;justify-content:center !important;padding:0 !important;box-shadow:0 2px 12px rgba(0,0,0,0.5) !important;-webkit-tap-highlight-color:transparent !important;pointer-events:auto !important;-webkit-appearance:none !important;appearance:none !important;}";
+          style.textContent = "#fugah-file-preview-close-body{position:fixed !important;top:max(12px, env(safe-area-inset-top, 12px)) !important;right:max(12px, env(safe-area-inset-right, 12px)) !important;width:50px !important;height:50px !important;min-width:50px !important;min-height:50px !important;border:none !important;border-radius:50% !important;background:#000 !important;color:#fff !important;font-size:32px !important;line-height:1 !important;cursor:pointer !important;z-index:2147483647 !important;display:flex !important;align-items:center !important;justify-content:center !important;padding:0 !important;box-shadow:0 2px 12px rgba(0,0,0,0.5) !important;-webkit-tap-highlight-color:transparent !important;pointer-events:auto !important;-webkit-appearance:none !important;appearance:none !important;touch-action:manipulation !important;user-select:none !important;-webkit-user-select:none !important;}";
           document.head.appendChild(style);
         }
         var btn = document.createElement("button");
@@ -2923,17 +3116,40 @@
         btn.setAttribute("aria-label", "Close and go back to chat");
         btn.id = "fugah-file-preview-close-body";
         btn.innerHTML = "&times;";
-        btn.style.cssText = "position:fixed;top:12px;right:12px;width:50px;height:50px;border:none;border-radius:50%;background:#000;color:#fff;font-size:32px;z-index:2147483647;display:flex;align-items:center;justify-content:center;";
+        btn.style.cssText = "position:fixed;top:12px;right:12px;width:50px;height:50px;border:none;border-radius:50%;background:#000;color:#fff;font-size:32px;z-index:2147483647;display:flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent;touch-action:manipulation;";
+        
+        // Track if already handled to prevent double-fire
+        var closeHandled = false;
+        
         btn.addEventListener("click", function (e) {
           e.preventDefault();
           e.stopPropagation();
+          e.stopImmediatePropagation();
+          if (closeHandled) return;
+          closeHandled = true;
+          console.log('Preview close button clicked');
           closeFilePreviewModal();
+          setTimeout(function() { closeHandled = false; }, 500);
         });
-        btn.addEventListener("touchstart", function (e) {
+        
+        // Use touchend for iOS reliability
+        btn.addEventListener("touchend", function (e) {
           e.preventDefault();
           e.stopPropagation();
+          e.stopImmediatePropagation();
+          if (closeHandled) return;
+          closeHandled = true;
+          console.log('Preview close button touchend');
           closeFilePreviewModal();
+          setTimeout(function() { closeHandled = false; }, 500);
         }, { passive: false });
+        
+        // Prevent touchstart from doing anything except stopping propagation
+        btn.addEventListener("touchstart", function (e) {
+          e.stopPropagation();
+          e.stopImmediatePropagation();
+        }, { passive: false });
+        
         document.body.appendChild(btn);
         filePreviewCloseBodyEl = btn;
       }
@@ -2991,20 +3207,42 @@
         }, { passive: false });
       }
       if (filePreviewModalClose) {
-        filePreviewModalClose.addEventListener("click", closeFilePreviewModal);
+        filePreviewModalClose.addEventListener("click", function (e) {
+          e.preventDefault();
+          e.stopPropagation();
+          e.stopImmediatePropagation();
+          closeFilePreviewModal();
+        });
+        filePreviewModalClose.addEventListener("touchend", function (e) {
+          e.preventDefault();
+          e.stopPropagation();
+          e.stopImmediatePropagation();
+          closeFilePreviewModal();
+        }, { passive: false });
         filePreviewModalClose.addEventListener("touchstart", function (e) {
           e.preventDefault();
           e.stopPropagation();
-          closeFilePreviewModal();
+          e.stopImmediatePropagation();
         }, { passive: false });
       }
       const filePreviewModalCloseIos = shadow.querySelector("#file-preview-modal-close-ios");
       if (filePreviewModalCloseIos) {
-        filePreviewModalCloseIos.addEventListener("click", closeFilePreviewModal);
+        filePreviewModalCloseIos.addEventListener("click", function (e) {
+          e.preventDefault();
+          e.stopPropagation();
+          e.stopImmediatePropagation();
+          closeFilePreviewModal();
+        });
+        filePreviewModalCloseIos.addEventListener("touchend", function (e) {
+          e.preventDefault();
+          e.stopPropagation();
+          e.stopImmediatePropagation();
+          closeFilePreviewModal();
+        }, { passive: false });
         filePreviewModalCloseIos.addEventListener("touchstart", function (e) {
           e.preventDefault();
           e.stopPropagation();
-          closeFilePreviewModal();
+          e.stopImmediatePropagation();
         }, { passive: false });
       }
 

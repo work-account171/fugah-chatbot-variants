@@ -2711,6 +2711,20 @@
       const filePreviewModalPdfWrap = shadow.querySelector("#file-preview-modal-pdf-wrap");
       const filePreviewModalOverlay = shadow.querySelector(".file-preview-modal-overlay");
       const filePreviewModalClose = shadow.querySelector("#file-preview-modal-close-btn") || shadow.querySelector(".file-preview-modal-close");
+      
+      // Elements to hide when preview modal is open
+      const chatRatingHeader = shadow.querySelector(".chat-rating-header");
+      const fugahFooterEnd = shadow.querySelector("#fugah-footer-end");
+      
+      function hideHeaderFooterForPreview() {
+        if (chatRatingHeader) chatRatingHeader.style.display = "none";
+        if (fugahFooterEnd) fugahFooterEnd.style.display = "none";
+      }
+      
+      function showHeaderFooterAfterPreview() {
+        if (chatRatingHeader) chatRatingHeader.style.display = "";
+        if (fugahFooterEnd) fugahFooterEnd.style.display = "";
+      }
 
       let filePreviewModalBlobUrl = null;
       let pdfViewerPdfDoc = null;
@@ -3100,17 +3114,21 @@
       }
 
       var filePreviewCloseBodyEl = null;
+      var filePreviewShareBodyEl = null;
 
       function addFilePreviewCloseToBody() {
+        hideHeaderFooterForPreview();
         if (filePreviewCloseBodyEl && filePreviewCloseBodyEl.parentNode) return;
         var isMobile = typeof window.matchMedia !== "undefined" && window.matchMedia("(max-width: 768px)").matches;
         if (!isMobile) return;
         if (!document.getElementById("fugah-preview-close-body-style")) {
           var style = document.createElement("style");
           style.id = "fugah-preview-close-body-style";
-          style.textContent = "#fugah-file-preview-close-body{position:fixed !important;top:max(12px, env(safe-area-inset-top, 12px)) !important;right:max(12px, env(safe-area-inset-right, 12px)) !important;width:50px !important;height:50px !important;min-width:50px !important;min-height:50px !important;border:none !important;border-radius:50% !important;background:#000 !important;color:#fff !important;font-size:32px !important;line-height:1 !important;cursor:pointer !important;z-index:2147483647 !important;display:flex !important;align-items:center !important;justify-content:center !important;padding:0 !important;box-shadow:0 2px 12px rgba(0,0,0,0.5) !important;-webkit-tap-highlight-color:transparent !important;pointer-events:auto !important;-webkit-appearance:none !important;appearance:none !important;touch-action:manipulation !important;user-select:none !important;-webkit-user-select:none !important;}";
+          style.textContent = "#fugah-file-preview-close-body{position:fixed !important;top:max(12px, env(safe-area-inset-top, 12px)) !important;right:max(12px, env(safe-area-inset-right, 12px)) !important;width:50px !important;height:50px !important;min-width:50px !important;min-height:50px !important;border:none !important;border-radius:50% !important;background:#000 !important;color:#fff !important;font-size:32px !important;line-height:1 !important;cursor:pointer !important;z-index:2147483647 !important;display:flex !important;align-items:center !important;justify-content:center !important;padding:0 !important;box-shadow:0 2px 12px rgba(0,0,0,0.5) !important;-webkit-tap-highlight-color:transparent !important;pointer-events:auto !important;-webkit-appearance:none !important;appearance:none !important;touch-action:manipulation !important;user-select:none !important;-webkit-user-select:none !important;}#fugah-file-preview-share-body{position:fixed !important;top:max(12px, env(safe-area-inset-top, 12px)) !important;right:max(72px, calc(62px + env(safe-area-inset-right, 12px))) !important;width:50px !important;height:50px !important;min-width:50px !important;min-height:50px !important;border:none !important;border-radius:50% !important;background:#000 !important;color:#fff !important;font-size:22px !important;line-height:1 !important;cursor:pointer !important;z-index:2147483647 !important;display:flex !important;align-items:center !important;justify-content:center !important;padding:0 !important;box-shadow:0 2px 12px rgba(0,0,0,0.5) !important;-webkit-tap-highlight-color:transparent !important;pointer-events:auto !important;-webkit-appearance:none !important;appearance:none !important;touch-action:manipulation !important;user-select:none !important;-webkit-user-select:none !important;}";
           document.head.appendChild(style);
         }
+        
+        // Close button
         var btn = document.createElement("button");
         btn.type = "button";
         btn.setAttribute("aria-label", "Close and go back to chat");
@@ -3152,6 +3170,87 @@
         
         document.body.appendChild(btn);
         filePreviewCloseBodyEl = btn;
+        
+        // Share/Download button
+        var shareBtn = document.createElement("button");
+        shareBtn.type = "button";
+        shareBtn.setAttribute("aria-label", "Share or download image");
+        shareBtn.id = "fugah-file-preview-share-body";
+        shareBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>';
+        shareBtn.style.cssText = "position:fixed;top:12px;right:72px;width:50px;height:50px;border:none;border-radius:50%;background:#000;color:#fff;font-size:22px;z-index:2147483647;display:flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent;touch-action:manipulation;";
+        
+        var shareHandled = false;
+        
+        shareBtn.addEventListener("click", function (e) {
+          e.preventDefault();
+          e.stopPropagation();
+          e.stopImmediatePropagation();
+          if (shareHandled) return;
+          shareHandled = true;
+          handleShareImage();
+          setTimeout(function() { shareHandled = false; }, 500);
+        });
+        
+        shareBtn.addEventListener("touchend", function (e) {
+          e.preventDefault();
+          e.stopPropagation();
+          e.stopImmediatePropagation();
+          if (shareHandled) return;
+          shareHandled = true;
+          handleShareImage();
+          setTimeout(function() { shareHandled = false; }, 500);
+        }, { passive: false });
+        
+        shareBtn.addEventListener("touchstart", function (e) {
+          e.stopPropagation();
+          e.stopImmediatePropagation();
+        }, { passive: false });
+        
+        document.body.appendChild(shareBtn);
+        filePreviewShareBodyEl = shareBtn;
+      }
+      
+      function handleShareImage() {
+        var imgSrc = filePreviewModalImg ? filePreviewModalImg.src : null;
+        if (!imgSrc) {
+          console.log('No image to share');
+          return;
+        }
+        
+        // Try Web Share API first (works on mobile)
+        if (navigator.share && navigator.canShare) {
+          fetch(imgSrc)
+            .then(function(res) { return res.blob(); })
+            .then(function(blob) {
+              var file = new File([blob], 'image.png', { type: blob.type });
+              var shareData = { files: [file] };
+              if (navigator.canShare(shareData)) {
+                navigator.share(shareData)
+                  .then(function() { console.log('Image shared successfully'); })
+                  .catch(function(err) { 
+                    console.log('Share cancelled or failed:', err);
+                    downloadImage(imgSrc);
+                  });
+              } else {
+                downloadImage(imgSrc);
+              }
+            })
+            .catch(function() {
+              downloadImage(imgSrc);
+            });
+        } else {
+          downloadImage(imgSrc);
+        }
+      }
+      
+      function downloadImage(imgSrc) {
+        var link = document.createElement('a');
+        link.href = imgSrc;
+        link.download = 'image_' + Date.now() + '.png';
+        link.style.display = 'none';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
       }
 
       function removeFilePreviewCloseFromBody() {
@@ -3159,10 +3258,15 @@
           filePreviewCloseBodyEl.parentNode.removeChild(filePreviewCloseBodyEl);
           filePreviewCloseBodyEl = null;
         }
+        if (filePreviewShareBodyEl && filePreviewShareBodyEl.parentNode) {
+          filePreviewShareBodyEl.parentNode.removeChild(filePreviewShareBodyEl);
+          filePreviewShareBodyEl = null;
+        }
       }
 
       function closeFilePreviewModal() {
         removeFilePreviewCloseFromBody();
+        showHeaderFooterAfterPreview();
         if (!filePreviewModal) return;
         filePreviewModal.style.display = "none";
         filePreviewModal.setAttribute("aria-hidden", "true");

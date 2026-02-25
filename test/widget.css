@@ -2445,6 +2445,39 @@ body.chat-open * {
   background-color: rgba(255, 255, 255, 0.22);
 }
 
+/* Download button in top bar – same style as close button */
+.file-preview-modal-download {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
+  border: none;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.12);
+  color: #fff !important;
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  flex-shrink: 0;
+  transition: background-color 0.2s ease;
+  margin-right: 10px;
+}
+.file-preview-modal-download:hover {
+  background-color: rgba(255, 255, 255, 0.22);
+}
+.file-preview-modal-download svg {
+  width: 20px;
+  height: 20px;
+  stroke: #fff;
+}
+
 /* iOS-only: extra close button fixed to viewport so × always visible on iPhone/iPad */
 .file-preview-modal-close-ios {
   display: none;

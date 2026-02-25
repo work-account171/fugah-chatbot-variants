@@ -2711,6 +2711,7 @@
       const filePreviewModalPdfWrap = shadow.querySelector("#file-preview-modal-pdf-wrap");
       const filePreviewModalOverlay = shadow.querySelector(".file-preview-modal-overlay");
       const filePreviewModalClose = shadow.querySelector("#file-preview-modal-close-btn") || shadow.querySelector(".file-preview-modal-close");
+      const filePreviewModalDownload = shadow.querySelector("#file-preview-modal-download-btn");
       
       // Elements to hide when preview modal is open
       const chatRatingHeader = shadow.querySelector(".chat-rating-header");
@@ -2820,7 +2821,7 @@
         pdfViewerCurrentPage = 1;
         filePreviewModal.style.display = "flex";
         filePreviewModal.setAttribute("aria-hidden", "false");
-        addFilePreviewCloseToBody();
+        // addFilePreviewCloseToBody(); // Disabled - using buttons inside modal instead
 
         var wrap = filePreviewModalPdfWrap;
         function doRender() {
@@ -2896,7 +2897,7 @@
         filePreviewModalPdfWrap.innerHTML = "";
         filePreviewModal.style.display = "flex";
         filePreviewModal.setAttribute("aria-hidden", "false");
-        addFilePreviewCloseToBody();
+        // addFilePreviewCloseToBody(); // Disabled - using buttons inside modal instead
 
         var wrap = filePreviewModalPdfWrap;
         
@@ -2949,7 +2950,7 @@
         filePreviewModalPdfWrap.innerHTML = "";
         filePreviewModal.style.display = "flex";
         filePreviewModal.setAttribute("aria-hidden", "false");
-        addFilePreviewCloseToBody();
+        // addFilePreviewCloseToBody(); // Disabled - using buttons inside modal instead
 
         var wrap = filePreviewModalPdfWrap;
         var excelCurrentSheet = 0;
@@ -3088,7 +3089,7 @@
           filePreviewModalImg.style.display = "block";
           filePreviewModalImg.src = filePreviewThumb.src;
           filePreviewModalImg.alt = file.name;
-        addFilePreviewCloseToBody();
+        // addFilePreviewCloseToBody(); // Disabled - using buttons inside modal instead
         } else if (isPdf) {
           filePreviewModalBlobUrl = URL.createObjectURL(file);
           showPdfFitToScreen(filePreviewModalBlobUrl);
@@ -3110,7 +3111,7 @@
 
         filePreviewModal.style.display = "flex";
         filePreviewModal.setAttribute("aria-hidden", "false");
-        addFilePreviewCloseToBody();
+        // addFilePreviewCloseToBody(); // Disabled - using buttons inside modal instead
       }
 
       var filePreviewCloseBodyEl = null;
@@ -3118,6 +3119,8 @@
       function addFilePreviewCloseToBody() {
         hideHeaderFooterForPreview();
         if (filePreviewCloseBodyEl && filePreviewCloseBodyEl.parentNode) return;
+        var isMobile = typeof window.matchMedia !== "undefined" && window.matchMedia("(max-width: 768px)").matches;
+        if (!isMobile) return;
         var isMobile = typeof window.matchMedia !== "undefined" && window.matchMedia("(max-width: 768px)").matches;
         if (!isMobile) return;
         if (!document.getElementById("fugah-preview-close-body-style")) {
@@ -3241,6 +3244,37 @@
           e.stopImmediatePropagation();
         }, { passive: false });
       }
+      
+      // Download button in preview modal - triggers file input to upload a new file
+      if (filePreviewModalDownload) {
+        filePreviewModalDownload.addEventListener("click", function (e) {
+          e.preventDefault();
+          e.stopPropagation();
+          e.stopImmediatePropagation();
+          // Close the preview modal first
+          closeFilePreviewModal();
+          // Trigger file input click to upload new file
+          if (messageDetailFileInput) {
+            messageDetailFileInput.click();
+          }
+        });
+        filePreviewModalDownload.addEventListener("touchend", function (e) {
+          e.preventDefault();
+          e.stopPropagation();
+          e.stopImmediatePropagation();
+          // Close the preview modal first
+          closeFilePreviewModal();
+          // Trigger file input click to upload new file
+          if (messageDetailFileInput) {
+            messageDetailFileInput.click();
+          }
+        }, { passive: false });
+        filePreviewModalDownload.addEventListener("touchstart", function (e) {
+          e.stopPropagation();
+          e.stopImmediatePropagation();
+        }, { passive: false });
+      }
+      
       const filePreviewModalCloseIos = shadow.querySelector("#file-preview-modal-close-ios");
       if (filePreviewModalCloseIos) {
         filePreviewModalCloseIos.addEventListener("click", function (e) {
@@ -3279,7 +3313,7 @@
         filePreviewModalImg.alt = "Preview";
         filePreviewModal.style.display = "flex";
         filePreviewModal.setAttribute("aria-hidden", "false");
-        addFilePreviewCloseToBody();
+        // addFilePreviewCloseToBody(); // Disabled - using buttons inside modal instead
       }
 
       // Open modal with blob URL for PDF, Word, Excel (from chat) - fit to screen
